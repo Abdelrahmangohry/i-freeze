@@ -1,0 +1,40 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Shortcut 1:
+    Throws the user to Main Activity through the intent-->
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_check_24"
+        android:shortcutId="compose0"
+        android:shortcutShortLabel="@string/home">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.lock.applock.MainActivity"
+            android:targetPackage="com.lock.applock" />
+    </shortcut>
+
+    <!-- Shortcut 2:
+    Throws the user to Activity 1 through the intent-->
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/icon_settings"
+        android:shortcutId="compose1"
+        android:shortcutShortLabel="@string/Setting">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.lock.applock.presentation.activity.SettingActivity"
+            android:targetPackage="com.lock.applock" />
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/appstore"
+        android:shortcutId="compose1"
+        android:shortcutShortLabel="@string/WhiteList">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.lock.applock.presentation.activity.PhoneAppsActivity"
+            android:targetPackage="com.lock.applock.presentation.activity" />
+    </shortcut>
+
+</shortcuts>

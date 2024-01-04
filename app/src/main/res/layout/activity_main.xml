@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+  >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <RelativeLayout
+            android:id="@+id/layoutWhite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true">
+
+            <EditText
+                android:id="@+id/etWhiteListWebsite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/btnAddWhiteList"
+                android:background="@color/cardview_shadow_end_color"
+                android:hint="WhiteListWebsite"
+                android:padding="10dp" />
+
+            <Button
+                android:id="@+id/btnAddWhiteList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:padding="10dp"
+                android:text="+" />
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerWhite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layoutWhite"
+            android:nestedScrollingEnabled="false"
+            android:scrollbars="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <View
+            android:id="@+id/view1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/recyclerWhite"
+            android:layout_marginTop="10dp"
+            android:background="@color/blue" />
+
+        <RelativeLayout
+            android:id="@+id/layoutBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/view1">
+
+            <EditText
+                android:id="@+id/etBlackListWebsite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/btnAddBlackList"
+                android:background="@color/cardview_shadow_end_color"
+                android:hint="BlackListWebsite"
+                android:padding="10dp" />
+
+            <Button
+                android:id="@+id/btnAddBlackList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:padding="10dp"
+                android:text="+" />
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerBlack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layoutBlack"
+            android:nestedScrollingEnabled="false"
+            android:scrollbars="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <View
+            android:id="@+id/view2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/recyclerBlack"
+            android:layout_marginTop="10dp"
+            android:background="@color/blue" />
+
+        <Button
+            android:id="@+id/btnStartBlocklist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/view2"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:text="Start Blacklist"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btnStartWhitelist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btnStartBlocklist"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:text="Start Whitelist"
+            android:textAllCaps="false" />
+
+    </RelativeLayout>
+</ScrollView>

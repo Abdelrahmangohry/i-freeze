@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">i-Freeze</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="accessibility_service_description">accessibility_service_description</string>
+    <string name="title_activity_phone_apps">PhoneAppsActivity</string>
+    <string name="title_activity_splash">i-Freeze</string>
+    <string name="title_activity_setting">SettingActivity</string>
+    <string name="title_activity_settinh">SettinhActivity</string>
+    <string name="title_activity_white_lite">WhiteLiteActivity</string>
+    <string name="home">Home</string>
+    <string name="Setting">Setting</string>
+    <string name="WhiteList">White List</string>
+    <string name="title_activity_black_list_web">BlackListWeb</string>
+    <string name="title_activity_white_list_web">WhiteListWeb</string>
+</resources>
