@@ -1,6 +1,5 @@
 package com.lock.applock.service
 
-import android.app.Notification
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
@@ -17,8 +16,6 @@ import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
-import androidx.core.content.getSystemService
 import com.lock.applock.helper.NotificationHelper
 import com.patient.data.cashe.PreferencesGateway
 
@@ -115,7 +112,7 @@ class NetworkMonitoringService : Service() {
         if (networkInfo != null) {
             val networkType = when (networkInfo.type) {
                 ConnectivityManager.TYPE_WIFI -> {
-                    val ssid = "flothers"
+                    //  val ssid = "flothers"
                     val list: ArrayList<String> = preferenc.getList("allowedWifiList")
 //                    var mac = getMacAddress()
 
@@ -125,13 +122,15 @@ class NetworkMonitoringService : Service() {
                         //      Log.d("islam", "getCurrentSSID : ${getCurrentSSID().contains(ssid, true)} ")
                     }
                     if (preferenc.load("WifiWhite", false) == true) {
+//Mgd
+// start
+                        val isWhiteListed = list.any {
+                            it.equals(getCurrentSSID(), true)
+                        }
+                        if (!isWhiteListed)
+                            startService()
 
-                          if (!list.contains(getCurrentSSID()))
-                               startService()
-                        else {
-                              return
-                          }
-
+//end
                     }
                     "Wi-Fi"
                 }
