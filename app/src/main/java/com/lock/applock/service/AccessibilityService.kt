@@ -40,7 +40,7 @@ class AccessibilityServices : AccessibilityService() {
             "com.android.launcher", "com.google.android.launcher",
             "com.miui.home", "com.hihonor.android.launcher",
             "com.huawei.android.launcher", "com.sec.android.app.launcher",
-            "com.samsung.android.app.launcher", "com.lock.applock"
+            "com.samsung.android.app.launcher", "com.lock.applock","com.oppo.launcher","com.coloros.launcher"
         )
         return launcherPackages.any { packageName.startsWith(it) }
     }

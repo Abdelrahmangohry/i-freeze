@@ -13,6 +13,7 @@ sealed class Screen(val route:String){
     object LicenseActivation : Screen(route = "license_activation")
     object WhiteList : Screen(route = "withe_list_screen")
     object BlackList : Screen(route = "black_list_screen")
+    object AllBrowsersList : Screen(route = "all_browsers")
     object BlackListWeb : Screen(route = "black_list_web_screen")
     object WhiteListWeb : Screen(route = "white_list_web_screen")
     object WhiteListWifi : Screen(route = "white_list_wifi")
