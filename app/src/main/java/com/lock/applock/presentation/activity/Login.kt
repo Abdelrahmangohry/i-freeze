@@ -102,7 +102,7 @@ fun Login(
                 .background(Color(0xFF175AA8)),
 
             ) {
-            loginHeaderLogo()
+
             Column(
                 modifier = Modifier.padding(top = 250.dp),
 
