@@ -122,15 +122,14 @@ class NetworkMonitoringService : Service() {
                         //      Log.d("islam", "getCurrentSSID : ${getCurrentSSID().contains(ssid, true)} ")
                     }
                     if (preferenc.load("WifiWhite", false) == true) {
-//Mgd
-// start
+
                         val isWhiteListed = list.any {
                             it.equals(getCurrentSSID(), true)
                         }
                         if (!isWhiteListed)
                             startService()
 
-//end
+
                     }
                     "Wi-Fi"
                 }

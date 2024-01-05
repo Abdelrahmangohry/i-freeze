@@ -30,7 +30,7 @@ fun NavGraphBuilder.homeNavGraph(
 
 ) {
     navigation(
-        startDestination = Screen.NetworkControl.route,
+        startDestination = Screen.Home.route,
         route = HOME_GRAPH_ROUTE
     ) {
         composable(
