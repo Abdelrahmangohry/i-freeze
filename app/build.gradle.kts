@@ -25,6 +25,19 @@ android {
         }
     }
 
+    flavorDimensions.add("I-freeze")
+    productFlavors {
+        create("beta") {
+            dimension = "I-freeze"
+            applicationId = "com.lock.applock"
+//            buildConfigField("String", "appName", "My QA App")
+        }
+        create("prod") {
+            dimension = "I-freeze"
+            applicationId = "com.lock.applock"
+//            buildConfigField("String", "appName", "My Prod App")
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -33,6 +46,9 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
+        }
+        debug{
+
         }
     }
     compileOptions {
