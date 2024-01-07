@@ -44,6 +44,10 @@ class AccessibilityServices : AccessibilityService() {
         )
         return launcherPackages.any { packageName.startsWith(it) }
     }
+    private fun isBrowsers(packageName: String):Boolean{
+        val browserList= listOf("com.")
+        return browserList.any{packageName.startsWith(it)}
+    }
     private fun getAppDatabaseInstance(): AppsDB {
         return RoomDBModule.provideRoomDB(applicationContext)
     }
@@ -77,10 +81,19 @@ class AccessibilityServices : AccessibilityService() {
     private fun handleAppBasedOnLists(packageName: String, serviceIntent: Intent) {
         val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
         val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
+        val isBrowsersEnabled = preferenc.load("Browsers", false) ?: false
         if (!::appsList.isInitialized){
             serviceScope.launch {
                 appsList = getAppDatabaseInstance().daoApps().getAppsList()
             }
+        }
+        val isAppInBrowserList = isBrowsers(packageName)
+        if (isBrowsersEnabled && isAppInBrowserList){
+            applicationContext.startService(serviceIntent)
+            killAppAndShowOverlay(packageName)
+        }else{
+            applicationContext.stopService(serviceIntent)
+            removeOverlayAndViewBinding()
         }
         val isAppInWhitelist = isAppInList(packageName, appsList.filter { it.statusWhite == true })
         val isAppInBlacklist = isAppInList(packageName, appsList.filter { it.status == true })

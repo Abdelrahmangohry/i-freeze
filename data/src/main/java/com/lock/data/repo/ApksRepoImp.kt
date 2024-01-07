@@ -6,9 +6,10 @@ import com.lock.data.dp.AppsDB
 import com.lock.data.model.AppsModel
 import javax.inject.Inject
 
-class ApksRepoImp @Inject constructor(private val room : AppsDB,private val context: Context):ApksRepo {
+class ApksRepoImp @Inject constructor(private val room: AppsDB, private val context: Context) :
+    ApksRepo {
     override suspend fun saveApps(list: List<AppsModel>) {
-    room.daoApps().insertApps(list)
+        room.daoApps().insertApps(list)
     }
 
     override suspend fun updateApp(app: AppsModel) {
@@ -30,8 +31,17 @@ class ApksRepoImp @Inject constructor(private val room : AppsDB,private val cont
             val activityInfo = resolveInfo.activityInfo
             val name = activityInfo.loadLabel(pk).toString()
             val packageName = activityInfo.packageName
-            apps.add(AppsModel(name, packageName, false))
+            if (!isBrowserPackage(packageName)) {
+                apps.add(AppsModel(name, packageName, false))
+            }
         }
         return apps
+    }
+
+    private fun isBrowserPackage(packageName: String): Boolean {
+        val launcherPackages = listOf(
+             "com.google.android.youtube",
+        )
+        return launcherPackages.any { packageName.startsWith(it) }
     }
 }
