@@ -45,24 +45,37 @@ class AccessibilityServices : AccessibilityService() {
         return launcherPackages.any { packageName.startsWith(it) }
     }
     private fun isBrowsers(packageName: String):Boolean{
-        val browserList= listOf("com.")
+        val browserList= listOf("com.android.chrome", "org.mozilla.firefox", "com.microsoft.emmx",
+            "com.opera.browser", "com.brave.browser", "com.sec.android.app.sbrowser", "com.UCMobile.intl")
         return browserList.any{packageName.startsWith(it)}
     }
+
+    //////////////
     private fun getAppDatabaseInstance(): AppsDB {
         return RoomDBModule.provideRoomDB(applicationContext)
     }
+    ////////////////
+
 
     override fun onAccessibilityEvent(p0: AccessibilityEvent?) {
         preferenc = PreferencesGateway(applicationContext)
+
+        // Create an intent for ForceCloseService class
         serviceIntent = Intent(applicationContext, ForceCloseService::class.java)
+
+        // Use coroutine to asynchronously fetch the list of apps from the database
         serviceScope.launch {
             appsList = getAppDatabaseInstance().daoApps().getAppsList()
         }
+        // Get the package name from the AccessibilityEvent
         val packageName = p0?.packageName.toString()
         Log.d("islam", "packageName $packageName")
+
+        // Check if the event type is a window state change
         if (p0?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             Log.d("islam", "packageName $packageName")
             if (!isLauncherPackage(packageName)) {
+                // Handle the app based on lists using the ForceCloseService intent
                 handleAppBasedOnLists(packageName, serviceIntent)
 
             }
@@ -71,9 +84,14 @@ class AccessibilityServices : AccessibilityService() {
 
     fun killThisPackageIfRunning(context: Context, packageName: String?) {
         val activityManager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+
+        // Create an intent to launch the home screen (main launcher)
         val startMain = Intent(Intent.ACTION_MAIN)
         startMain.addCategory(Intent.CATEGORY_HOME)
+        // Set flags to start a new task and clear the existing task
         startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        // Start the home screen by launching the intent
         context.startActivity(startMain)
         activityManager.killBackgroundProcesses(packageName)
     }

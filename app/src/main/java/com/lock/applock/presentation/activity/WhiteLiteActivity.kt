@@ -15,10 +15,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,13 +53,17 @@ import com.patient.data.cashe.PreferencesGateway
 fun  WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController){
     viewModel.getAllApps()
     val newList= viewModel.articlesItems.collectAsState()
-    WhiteAppList(newList.value, onBackPressed = { navController.popBackStack() })
+    WhiteAppList(newList.value, viewModel,onBackPressed = { navController.popBackStack() })
     
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WhiteAppList(
-    listItems: List<AppsModel> = listOf(), onBackPressed: () -> Unit) {
+    listItems: List<AppsModel> = listOf(), viewModel: AppsViewModel, onBackPressed: () -> Unit) {
+
+    val searchText = remember { mutableStateOf("") }
+
     Column(modifier = Modifier
         .fillMaxWidth()
         .background(Color(0xFF175AA8))) {
@@ -72,13 +80,31 @@ fun WhiteAppList(
             color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 6.dp, bottom = 15.dp).padding(horizontal = 35.dp),
+                .padding(top = 6.dp, bottom = 15.dp).padding(horizontal = 25.dp),
             fontWeight = FontWeight.ExtraBold,
             fontSize = 22.sp
         )}
+
+        androidx.compose.material3.TextField(
+            value = searchText.value,
+            onValueChange = { searchText.value = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            label = { Text("Search...") },
+            textStyle = TextStyle(color = Color.Black),
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
+            }
+
+        )
+
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(listItems.size) { it ->
-                WhiteListItem(listItems[it])
+            val filteredList = listItems.filter {
+                it.appName.contains(searchText.value, ignoreCase = true)
+            }
+            items(filteredList.size) { it ->
+                WhiteListItem(filteredList[it], viewModel)
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -87,8 +113,8 @@ fun WhiteAppList(
 
 @Composable
 fun WhiteListItem(
-    app: AppsModel) {
-    val viewModel: AppsViewModel = hiltViewModel()
+    app: AppsModel,viewModel: AppsViewModel) {
+
     Card(
         modifier = Modifier
 
@@ -141,6 +167,17 @@ fun WhiteListItem(
                         viewModel.updateApp(app.copy(status = false, statusWhite = it))
                         isToggle.value = !isToggle.value
 
+                    },
+                    thumbContent = if (isToggle.value) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    }else {
+                        null
                     }
                 )
             }

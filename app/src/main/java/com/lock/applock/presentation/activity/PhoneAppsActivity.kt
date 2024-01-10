@@ -95,12 +95,13 @@ fun BlackListApps(listItems: List<AppsModel> = listOf(),viewModel: AppsViewModel
             onValueChange = { searchText.value = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            label = { Text("Search") },
-            textStyle = TextStyle(color = Color.White),
+                .padding(12.dp),
+            label = { Text("Search...") },
+            textStyle = TextStyle(color = Color.Black),
             leadingIcon = {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
             }
+
         )
 
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {

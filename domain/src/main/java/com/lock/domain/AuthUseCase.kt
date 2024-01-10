@@ -1,5 +1,6 @@
 package com.lock.domain
 
+import com.lock.data.model.AppsModel
 import com.lock.data.model.DeviceDTO
 import com.lock.data.repo.auth.AuthRepo
 import kotlinx.coroutines.flow.Flow
@@ -14,4 +15,7 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
           deviceDto).map { it.body() }
     }
 
+//    suspend fun getApplication() : Flow<AppsModel?>{
+//        return repo.getApplications().map { it.body() }
+//    }
 }

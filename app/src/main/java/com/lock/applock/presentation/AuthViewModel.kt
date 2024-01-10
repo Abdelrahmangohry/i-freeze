@@ -36,4 +36,7 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
                 }
         }
     }
+
+
+
 }

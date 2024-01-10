@@ -1,5 +1,6 @@
 package com.lock.data.repo.auth
 
+import com.lock.data.model.AppsModel
 import com.lock.data.model.DeviceDTO
 import com.lock.data.remote.UserApi
 import kotlinx.coroutines.flow.Flow
@@ -14,4 +15,8 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
     ) = flow {
             emit(api.getUserLogin(activationKey,deviceDto))
     }
+
+//    override suspend fun getApplications() = flow {
+//        emit(api.)
+//    }
 }

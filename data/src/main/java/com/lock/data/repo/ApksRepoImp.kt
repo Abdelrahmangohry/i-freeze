@@ -40,7 +40,8 @@ class ApksRepoImp @Inject constructor(private val room: AppsDB, private val cont
 
     private fun isBrowserPackage(packageName: String): Boolean {
         val launcherPackages = listOf(
-             "com.google.android.youtube",
+            "com.android.chrome", "org.mozilla.firefox", "com.microsoft.emmx",
+            "com.opera.browser", "com.brave.browser", "com.sec.android.app.sbrowser", "com.UCMobile.intl"
         )
         return launcherPackages.any { packageName.startsWith(it) }
     }

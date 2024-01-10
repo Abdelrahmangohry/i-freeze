@@ -10,4 +10,6 @@ interface AuthRepo {
                              ,deviceDto: DeviceDTO ):
             Flow<Response<Any>>
 
+//    suspend fun getApplications() : Flow<Response<AppsModel>>
+
 }

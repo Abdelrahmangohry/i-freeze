@@ -2,6 +2,7 @@ package com.lock.applock.presentation.activity
 
 import SecondaryColor
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.Context
@@ -76,6 +77,7 @@ fun HeaderSetting(onBackPressed: () -> Unit) {
 }
 
 
+@SuppressLint("SuspiciousIndentation")
 @RequiresApi(34)
 @Composable
 fun GeneralOptionsUISetting(
@@ -121,7 +123,7 @@ fun GeneralOptionsUISetting(
         GeneralSettingItem(
             icon = R.drawable.draw,
             mainText = "Over Draw ",
-            subText = "can create a layout over ohter apps                             ",
+            subText = "can create a layout over other apps",
             onClick = {
                 Log.d("islam", "GeneralOptionsUISetting :drawAction ")
 
