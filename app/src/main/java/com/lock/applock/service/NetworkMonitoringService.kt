@@ -115,15 +115,24 @@ class NetworkMonitoringService : Service() {
         if (networkInfo != null) {
             val networkType = when (networkInfo.type) {
                 ConnectivityManager.TYPE_WIFI -> {
-                    val ssid = "ZEIN"
+                    //  val ssid = "flothers"
+                    val list: ArrayList<String> = preferenc.getList("allowedWifiList")
 //                    var mac = getMacAddress()
 
                     Log.d("islam", "showNetworkInfo : ${preferenc.load("WifiBlocked", false)} ")
-                    if (preferenc.load("WifiBlocked", false) == true
-                        && !getCurrentSSID().contains(ssid, true)
-                    ) {
+                    if (preferenc.load("WifiBlocked", false) == true) {
                         startService()
-                        Log.d("islam", "getCurrentSSID : ${getCurrentSSID().contains(ssid, true)} ")
+                        //      Log.d("islam", "getCurrentSSID : ${getCurrentSSID().contains(ssid, true)} ")
+                    }
+                    if (preferenc.load("WifiWhite", false) == true) {
+
+                        val isWhiteListed = list.any {
+                            it.equals(getCurrentSSID(), true)
+                        }
+                        if (!isWhiteListed)
+                            startService()
+
+
                     }
                     "Wi-Fi"
                 }

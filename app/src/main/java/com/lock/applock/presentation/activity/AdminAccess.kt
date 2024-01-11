@@ -143,7 +143,7 @@ fun GeneralOptionsUI(navController: NavController) {
             mainText = "Admin Login",
             subText = "Administrative Privileges",
             onClick = {
-                navController.navigate(Screen.Login.route)
+                navController.navigate(Screen.Home.route)
 
             }
         )
