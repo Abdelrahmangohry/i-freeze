@@ -7,6 +7,7 @@ import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.example.compse.ui.*
 import com.lock.applock.presentation.activity.AdminAccess
+import com.lock.applock.presentation.activity.AllBrowsersList
 import com.lock.applock.presentation.activity.AppManager
 import com.lock.applock.presentation.activity.BlackList
 import com.lock.applock.presentation.activity.BlackListWeb
@@ -29,7 +30,7 @@ fun NavGraphBuilder.homeNavGraph(
 
 ) {
     navigation(
-        startDestination = Screen.AdminAccess.route,
+        startDestination = Screen.Home.route,
         route = HOME_GRAPH_ROUTE
     ) {
         composable(
@@ -63,6 +64,13 @@ fun NavGraphBuilder.homeNavGraph(
         ) {
             BlackList(navController = navController)
         }
+
+        composable(
+            route = Screen.AllBrowsersList.route
+        ) {
+            AllBrowsersList(navController = navController)
+        }
+
         composable(
             route = Screen.BlackListWeb.route
         ) {

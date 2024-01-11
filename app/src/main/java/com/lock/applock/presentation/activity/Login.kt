@@ -105,8 +105,6 @@ fun Login(
             ) {
 
             Column(
-                modifier = Modifier.padding(top = 250.dp),
-
                 horizontalAlignment = Alignment.CenterHorizontally,
 
 
@@ -114,7 +112,7 @@ fun Login(
                 val username = remember { mutableStateOf(TextFieldValue()) }
                 val password = remember { mutableStateOf(TextFieldValue()) }
                 HeaderLogin(onBackPressed = {navController.popBackStack()})
-
+                loginHeaderLogo()
                 Spacer(modifier = Modifier.height(20.dp))
                 OutlinedTextField(
                     label = { Text(text = "Username") },
@@ -190,7 +188,7 @@ fun Login(
                                 }
                             }
                         },
-                        modifier = Modifier,
+                        modifier = Modifier.padding(horizontal = 50.dp),
                         colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
 
                     ) {

@@ -1,6 +1,5 @@
 package com.lock.applock.service
 
-import android.app.Notification
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
@@ -17,8 +16,6 @@ import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
-import androidx.core.content.getSystemService
 import com.lock.applock.helper.NotificationHelper
 import com.patient.data.cashe.PreferencesGateway
 
