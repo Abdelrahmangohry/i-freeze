@@ -37,17 +37,32 @@ class AccessibilityServices : AccessibilityService() {
     private lateinit var preferenc: PreferencesGateway
     private fun isLauncherPackage(packageName: String): Boolean {
         val launcherPackages = listOf(
-            "com.android.launcher", "com.google.android.launcher",
-            "com.miui.home", "com.hihonor.android.launcher",
-            "com.huawei.android.launcher", "com.sec.android.app.launcher",
-            "com.samsung.android.app.launcher", "com.lock.applock","com.oppo.launcher","com.coloros.launcher"
+            "com.android.launcher",
+            "com.google.android.launcher",
+            "com.miui.home",
+            "com.hihonor.android.launcher",
+            "com.huawei.android.launcher",
+            "com.sec.android.app.launcher",
+            "com.samsung.android.app.launcher",
+            "com.lock.applock",
+            "com.oppo.launcher",
+            "com.coloros.launcher"
         )
         return launcherPackages.any { packageName.startsWith(it) }
     }
-    private fun isBrowsers(packageName: String):Boolean{
-        val browserList= listOf("com.android.chrome", "org.mozilla.firefox", "com.microsoft.emmx",
-            "com.opera.browser", "com.brave.browser", "com.sec.android.app.sbrowser", "com.UCMobile.intl")
-        return browserList.any{packageName.startsWith(it)}
+
+    private fun isBrowsers(packageName: String): Boolean {
+        val browserList = listOf(
+            "com.android.chrome",
+            "org.mozilla.firefox",
+            "com.microsoft.emmx",
+            "com.opera.browser",
+            "com.opera.browser.afin",
+            "com.brave.browser",
+            "com.sec.android.app.sbrowser",
+            "com.UCMobile.intl"
+        )
+        return browserList.any { packageName.startsWith(it) }
     }
 
     //////////////
@@ -100,16 +115,16 @@ class AccessibilityServices : AccessibilityService() {
         val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
         val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
         val isBrowsersEnabled = preferenc.load("Browsers", false) ?: false
-        if (!::appsList.isInitialized){
+        if (!::appsList.isInitialized) {
             serviceScope.launch {
                 appsList = getAppDatabaseInstance().daoApps().getAppsList()
             }
         }
         val isAppInBrowserList = isBrowsers(packageName)
-        if (isBrowsersEnabled && isAppInBrowserList){
+        if (isBrowsersEnabled && isAppInBrowserList) {
             applicationContext.startService(serviceIntent)
             killAppAndShowOverlay(packageName)
-        }else{
+        } else {
             applicationContext.stopService(serviceIntent)
             removeOverlayAndViewBinding()
         }
