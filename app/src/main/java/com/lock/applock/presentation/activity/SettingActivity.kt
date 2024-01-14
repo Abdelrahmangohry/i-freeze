@@ -8,6 +8,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -36,6 +37,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.lock.applock.GeneralSettingItem
 import com.lock.applock.R
@@ -143,8 +146,7 @@ fun GeneralOptionsUISetting(
             subText = "This is essential part of Android's",
             onClick = {
                 Log.d("islam", "GeneralOptionsUISetting :accessibility ")
-                val enabledServicesSetting = Settings.Secure.getString(
-                    context.contentResolver,
+                val enabledServicesSetting = Settings.Secure.getString(context.contentResolver,
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
                 )
                 if (enabledServicesSetting?.contains("com.lock.applock.service.AccessibilityServices") != true){
@@ -152,6 +154,26 @@ fun GeneralOptionsUISetting(
                         context.startActivity(intent)
                 }else{
                     Toast.makeText(context,"its already isAccessibilityServiceEnabled ", Toast.LENGTH_LONG).show()
+                }
+            }
+        )
+
+        GeneralSettingItem(
+            icon = R.drawable.location,
+            mainText = "Location Permission",
+            subText = "Enable location access for better functionality",
+            onClick = {
+                val locationPermissionRequestCode = 123
+                // Check if location permission is already granted
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // Location permission is not granted, request it
+                    ActivityCompat.requestPermissions(context as Activity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        locationPermissionRequestCode
+                    )
+                } else {
+                    // Location permission is already granted
+                    Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_LONG).show()
                 }
             }
         )

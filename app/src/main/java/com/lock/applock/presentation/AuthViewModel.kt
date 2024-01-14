@@ -23,15 +23,20 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         viewModelScope.launch {
             useCase.getUserLogin(activationKey, deviceDto).onStart {
                 _loginFlow.emit(NetWorkState.Loading)
+                Log.d("abdo", "Start")
             }
                 .catch {
                     _loginFlow.emit(NetWorkState.Error(it))
+                    Log.d("abdo", "Catch $it")
+
                 }
                 .onCompletion {
                     _loginFlow.emit(NetWorkState.StopLoading)
+                    Log.d("abdo", "onCompletion $it")
+
                 }
                 .collectLatest {
-                    Log.d("islam", "getUserLogin: ${it}")
+                    Log.d("abdo", "getUserLogin: ${it}")
                     _loginFlow.emit(NetWorkState.Success(it))
                 }
         }
