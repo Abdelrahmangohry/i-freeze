@@ -14,7 +14,7 @@
     <color name="lightBlue">#bdd5ea</color>
     <color name="window_bk">#175AA8</color>
     <color name="grayButton">#44464e</color>
-    <color name="RedButtons">#ff5050</color>
-    <color name="GreenButtons">#99ff66</color>
+    <color name="RedButtons">#F0A7A7</color>
+    <color name="GreenButtons">#C8F8AC</color>
     <color name="appBar">#013572</color>
 </resources>

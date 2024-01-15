@@ -16,6 +16,7 @@
  import androidx.compose.foundation.layout.size
  import androidx.compose.foundation.layout.width
  import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.text.KeyboardOptions
  import androidx.compose.material.icons.Icons
  import androidx.compose.material.icons.filled.ArrowBack
  import androidx.compose.material.icons.filled.Check
@@ -39,6 +40,7 @@
  import androidx.compose.ui.platform.LocalContext
  import androidx.compose.ui.text.TextStyle
  import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.input.ImeAction
  import androidx.compose.ui.text.style.TextAlign
  import androidx.compose.ui.unit.dp
  import androidx.compose.ui.unit.sp
@@ -96,11 +98,14 @@ fun BlackListApps(listItems: List<AppsModel> = listOf(),viewModel: AppsViewModel
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            label = { Text("Search...") },
-            textStyle = TextStyle(color = Color.Black),
+            label = { Text("Search...", color = Color.White) },
+
             leadingIcon = {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
-            }
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Search
+            ),
 
         )
 

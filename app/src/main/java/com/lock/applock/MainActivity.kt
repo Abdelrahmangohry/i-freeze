@@ -40,6 +40,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -206,16 +207,13 @@ fun Demo_DropDownMenu(navController: NavController) {
     name = parts[0]
 
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().padding(12.dp),
+        horizontalArrangement = Arrangement.End
 
     ) {
-        Text(text = "Admin Portal", color = Color.White, fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(horizontal = 105.dp).padding(top = 10.dp)
-        )
+
         IconButton(
             onClick = { expanded = !expanded },
-            modifier = Modifier.wrapContentSize(Alignment.TopEnd)
         ) {
             Image(
                 modifier = Modifier.size(30.dp)
@@ -226,25 +224,26 @@ fun Demo_DropDownMenu(navController: NavController) {
                 contentDescription = "More",
                 colorFilter = ColorFilter.tint(Color(0xFF175AA8))
             )
-        }
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text(name) },
-                onClick = { }
-            )
-            DropdownMenuItem(
-                text = { Text("Logout") },
-                onClick = {
-                    navController.navigate(Screen.AdminAccess.route)
-                    Toast.makeText(context, "Logout Successfully", Toast.LENGTH_SHORT).show()
-                }
-            )
-        }
 
+            DropdownMenu(
+
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(name) },
+                    onClick = { }
+                )
+                DropdownMenuItem(
+                    text = { Text("Logout") },
+                    onClick = {
+                        navController.navigate(Screen.AdminAccess.route)
+                        Toast.makeText(context, "Logout Successfully", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -358,9 +357,10 @@ fun GeneralOptionsUI(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: () -> Unit) {
-    ElevatedCard(elevation = CardDefaults.cardElevation(
-        defaultElevation = 8.dp
-    ),
+    ElevatedCard(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        ),
         onClick = { onClick() },
         modifier = Modifier
             .padding(bottom = 12.dp)

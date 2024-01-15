@@ -24,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -125,12 +126,18 @@ fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit) {
                 .background(color = Color.White)
                 .padding(15.dp),
 
-
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = Color.Black, // Text color // Color of the leading icon
+                unfocusedBorderColor = Color.LightGray, // Border color when unfocused
+                focusedBorderColor = Color.Black,
+                cursorColor = Color.Black,
+            ),
+            maxLines = 1,
             onValueChange = { newText ->
                 text2.value = newText
             },
-            label = { Text(text = "Wifi") },
-            placeholder = { Text(text = "Enter Wifi", color = Color.Gray) },
+            label = { Text(text = "Wifi", color = Color.Black) },
+            placeholder = { Text(text = "Enter Wifi Name", color = Color.Gray) },
 
         )
 

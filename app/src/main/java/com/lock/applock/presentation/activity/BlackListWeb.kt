@@ -34,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -157,19 +158,27 @@ fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit) {
                 .background(color = Color.White)
                 .padding(15.dp),
 
-
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = Color.Black, // Text color // Color of the leading icon
+                unfocusedBorderColor = Color.LightGray, // Border color when unfocused
+                focusedBorderColor = Color.Black,
+                cursorColor = Color.Black,
+            ),
+            maxLines = 1,
             onValueChange = { newText ->
                 text2.value = newText
             },
-            label = { Text(text = "Address") },
-            placeholder = { Text(text = "Enter Address", color = Color.Black) },
+            label = { Text(text = "Address", color = Color.Black) },
+            placeholder = { Text(text = "Enter Address") },
         )
 
         Button(
             onClick = {
-                onValidMacSubmit(text2.value)
-                text2.value = "" // Clear the text field
-
+                val newWebsite = text2.value.trim()
+                if (newWebsite.isNotEmpty()) {
+                    onValidMacSubmit(text2.value)
+                    text2.value = "" // Clear the text field
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
