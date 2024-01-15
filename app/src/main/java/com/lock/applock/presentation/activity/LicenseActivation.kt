@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,7 +48,10 @@ import kotlinx.coroutines.flow.map
 
 @RequiresApi(34)
 @Composable
-fun LicenseActivation(navController: NavController, authViewModel: AuthViewModel= hiltViewModel()) {
+fun LicenseActivation(
+    navController: NavController,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
@@ -60,51 +64,66 @@ fun LicenseActivation(navController: NavController, authViewModel: AuthViewModel
 @SuppressLint("FlowOperatorInvokedInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun licenseKey(authViewModel:AuthViewModel) {
+fun licenseKey(authViewModel: AuthViewModel) {
     var text by remember { mutableStateOf("") }
     val deviceDto = DeviceDTO(
         deviceName = "YourDeviceName",
         operatingSystemVersion = "YourOperatingSystemVersion",
         deviceIp = "YourDeviceIp",
-        macAddress = "YourMacAddress")
+        macAddress = "YourMacAddress"
+    )
 
     val loginState by authViewModel.loginFlow
         .map { it }
         .collectAsState(initial = NetWorkState.Loading)
-
+    Row(modifier = Modifier.padding(top = 100.dp, bottom = 30.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "License Activation",
+            color = Color.White,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 22.sp
+        )
+    }
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Column(modifier = Modifier.background(color = Color.White)) {
 
 
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                label = { Text("xxxx-xxxx-xxxx-xxxx") },
+                label = { Text("xxxx-xxxx-xxxx-xxxx", color = Color.Black) },
                 maxLines = 1,
-
-
-                textStyle = TextStyle(color = Color.Blue, fontWeight = FontWeight.Bold),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = Color.Black, // Text color // Color of the leading icon
+                    unfocusedBorderColor = Color.LightGray, // Border color when unfocused
+                    focusedBorderColor = Color.Black,
+                    cursorColor = Color.Black
+                ),
                 modifier = Modifier.padding(20.dp),
-                )
+            )
 
         }
         Column {
-            ElevatedButton(onClick = {
+            ElevatedButton(
+                onClick = {
                     authViewModel.getUserLogin(text, deviceDto)
 
 
-            }, modifier = Modifier.padding(vertical = 16.dp),
+                }, modifier = Modifier.padding(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-                ) {
+            ) {
                 Text("Activate", fontSize = 16.sp, color = Color.White)
             }
         }
-         //Observe the loginFlow and show Toast messages accordingly
+        //Observe the loginFlow and show Toast messages accordingly
         when (loginState) {
             is NetWorkState.Success<*> -> {
                 Toast.makeText(
@@ -113,6 +132,7 @@ fun licenseKey(authViewModel:AuthViewModel) {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+
             is NetWorkState.Error -> {
                 Toast.makeText(
                     LocalContext.current,
@@ -123,7 +143,8 @@ fun licenseKey(authViewModel:AuthViewModel) {
 
             else -> {}
         }
-}}
+    }
+}
 
 @Composable
 fun headerLicense(onBackPressed: () -> Unit) {
@@ -135,16 +156,7 @@ fun headerLicense(onBackPressed: () -> Unit) {
                 tint = Color.White
             )
         }
-        Text(
-            text = "License Activation",
-            color = Color.White,
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp).padding(horizontal = 70.dp),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
-        )
     }
 }
 
