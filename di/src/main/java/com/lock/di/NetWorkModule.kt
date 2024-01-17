@@ -56,9 +56,9 @@ object NetWorkModule {
 
     @Provides
     fun providesBaseUrl(): String {
-        return "http://184.174.37.115:44500/api/Licenses/"
+        return "https://security.flothers.com:8443/"
     }
-
+    //https://security.flothers.com:8443/api/Licenses/ActivateDevice/94156ef6-b6f3-4b3f-bed6-f4e077e99abd
     @Provides
     fun provideRetrofitClient(
         okHttpClient: OkHttpClient,

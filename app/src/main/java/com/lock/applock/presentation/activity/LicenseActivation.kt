@@ -2,6 +2,8 @@ package com.lock.applock.presentation.activity
 
 
 import android.annotation.SuppressLint
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -65,10 +67,24 @@ fun LicenseActivation(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun licenseKey(authViewModel: AuthViewModel) {
+    //getting the device Name
+    val deviceName: String = Build.MODEL
+    //getting the operating system version
+    val operatingSystemVersion: String = "Android " + Build.VERSION.RELEASE
+    val model: String = Build.MODEL
+    val brand: String = Build.BRAND
+    val device: String = Build.DEVICE
+
+//    Log.d("abdo", "device name ${deviceName}")
+//    Log.d("abdo", " operatingSystemVersion ${operatingSystemVersion}")
+//    Log.d("abdo", " model ${model}")
+//    Log.d("abdo", " brand ${brand}")
+//    Log.d("abdo", " device ${device}")
+
     var text by remember { mutableStateOf("") }
     val deviceDto = DeviceDTO(
-        deviceName = "YourDeviceName",
-        operatingSystemVersion = "YourOperatingSystemVersion",
+        deviceName = deviceName,
+        operatingSystemVersion = operatingSystemVersion,
         deviceIp = "YourDeviceIp",
         macAddress = "YourMacAddress"
     )
