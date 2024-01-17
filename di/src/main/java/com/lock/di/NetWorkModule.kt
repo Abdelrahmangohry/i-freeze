@@ -37,7 +37,7 @@ object NetWorkModule {
             val original = chain.request()
             val requestBuilder = original.newBuilder()
                 .method(original.method, original.body)
-            requestBuilder.addHeader("Content-Type", "application/json")
+//            requestBuilder.addHeader("Content-Type", "application/json")
             val request = requestBuilder
                 .build()
             Log.d(TAG, "provideOkHttpClient: ${request}")

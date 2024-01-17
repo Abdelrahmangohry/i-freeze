@@ -130,7 +130,7 @@ fun licenseKey(authViewModel: AuthViewModel) {
         Column {
             ElevatedButton(
                 onClick = {
-                    authViewModel.getUserLogin(text, deviceDto)
+                    authViewModel.getUserLogin("94156ef6-b6f3-4b3f-bed6-f4e077e99abd", deviceDto)
 
 
                 }, modifier = Modifier.padding(vertical = 16.dp),
