@@ -13,7 +13,7 @@ interface UserApi {
     @POST("api/Licenses/ActivateDevice/{activationKey}")
     suspend fun getUserLogin(
        @Path("activationKey")
-        activationKey: String="94156ef6-b6f3-4b3f-bed6-f4e077e99abd",
+        activationKey: String,
         @Body deviceDto: DeviceDTO
     ): Response<Any>
 }

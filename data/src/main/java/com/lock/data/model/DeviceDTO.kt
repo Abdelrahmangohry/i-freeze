@@ -1,6 +1,6 @@
 package com.lock.data.model
 
-data class DeviceDTO(  val deviceName: String="abdooooooooooooooooooooooooooooo",
-                       val operatingSystemVersion: String="islam",
-                       val deviceIp: String="islam",
-                       val macAddress: String="islam")
+data class DeviceDTO(val deviceName: String,
+                       val operatingSystemVersion: String,
+                       val deviceIp: String,
+                       val macAddress: String)

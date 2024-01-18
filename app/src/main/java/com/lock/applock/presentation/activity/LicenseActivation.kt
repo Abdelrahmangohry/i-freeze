@@ -2,6 +2,9 @@ package com.lock.applock.presentation.activity
 
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Context.WIFI_SERVICE
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -38,6 +41,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.core.motion.utils.Utils
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -46,6 +50,8 @@ import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
 import com.lock.data.model.DeviceDTO
 import kotlinx.coroutines.flow.map
+import java.net.Inet4Address
+import java.net.NetworkInterface
 
 
 @RequiresApi(34)
@@ -70,23 +76,68 @@ fun licenseKey(authViewModel: AuthViewModel) {
     //getting the device Name
     val deviceName: String = Build.MODEL
     //getting the operating system version
-    val operatingSystemVersion: String = "Android " + Build.VERSION.RELEASE
+    val operatingSystemVersion: String = "Android" + Build.VERSION.RELEASE
     val model: String = Build.MODEL
     val brand: String = Build.BRAND
     val device: String = Build.DEVICE
+    val context : Context
 
-//    Log.d("abdo", "device name ${deviceName}")
-//    Log.d("abdo", " operatingSystemVersion ${operatingSystemVersion}")
-//    Log.d("abdo", " model ${model}")
-//    Log.d("abdo", " brand ${brand}")
-//    Log.d("abdo", " device ${device}")
+
+    fun getIpAddress(): String {
+        var ipAddress = ""
+        try {
+            val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+            while (networkInterfaces.hasMoreElements()) {
+                val networkInterface = networkInterfaces.nextElement()
+                val inetAddresses = networkInterface.inetAddresses
+                while (inetAddresses.hasMoreElements()) {
+                    val inetAddress = inetAddresses.nextElement()
+                    if (inetAddress is Inet4Address && !inetAddress.isLoopbackAddress) {
+                        ipAddress = inetAddress.hostAddress
+                        break
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ipAddress
+    }
+
+    fun getMacAddress(): String {
+        var macAddress = ""
+        try {
+            val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+            while (networkInterfaces.hasMoreElements()) {
+                val networkInterface = networkInterfaces.nextElement()
+                val hardwareAddress = networkInterface.hardwareAddress
+                if (hardwareAddress != null && hardwareAddress.isNotEmpty()) {
+                    macAddress = hardwareAddress.joinToString(":") { byte -> "%02X".format(byte) }
+                    break
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return macAddress
+    }
+    val macAddress = getMacAddress()
+    val ipAddress = getIpAddress()
+
+    Log.d("abdo", "device name $deviceName")
+    Log.d("abdo", " operatingSystemVersion $operatingSystemVersion")
+    Log.d("abdo", " model $model")
+    Log.d("abdo", " brand $brand")
+    Log.d("abdo", " device $device")
+    Log.d("abdo", " macAddress $macAddress")
+    Log.d("abdo", " ipAddress $ipAddress")
 
     var text by remember { mutableStateOf("") }
     val deviceDto = DeviceDTO(
-        deviceName = deviceName,
+        deviceName = brand + deviceName,
         operatingSystemVersion = operatingSystemVersion,
-        deviceIp = "YourDeviceIp",
-        macAddress = "YourMacAddress"
+        deviceIp = ipAddress,
+        macAddress = macAddress
     )
 
     val loginState by authViewModel.loginFlow
@@ -130,7 +181,7 @@ fun licenseKey(authViewModel: AuthViewModel) {
         Column {
             ElevatedButton(
                 onClick = {
-                    authViewModel.getUserLogin("94156ef6-b6f3-4b3f-bed6-f4e077e99abd", deviceDto)
+                    authViewModel.getUserLogin(text, deviceDto)
 
 
                 }, modifier = Modifier.padding(vertical = 16.dp),
