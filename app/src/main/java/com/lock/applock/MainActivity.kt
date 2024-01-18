@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun checkOverlayPermission() {
+    private fun checkOverlayPermission() {
         if (!Settings.canDrawOverlays(applicationContext)) {
             val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
             myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -158,6 +158,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         when (requestCode) {
@@ -167,6 +168,7 @@ class MainActivity : ComponentActivity() {
                     Log.d("islam", "onActivityResult:resultCode == RESULT_OK == true ")
                 } else {
                     Log.d("islam", "onActivityResult:resultCode == RESULT_OK == false ")
+                    //TODO add a message
                 }
 
 
@@ -211,14 +213,17 @@ fun Demo_DropDownMenu(navController: NavController) {
     ) {
         Text(text = "Admin Portal", color = Color.White, fontWeight = FontWeight.ExtraBold,
             fontSize = 22.sp,
-            modifier = Modifier.padding(horizontal = 105.dp).padding(top = 10.dp)
+            modifier = Modifier
+                .padding(horizontal = 105.dp)
+                .padding(top = 10.dp)
         )
         IconButton(
             onClick = { expanded = !expanded },
             modifier = Modifier.wrapContentSize(Alignment.TopEnd)
         ) {
             Image(
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier
+                    .size(30.dp)
                     .background(Color.White, shape = Shape.large),
 
                 painter = painterResource(id = R.drawable.person),
