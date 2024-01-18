@@ -1,7 +1,6 @@
 package com.lock.applock.presentation.activity
 
 import SecondaryColor
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.admin.DevicePolicyManager
@@ -33,8 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -111,11 +108,11 @@ fun GeneralOptionsUISetting(
             mainText = "Admin Permission",
             subText = "For get access and control over apps",
             onClick = {
-                if (!deviceManager.isDeviceOwnerApp(activity.getPackageName())){
-                    val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                    intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-                    activity.startActivityForResult(intent, 1)
+                if (!deviceManager.isAdminActive(compName)){
+                    val adminIntent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                    adminIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+                    adminIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin")
+                    activity.startActivityForResult(adminIntent, 1)
                 }else{
                     Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_LONG).show()
                 }
@@ -222,7 +219,9 @@ fun SupportOptionsUISetting(moveToApps: () -> Unit, kisko: () -> Unit) {
             mainText = "About",
             onClick = {}
         )
+
     }
+
 }
 
 

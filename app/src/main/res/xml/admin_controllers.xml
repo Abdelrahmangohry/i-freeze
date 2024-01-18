@@ -5,6 +5,10 @@
     <watch-login/>
     <reset-password/>
     <force-lock/>
+    <package-blacklist>
+        <item>com.android.browser</item>
+        <!--TODO Add more packages if needed -->
+    </package-blacklist>
     <wipe-data/>
     <disable-camera/>
     <encrypted-storage/>

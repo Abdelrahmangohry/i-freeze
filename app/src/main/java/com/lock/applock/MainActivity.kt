@@ -151,7 +151,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun checkOverlayPermission() {
+    private fun checkOverlayPermission() {
         if (!Settings.canDrawOverlays(applicationContext)) {
             val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
             myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -159,6 +159,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         when (requestCode) {
@@ -168,6 +169,7 @@ class MainActivity : ComponentActivity() {
                     Log.d("islam", "onActivityResult:resultCode == RESULT_OK == true ")
                 } else {
                     Log.d("islam", "onActivityResult:resultCode == RESULT_OK == false ")
+                    //TODO add a message
                 }
 
 
