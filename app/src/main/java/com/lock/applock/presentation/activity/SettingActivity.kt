@@ -1,6 +1,7 @@
 package com.lock.applock.presentation.activity
 
 import SecondaryColor
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.admin.DevicePolicyManager
