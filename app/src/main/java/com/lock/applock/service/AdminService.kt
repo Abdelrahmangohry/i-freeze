@@ -34,7 +34,8 @@ class AdminService : DeviceAdminReceiver() {
     override fun onEnabled(context: Context, intent: Intent) {
         super.onEnabled(context, intent)
         showToast(context, "onEnabled")
-        removeChatHeadView(context)
+        if (chatHeadView != null)
+            removeChatHeadView(context)
     }
 
     override fun onDisabled(context: Context, intent: Intent) {
@@ -74,7 +75,8 @@ class AdminService : DeviceAdminReceiver() {
         chatHeadView?.let { view ->
             windowManager?.removeView(view)
             chatHeadView = null // Ensure the view is set to null to prevent memory leaks
-        }
+        } ?: Log.e("ForceCloseService", "chatHeadView is null")
+
     }
 
 }

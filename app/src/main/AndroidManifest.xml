@@ -61,7 +61,7 @@
         <service
             android:name=".service.ForceCloseService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false" />
         <service
             android:name=".service.AccessibilityServices"
             android:exported="true"

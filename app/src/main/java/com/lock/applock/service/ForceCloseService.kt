@@ -15,7 +15,6 @@ import android.view.WindowManager
 import com.lock.applock.R
 
 class ForceCloseService : Service() {
-    private val handler = Handler()
     private var chatHeadView: View? = null // Declare the view as a field
     private val myBinder = BinderForce()
    private var windowManager: WindowManager? = null
@@ -26,7 +25,10 @@ class ForceCloseService : Service() {
             return this@ForceCloseService
         }
     }
-
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        createChatHeadView()
+        return START_STICKY
+    }
     override fun onBind(intent: Intent?): IBinder? {
         return myBinder
     }
@@ -64,6 +66,6 @@ class ForceCloseService : Service() {
         chatHeadView?.let { view ->
             windowManager?.removeView(view)
             chatHeadView = null // Set the view to null after removal
-        }
+        } ?: Log.e("ForceCloseService", "chatHeadView is null")
     }
 }
