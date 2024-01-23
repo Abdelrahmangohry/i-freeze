@@ -3,6 +3,7 @@ package com.lock.applock.presentation.nav_graph
 import android.app.Activity
 import android.content.Context
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.*
@@ -30,8 +31,7 @@ import com.lock.applock.presentation.screen.HomeScreen
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
     activity : Activity, context:Context, wifi: () -> Unit,
-    authViewModel: AuthViewModel = hiltViewModel(), lifecycle: LifecycleOwner
-
+     lifecycle: LifecycleOwner
     ) {
     navigation(
         startDestination = Screen.AdminAccess.route,
@@ -107,7 +107,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.LicenseActivation.route
         ) {
-            LicenseActivation(navController = navController, authViewModel, lifecycle)
+            LicenseActivation(navController = navController, lifecycle)
         }
         composable(
             route = Screen.AppManager.route

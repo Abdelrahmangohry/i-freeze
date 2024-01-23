@@ -20,7 +20,7 @@ import com.patient.data.cashe.PreferencesGateway
 @RequiresApi(34)
 @Composable
 fun SetupNavGraph(navController: NavHostController,
-                  activity:Activity, context:Context, wifi: () -> Unit,authViewModel: AuthViewModel = hiltViewModel(), lifecycle: LifecycleOwner
+                  activity:Activity, context:Context, wifi: () -> Unit, lifecycle: LifecycleOwner
 
 ){
     NavHost(
@@ -28,6 +28,6 @@ fun SetupNavGraph(navController: NavHostController,
         startDestination = HOME_GRAPH_ROUTE,
         route = ROOT_GRAPH_ROUTE
     ) {
-        homeNavGraph(navController = navController  , activity,context,wifi, authViewModel, lifecycle)
+        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle)
     }
 }

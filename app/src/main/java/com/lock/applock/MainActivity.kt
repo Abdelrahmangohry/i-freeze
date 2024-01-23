@@ -63,10 +63,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.compse.ui.SetupNavGraph
+import com.lock.applock.presentation.AuthViewModel
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.AdminService
 import com.lock.applock.service.NetworkMonitoringService
@@ -132,7 +134,7 @@ class MainActivity : ComponentActivity() {
                 navController = rememberNavController()
                 SetupNavGraph(
                     navController = navController,
-                    this, this, { wifiCheck() }
+                    this, this, { wifiCheck() }, this
                 )
             }
         }

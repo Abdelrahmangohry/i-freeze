@@ -13,7 +13,7 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import retrofit2.converter.scalars.ScalarsConverterFactory
+
 
 const val TAG = "NetWorkModule"
 
@@ -68,7 +68,7 @@ object NetWorkModule {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(converterFactory)
             .build()
     }
     //ScalarsConverterFactory

@@ -53,23 +53,27 @@ import com.app.data.remote.NetWorkState
 import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
 import com.lock.data.model.DeviceDTO
+
 import kotlinx.coroutines.flow.map
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
 
+
 @RequiresApi(34)
 @Composable
 fun LicenseActivation(
-    navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel(),
-            lifecycle: LifecycleOwner
+    navController: NavController,lifecycle: LifecycleOwner,
+    authViewModel: AuthViewModel = hiltViewModel()
+
 ) {
+    var responseBody by remember { mutableStateOf<String?>(null) }
+
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
         headerLicense(onBackPressed = { navController.popBackStack() })
-        licenseKey(authViewModel, LocalContext.current, lifecycle)
+        licenseKey(lifecycle, authViewModel)
 
     }
 }
@@ -77,7 +81,7 @@ fun LicenseActivation(
 @SuppressLint("FlowOperatorInvokedInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun licenseKey(authViewModel: AuthViewModel, context: Context, lifecycle: LifecycleOwner) {
+fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
     //getting the device Name
     val deviceName: String = Build.BRAND + Build.MODEL
     //getting the operating system version
@@ -109,15 +113,15 @@ fun licenseKey(authViewModel: AuthViewModel, context: Context, lifecycle: Lifecy
     }
 
 
-        fun getMacAddress(): String {
-        val wifiManager = context.getSystemService(WIFI_SERVICE) as WifiManager
-        val wInfo: WifiInfo = wifiManager.connectionInfo
-        val macAddress: String = wInfo.macAddress
+//        fun getMacAddress(): String {
+//        val wifiManager = context.getSystemService(WIFI_SERVICE) as WifiManager
+//        val wInfo: WifiInfo = wifiManager.connectionInfo
+//        val macAddress: String = wInfo.macAddress
+//
+//        return macAddress
+//    }
 
-        return macAddress
-    }
-
-    val macAddress = getMacAddress()
+//    val macAddress = getMacAddress()
     val ipAddress = getIpAddress()
 
 
@@ -190,6 +194,7 @@ fun licenseKey(authViewModel: AuthViewModel, context: Context, lifecycle: Lifecy
 
     }
 }
+
 
 @Composable
 fun headerLicense(onBackPressed: () -> Unit) {

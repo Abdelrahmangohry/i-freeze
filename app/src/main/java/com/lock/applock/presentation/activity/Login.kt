@@ -96,7 +96,7 @@ fun Login(
             "Microsoft windows 11 pro"
         )
     )
-    Log.d("islam", "Login: ${viewModel.loginFlow.collectAsState(initial = NetWorkState.Loading)}")
+//    Log.d("islam", "Login: ${viewModel.loginFlow.collectAsState(initial = NetWorkState.Loading)}")
     MaterialTheme(
         colorScheme = MaterialTheme.colorScheme.copy(
             primary = Color.White, // Set the primary color to white

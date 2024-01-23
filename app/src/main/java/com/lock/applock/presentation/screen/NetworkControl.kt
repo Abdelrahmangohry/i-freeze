@@ -168,7 +168,7 @@ fun checkedPreferencesUpdates(authViewModel: AuthViewModel = hiltViewModel(), de
             WhiteListApps = false,
             Browsers = true,
         )
-    authViewModel.updateUserData(deviceID, deviceInfo)
+//    authViewModel.updateUserData(deviceID, deviceInfo)
 
 }
 
