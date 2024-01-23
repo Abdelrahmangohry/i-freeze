@@ -4,6 +4,7 @@ package com.lock.applock.presentation.activity
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Context.WIFI_SERVICE
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
@@ -43,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.core.motion.utils.Utils
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.app.data.remote.NetWorkState
@@ -58,13 +62,14 @@ import java.net.NetworkInterface
 @Composable
 fun LicenseActivation(
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+            lifecycle: LifecycleOwner
 ) {
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
         headerLicense(onBackPressed = { navController.popBackStack() })
-        licenseKey(authViewModel)
+        licenseKey(authViewModel, LocalContext.current, lifecycle)
 
     }
 }
@@ -72,15 +77,14 @@ fun LicenseActivation(
 @SuppressLint("FlowOperatorInvokedInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun licenseKey(authViewModel: AuthViewModel) {
+fun licenseKey(authViewModel: AuthViewModel, context: Context, lifecycle: LifecycleOwner) {
     //getting the device Name
-    val deviceName: String = Build.MODEL
+    val deviceName: String = Build.BRAND + Build.MODEL
     //getting the operating system version
-    val operatingSystemVersion: String = "Android" + Build.VERSION.RELEASE
+    val operatingSystemVersion: String = "Android " + Build.VERSION.RELEASE
     val model: String = Build.MODEL
-    val brand: String = Build.BRAND
+//    val brand: String = Build.BRAND
     val device: String = Build.DEVICE
-    val context : Context
 
 
     fun getIpAddress(): String {
@@ -104,45 +108,28 @@ fun licenseKey(authViewModel: AuthViewModel) {
         return ipAddress
     }
 
-    fun getMacAddress(): String {
-        var macAddress = ""
-        try {
-            val networkInterfaces = NetworkInterface.getNetworkInterfaces()
-            while (networkInterfaces.hasMoreElements()) {
-                val networkInterface = networkInterfaces.nextElement()
-                val hardwareAddress = networkInterface.hardwareAddress
-                if (hardwareAddress != null && hardwareAddress.isNotEmpty()) {
-                    macAddress = hardwareAddress.joinToString(":") { byte -> "%02X".format(byte) }
-                    break
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+
+        fun getMacAddress(): String {
+        val wifiManager = context.getSystemService(WIFI_SERVICE) as WifiManager
+        val wInfo: WifiInfo = wifiManager.connectionInfo
+        val macAddress: String = wInfo.macAddress
+
         return macAddress
     }
+
     val macAddress = getMacAddress()
     val ipAddress = getIpAddress()
 
-    Log.d("abdo", "device name $deviceName")
-    Log.d("abdo", " operatingSystemVersion $operatingSystemVersion")
-    Log.d("abdo", " model $model")
-    Log.d("abdo", " brand $brand")
-    Log.d("abdo", " device $device")
-    Log.d("abdo", " macAddress $macAddress")
-    Log.d("abdo", " ipAddress $ipAddress")
 
     var text by remember { mutableStateOf("") }
     val deviceDto = DeviceDTO(
-        deviceName = brand + deviceName,
+        deviceName = deviceName,
         operatingSystemVersion = operatingSystemVersion,
         deviceIp = ipAddress,
-        macAddress = macAddress
+        macAddress = "macAddress"
     )
 
-    val loginState by authViewModel.loginFlow
-        .map { it }
-        .collectAsState(initial = NetWorkState.Loading)
+
     Row(modifier = Modifier.padding(top = 100.dp, bottom = 30.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically) {
@@ -150,7 +137,7 @@ fun licenseKey(authViewModel: AuthViewModel) {
             text = "License Activation",
             color = Color.White,
             fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
+            fontSize = 20.sp
         )
     }
     Column(
@@ -182,6 +169,15 @@ fun licenseKey(authViewModel: AuthViewModel) {
             ElevatedButton(
                 onClick = {
                     authViewModel.getUserLogin(text, deviceDto)
+                    authViewModel._loginFlow.observe(lifecycle, Observer { response ->
+                        if(response.isSuccessful){
+                            Log.d("abdo", response.body().toString())
+                        }
+                        else{
+                            Log.d("abdo", response.message())
+                        }
+
+                    })
 
 
                 }, modifier = Modifier.padding(vertical = 16.dp),
@@ -191,25 +187,7 @@ fun licenseKey(authViewModel: AuthViewModel) {
             }
         }
         //Observe the loginFlow and show Toast messages accordingly
-        when (loginState) {
-            is NetWorkState.Success<*> -> {
-                Toast.makeText(
-                    LocalContext.current,
-                    "Activation successful!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
 
-            is NetWorkState.Error -> {
-                Toast.makeText(
-                    LocalContext.current,
-                    "Activation failed",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            else -> {}
-        }
     }
 }
 

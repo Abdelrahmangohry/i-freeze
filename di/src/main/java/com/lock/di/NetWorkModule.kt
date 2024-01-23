@@ -13,6 +13,7 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 const val TAG = "NetWorkModule"
 
@@ -58,7 +59,6 @@ object NetWorkModule {
     fun providesBaseUrl(): String {
         return "https://security.flothers.com:8443/"
     }
-    //https://security.flothers.com:8443/api/Licenses/ActivateDevice/94156ef6-b6f3-4b3f-bed6-f4e077e99abd
     @Provides
     fun provideRetrofitClient(
         okHttpClient: OkHttpClient,
@@ -68,9 +68,10 @@ object NetWorkModule {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(converterFactory)
+            .addConverterFactory(ScalarsConverterFactory.create())
             .build()
     }
+    //ScalarsConverterFactory
 
     @Provides
     fun provideWeatherApi(retrofit: Retrofit): UserApi {

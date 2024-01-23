@@ -3,9 +3,12 @@ package com.lock.applock.presentation.nav_graph
 import android.app.Activity
 import android.content.Context
 import androidx.annotation.RequiresApi
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.example.compse.ui.*
+import com.lock.applock.presentation.AuthViewModel
 import com.lock.applock.presentation.activity.AdminAccess
 import com.lock.applock.presentation.activity.AllBrowsersList
 import com.lock.applock.presentation.activity.AppManager
@@ -26,9 +29,10 @@ import com.lock.applock.presentation.screen.HomeScreen
 @RequiresApi(34)
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
-    activity : Activity, context:Context, wifi: () -> Unit
+    activity : Activity, context:Context, wifi: () -> Unit,
+    authViewModel: AuthViewModel = hiltViewModel(), lifecycle: LifecycleOwner
 
-) {
+    ) {
     navigation(
         startDestination = Screen.AdminAccess.route,
         route = HOME_GRAPH_ROUTE
@@ -103,7 +107,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.LicenseActivation.route
         ) {
-            LicenseActivation(navController = navController)
+            LicenseActivation(navController = navController, authViewModel, lifecycle)
         }
         composable(
             route = Screen.AppManager.route

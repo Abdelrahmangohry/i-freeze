@@ -40,16 +40,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lock.applock.R
+import com.lock.applock.presentation.AuthViewModel
 import com.lock.applock.presentation.activity.WhiteListItem
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.NetworkMonitoringService
 import com.lock.applock.ui.theme.Shape
+import com.lock.data.model.DeviceInfo
 import com.patient.data.cashe.PreferencesGateway
 
 @Composable
-fun NetworkControl(navController: NavController, wifi: () -> Unit) {
+fun NetworkControl(
+    navController: NavController,
+    wifi: () -> Unit,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
 
     val preference = PreferencesGateway(LocalContext.current)
     val serviceIntent = Intent(LocalContext.current, NetworkMonitoringService::class.java)
@@ -62,6 +69,10 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
     val wifiAllowedState = remember { mutableStateOf(isWifiWhiteListing) }
 
     var wifiListAllowed = preference.getList("WifiList")
+    var deviceID = "f9fb2f12-2276-4ff5-ae64-84f226cddb70"
+
+
+
 
     Column(
         modifier = Modifier
@@ -80,7 +91,7 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
                 mainText = "Block WiFi",
                 subText = "Click Here to Block WiFi",
                 isChecked = it,
-                onCheckedChange = {isChecked ->
+                onCheckedChange = { isChecked ->
 
                     wifiBlockedState.value = it
                     preference.update("WifiBlocked", isChecked)
@@ -88,9 +99,12 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
                     if (isChecked) {
                         Log.d("abdo", "i am here")
                         context.startService(serviceIntent)
+//                        checkedPreferencesUpdates(authViewModel,deviceID)
+//                        authViewModel.updateUserData(deviceID, deviceInfo)
                     } else {
                         Log.d("abdo", "iam in else")
                         context.stopService(serviceIntent)
+//                        checkedPreferencesUpdates(authViewModel,deviceID)
                     }
                     if (wifiAllowedState.value!!) {
                         preference.update("WifiWhite", it)
@@ -119,8 +133,7 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
                 if (wifiAllowedState.value!! && wifiListAllowed.isEmpty()) {
                     Log.d("abdo", "i am here")
                     context.startService(serviceIntent)
-                }
-                else {
+                } else {
                     Log.d("abdo", "iam in else")
                     context.stopService(serviceIntent)
                 }
@@ -139,29 +152,24 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
 
     }
 }
-
 @Composable
-fun SSidName(ssid: String) {
-    Card(
-        modifier = Modifier
+fun checkedPreferencesUpdates(authViewModel: AuthViewModel = hiltViewModel(), deviceID : String) {
+    val preference = PreferencesGateway(LocalContext.current)
+    val isWifiBlocked = preference.load("WifiBlocked", false)
+    val isWifiWhiteListing = preference.load("WifiWhite", false)
+    //var deviceID = "f9fb2f12-2276-4ff5-ae64-84f226cddb70"
+    val deviceInfo =
+        DeviceInfo(
+            BlockWiFi= isWifiBlocked ?: false,
+            WhiteListWiFi = isWifiWhiteListing ?: false,
+            BlockListURLs = true,
+            WhiteListURLs = false,
+            BlockListApps = true,
+            WhiteListApps = false,
+            Browsers = true,
+        )
+    authViewModel.updateUserData(deviceID, deviceInfo)
 
-            .fillMaxWidth()
-            .background(Color(0xFF175AA8))
-            .padding(horizontal = 10.dp)
-            .padding(top = 10.dp),
-
-        shape = Shape.large
-    )
-    {
-        Column(modifier = Modifier.padding(start = 10.dp).height(40.dp)) {
-            Text(
-                text = ssid,
-                style = TextStyle(fontWeight = FontWeight.Bold),
-                color = Color(0xFF175AA8)
-            )
-
-        }
-    }
 }
 
 
@@ -293,7 +301,7 @@ fun isMacAddress(mac: String): Boolean {
 
 @Composable
 fun HeaderMenu(onBackPressed: () -> Unit) {
-    Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -301,14 +309,15 @@ fun HeaderMenu(onBackPressed: () -> Unit) {
                 tint = Color.White
             )
         }
-    Text(
-        text = "Network Control",
-        color = Color.White,
+        Text(
+            text = "Network Control",
+            color = Color.White,
 
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 55.dp),
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 22.sp
-    )
-}}
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 55.dp),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 22.sp
+        )
+    }
+}
