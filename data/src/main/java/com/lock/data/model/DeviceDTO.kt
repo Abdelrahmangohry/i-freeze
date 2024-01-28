@@ -5,7 +5,7 @@ data class DeviceDTO(val deviceName: String,
                        val deviceIp: String,
                        val macAddress: String)
 
-
+data class Data(val deviceInfo:DeviceInfo)
 data class DeviceInfo(val blockWiFi: Boolean,
                       val whiteListWiFi: Boolean,
                       val blockListURLs: Boolean,

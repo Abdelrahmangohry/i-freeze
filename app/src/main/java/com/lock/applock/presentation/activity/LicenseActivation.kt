@@ -2,13 +2,8 @@ package com.lock.applock.presentation.activity
 
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Context.WIFI_SERVICE
-import android.net.wifi.WifiInfo
-import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,8 +23,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,24 +32,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.core.motion.utils.Utils
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.app.data.remote.NetWorkState
 import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
 import com.lock.data.model.DeviceDTO
 import com.patient.data.cashe.PreferencesGateway
 
-import kotlinx.coroutines.flow.map
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
@@ -132,7 +119,7 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
 //    val macAddress = getMacAddress()
     val ipAddress = getIpAddress()
 
-    var responseNew by remember { mutableStateOf<String?>(null) }
+    var deviceId by remember { mutableStateOf<String?>(null) }
     var text by remember { mutableStateOf("") }
     val deviceDto = DeviceDTO(
         deviceName = deviceName,
@@ -188,53 +175,57 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
                         if (response.isSuccessful) {
                             Log.d("abdo", response.body().toString())
 
-                            responseNew = response.body().toString().trim()
-                            Log.d("abdo", "this is new response ${responseNew!!}")
+                            deviceId = response.body().toString().trim()
+                            Log.d("abdo", "this is new response ${deviceId!!}")
 
-                            preference.save("responseID", responseNew!!)
+                            preference.save("responseID", deviceId!!)
 
-                            // Move the following code inside the Observer block
-                            authViewModel.updateUserData(responseNew!!)
-                            authViewModel._updateFlow.observe(lifecycle, Observer { it
-                                if (it.isSuccessful) {
-                                    Log.d("abdo", "all Responses body ${it.body()}")
-                                    preference.update(
-                                        "Blacklist",
-                                        it.body()?.blockListApps!!
 
-                                    )
-                                    preference.update(
-                                        "Whitelist",
-                                        it.body()?.whiteListApps!!
-                                    )
-                                    preference.update(
-                                        "Browsers",
-                                        it.body()?.browsers!!
-                                    )
-                                    preference.update(
-                                        "WebBlacklist",
-                                        it.body()?.blockListURLs!!
-                                    )
-                                    preference.update(
-                                        "WebWhitelist",
-                                        it.body()?.whiteListURLs!!
-                                    )
-                                    preference.update(
-                                        "WifiBlocked",
-                                        it.body()?.blockWiFi!!
-                                    )
-                                    preference.update(
-                                        "WifiWhite",
-                                        it.body()?.whiteListWiFi!!
-                                    )
-
-                                } else {
-                                    Log.d("abdo", "kolo error ${it.message()}")
-                                }
-                            })
                         } else {
                             Log.d("abdo", response.message())
                         }
+                        // Move the following code inside the Observer block
+                        authViewModel.updateUserData(deviceId!!)
+                        authViewModel._updateFlow.observe(lifecycle, Observer {responseID ->
+                            if (responseID.isSuccessful) {
+                                Log.d("abdo", "all Responses body Mgd ${responseID.body()?.deviceInfo}")
+                                //Log.d("abdo", "all Responses body ${responseID.body()}")
+
+
+                       /*         preference.update(
+                                    "Blacklist",
+                                    responseID.body()?.blockListApps!!
+
+                                )
+                                preference.update(
+                                    "Whitelist",
+                                    responseID.body()?.whiteListApps!!
+                                )
+                                preference.update(
+                                    "Browsers",
+                                    responseID.body()?.browsers!!
+                                )
+                                preference.update(
+                                    "WebBlacklist",
+                                    responseID.body()?.blockListURLs!!
+                                )
+                                preference.update(
+                                    "WebWhitelist",
+                                    responseID.body()?.whiteListURLs!!
+                                )
+                                preference.update(
+                                    "WifiBlocked",
+                                    responseID.body()?.blockWiFi!!
+                                )
+                                preference.update(
+                                    "WifiWhite",
+                                    responseID.body()?.whiteListWiFi!!
+                                )*/
+
+                            } else {
+                                Log.d("abdo", "kolo error ${responseID.message()}")
+                            }
+                        })
                     })
                 }, modifier = Modifier.padding(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))

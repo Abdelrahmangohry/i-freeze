@@ -86,7 +86,7 @@ fun Login(
 ) {
     var auth: FirebaseAuth = Firebase.auth
     val preference = PreferencesGateway(LocalContext.current)
-    viewModel.getUserLogin(
+  /*  viewModel.getUserLogin(
         "67E62E91-E758-42BA-C508-08DB4BB9CDC7",
 
         DeviceDTO(
@@ -95,7 +95,7 @@ fun Login(
             "005056C00001",
             "Microsoft windows 11 pro"
         )
-    )
+    )*/
 //    Log.d("islam", "Login: ${viewModel.loginFlow.collectAsState(initial = NetWorkState.Loading)}")
     MaterialTheme(
         colorScheme = MaterialTheme.colorScheme.copy(

@@ -1,6 +1,7 @@
 package com.lock.data.repo.auth
 
 import com.lock.data.model.AppsModel
+import com.lock.data.model.Data
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
 import com.lock.data.remote.UserApi
@@ -15,12 +16,13 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
         activationKey: String,
         deviceDto: DeviceDTO
     ) : Response<String> {
-           return api.getUserLogin(activationKey,deviceDto)
+           return api.
+           getUserLogin(activationKey,deviceDto)
     }
 
     override suspend fun updateUserData(
         deviceID : String,
-    ) :Response<DeviceInfo> {
+    ) :Response<Data> {
         return api.updateUserData(deviceID)
     }
 

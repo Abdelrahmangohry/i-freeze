@@ -1,5 +1,6 @@
 package com.lock.data.remote
 
+import com.lock.data.model.Data
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
 import retrofit2.Response
@@ -20,7 +21,7 @@ interface UserApi {
     suspend fun updateUserData(
         @Path("id")
         id : String,
-    ) : Response<DeviceInfo>
+    ) : Response<Data>
 
 }
 
