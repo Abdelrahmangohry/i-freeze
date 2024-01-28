@@ -97,6 +97,7 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
             .apply()
     }
 
+
     val gson: Gson = Gson()
     inline fun <reified T : Any> saveUser(key: String, value: T) {
         val json = gson.toJson(value)

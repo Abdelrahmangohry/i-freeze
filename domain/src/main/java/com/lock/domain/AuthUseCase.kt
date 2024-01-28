@@ -1,7 +1,6 @@
 package com.lock.domain
 
 import android.util.Log
-import com.lock.data.model.ApiResponse
 import com.lock.data.model.AppsModel
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
@@ -21,8 +20,7 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
 
     suspend fun updateUserData(
         deviceID : String,
-        deviceInfo : DeviceInfo
-    ) : Flow<Any?>{
-        return repo.updateUserData(deviceID,deviceInfo).map { it.body() }
+    ) : Response<DeviceInfo> {
+        return repo.updateUserData(deviceID)
     }
 }

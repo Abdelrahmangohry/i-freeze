@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,21 +54,21 @@ import com.app.data.remote.NetWorkState
 import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
 import com.lock.data.model.DeviceDTO
+import com.patient.data.cashe.PreferencesGateway
 
 import kotlinx.coroutines.flow.map
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
 
-
 @RequiresApi(34)
 @Composable
 fun LicenseActivation(
-    navController: NavController,lifecycle: LifecycleOwner,
+    navController: NavController, lifecycle: LifecycleOwner,
     authViewModel: AuthViewModel = hiltViewModel()
 
+
 ) {
-    var responseBody by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
@@ -82,16 +83,23 @@ fun LicenseActivation(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
+
+    val preference = PreferencesGateway(LocalContext.current)
+    var responseID = remember { preference.load("responseID", "") }
+//    val loginResponse by authViewModel.loginFlow.collectAsState(initial = null)
+//    val updateResponse by authViewModel.updateFlow.collectAsState(initial = null)
+
     //getting the device Name
-    val deviceName: String = Build.BRAND + Build.MODEL
+    val deviceName: String = Build.BRAND + Build.MODEL + "New"
     //getting the operating system version
-    val operatingSystemVersion: String = "Android " + Build.VERSION.RELEASE
+    val operatingSystemVersion: String = "Android 1" + Build.VERSION.RELEASE
     val model: String = Build.MODEL
 //    val brand: String = Build.BRAND
     val device: String = Build.DEVICE
 
 
     fun getIpAddress(): String {
+
         var ipAddress = ""
         try {
             val networkInterfaces = NetworkInterface.getNetworkInterfaces()
@@ -124,7 +132,7 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
 //    val macAddress = getMacAddress()
     val ipAddress = getIpAddress()
 
-
+    var responseNew by remember { mutableStateOf<String?>(null) }
     var text by remember { mutableStateOf("") }
     val deviceDto = DeviceDTO(
         deviceName = deviceName,
@@ -134,9 +142,11 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
     )
 
 
-    Row(modifier = Modifier.padding(top = 100.dp, bottom = 30.dp).fillMaxWidth(),
+    Row(
+        modifier = Modifier.padding(top = 100.dp, bottom = 30.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically) {
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = "License Activation",
             color = Color.White,
@@ -172,25 +182,94 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
         Column {
             ElevatedButton(
                 onClick = {
+
                     authViewModel.getUserLogin(text, deviceDto)
                     authViewModel._loginFlow.observe(lifecycle, Observer { response ->
-                        if(response.isSuccessful){
+                        if (response.isSuccessful) {
                             Log.d("abdo", response.body().toString())
-                        }
-                        else{
+
+                            responseNew = response.body().toString().trim()
+                            Log.d("abdo", "this is new response ${responseNew!!}")
+
+                            preference.save("responseID", responseNew!!)
+
+                            // Move the following code inside the Observer block
+                            authViewModel.updateUserData(responseNew!!)
+                            authViewModel._updateFlow.observe(lifecycle, Observer { it
+                                if (it.isSuccessful) {
+                                    Log.d("abdo", "all Responses body ${it.body()}")
+                                    preference.update(
+                                        "Blacklist",
+                                        it.body()?.blockListApps!!
+
+                                    )
+                                    preference.update(
+                                        "Whitelist",
+                                        it.body()?.whiteListApps!!
+                                    )
+                                    preference.update(
+                                        "Browsers",
+                                        it.body()?.browsers!!
+                                    )
+                                    preference.update(
+                                        "WebBlacklist",
+                                        it.body()?.blockListURLs!!
+                                    )
+                                    preference.update(
+                                        "WebWhitelist",
+                                        it.body()?.whiteListURLs!!
+                                    )
+                                    preference.update(
+                                        "WifiBlocked",
+                                        it.body()?.blockWiFi!!
+                                    )
+                                    preference.update(
+                                        "WifiWhite",
+                                        it.body()?.whiteListWiFi!!
+                                    )
+
+                                } else {
+                                    Log.d("abdo", "kolo error ${it.message()}")
+                                }
+                            })
+                        } else {
                             Log.d("abdo", response.message())
                         }
-
                     })
-
-
                 }, modifier = Modifier.padding(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
             ) {
                 Text("Activate", fontSize = 16.sp, color = Color.White)
             }
+
+//            ElevatedButton(
+//                onClick = {
+
+
+//                            authViewModel.updateUserData(responseID!!)
+//                            authViewModel._updateFlow.observe(lifecycle, Observer { response2 ->
+//                                if (response2.isSuccessful) {
+//                                    Log.d("abdo", "all Responses body ${response2.body()}")
+//                                    preference.update("Blacklist",response2.body()?.BlockListApps ?: true)
+//                                    preference.update("Whitelist",response2.body()?.WhiteListApps ?: false)
+//                                    preference.update("Browsers",response2.body()?.Browsers ?: false)
+//                                    preference.update("WebBlacklist",response2.body()?.BlockListURLs ?: false)
+//                                    preference.update("WebWhitelist",response2.body()?.WhiteListURLs ?: false)
+//                                    preference.update("WifiBlocked",response2.body()?.BlockWiFi ?: false)
+//                                    preference.update("WifiWhite",response2.body()?.WhiteListWiFi ?: false)
+//
+//                                } else {
+//                                    Log.d("abdo", "kolo error ${response2.message()}")
+//                                }
+//                            })
+
+//                }, modifier = Modifier.padding(vertical = 16.dp),
+//                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
+//            ) {
+//                Text("SynC", fontSize = 16.sp, color = Color.White)
+//            }
         }
-        //Observe the loginFlow and show Toast messages accordingly
+
 
     }
 }

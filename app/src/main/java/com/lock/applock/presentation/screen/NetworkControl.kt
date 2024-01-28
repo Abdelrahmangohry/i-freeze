@@ -152,25 +152,25 @@ fun NetworkControl(
 
     }
 }
-@Composable
-fun checkedPreferencesUpdates(authViewModel: AuthViewModel = hiltViewModel(), deviceID : String) {
-    val preference = PreferencesGateway(LocalContext.current)
-    val isWifiBlocked = preference.load("WifiBlocked", false)
-    val isWifiWhiteListing = preference.load("WifiWhite", false)
-    //var deviceID = "f9fb2f12-2276-4ff5-ae64-84f226cddb70"
-    val deviceInfo =
-        DeviceInfo(
-            BlockWiFi= isWifiBlocked ?: false,
-            WhiteListWiFi = isWifiWhiteListing ?: false,
-            BlockListURLs = true,
-            WhiteListURLs = false,
-            BlockListApps = true,
-            WhiteListApps = false,
-            Browsers = true,
-        )
-//    authViewModel.updateUserData(deviceID, deviceInfo)
-
-}
+//@Composable
+//fun checkedPreferencesUpdates(authViewModel: AuthViewModel = hiltViewModel(), deviceID : String) {
+//    val preference = PreferencesGateway(LocalContext.current)
+//    val isWifiBlocked = preference.load("WifiBlocked", false)
+//    val isWifiWhiteListing = preference.load("WifiWhite", false)
+//    //var deviceID = "f9fb2f12-2276-4ff5-ae64-84f226cddb70"
+//    val deviceInfo =
+//        DeviceInfo(
+//            blockWiFi= isWifiBlocked ?: false,
+//            whiteListWiFi = isWifiWhiteListing ?: false,
+//            blockListURLs = true,
+//            whiteListURLs = false,
+//            blockListApps = true,
+//            whiteListApps = false,
+//            browsers = true,
+//        )
+////    authViewModel.updateUserData(deviceID, deviceInfo)
+//
+//}
 
 
 @Composable

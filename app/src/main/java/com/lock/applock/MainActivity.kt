@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -63,7 +64,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -85,6 +89,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var compName: ComponentName
     private lateinit var preferenc: PreferencesGateway
     lateinit var navController: NavHostController
+    private val handler = Handler()
     val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -102,17 +107,17 @@ class MainActivity : ComponentActivity() {
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
 
-//        when {
-//            ContextCompat.checkSelfPermission(
-//                this,
-//                android.Manifest.permission.ACCESS_FINE_LOCATION
-//            ) == PackageManager.PERMISSION_GRANTED -> {
-//            }
-//            else -> {
-//                requestPermissionLauncher.launch(
-//                    android.Manifest.permission.ACCESS_FINE_LOCATION)
-//            }
-//        }
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+            }
+            else -> {
+                requestPermissionLauncher.launch(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
         when {
             ContextCompat.checkSelfPermission(
                 this,
@@ -128,6 +133,10 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
+//        runServerUpdates(this)
+//        handler.postDelayed(runnableCode, 24 * 60 * 60 * 1000)
+
         setContent {
             window.statusBarColor = getColor(R.color.blue)
             AppLockTheme {
@@ -136,10 +145,49 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     this, this, { wifiCheck() }, this
                 )
+
             }
         }
     }
 
+//    private val runnableCode: Runnable = object : Runnable {
+//        override fun run() {
+//            try {
+//                // Call your function here
+////                runServerUpdates(this@MainActivity)
+//                Toast.makeText(LocalContext.current, "The server updated Successfully",Toast.LENGTH_SHORT).show()
+//            } finally {
+//                // Re-schedule the function to run after 24 hours
+//                handler.postDelayed(this,   6 * 1000)
+//            }
+//        }
+//    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        // Remove any pending callbacks to prevent memory leaks
+//        handler.removeCallbacks(runnableCode)
+//    }
+
+//    fun runServerUpdates(lifecycle: LifecycleOwner,authViewModel: AuthViewModel = hiltViewModel()) {
+//        val preference = PreferencesGateway(LocalContext.current)
+//        var responseID = remember { preference.load("responseID", "")}
+//        authViewModel.updateUserData(responseID!!)
+//        authViewModel._updateFlow.observe(lifecycle, Observer { response2 ->
+//            if (response2.isSuccessful) {
+//                Log.d("abdo", "all Responses body ${response2.body()}")
+//                preference.update("Blacklist",response2.body()?.BlockListApps ?: true)
+//                preference.update("Whitelist",response2.body()?.WhiteListApps ?: false)
+//                preference.update("Browsers",response2.body()?.Browsers ?: false)
+//                preference.update("WebBlacklist",response2.body()?.BlockListURLs ?: false)
+//                preference.update("WebWhitelist",response2.body()?.WhiteListURLs ?: false)
+//                preference.update("WifiBlocked",response2.body()?.BlockWiFi ?: false)
+//                preference.update("WifiWhite",response2.body()?.WhiteListWiFi ?: false)
+//
+//            } else {
+//                Log.d("abdo", "kolo error ${response2.message()}")
+//            }
+//        })
+//    }
     fun CreateKiskoMode() {
         if (deviceManager.isDeviceOwnerApp(applicationContext.getPackageName())) {
             Log.d("islam", "CcreateKiskoMode : ${preferenc.load("kisko", false)}")
