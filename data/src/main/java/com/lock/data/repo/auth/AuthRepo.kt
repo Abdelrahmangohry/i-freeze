@@ -2,6 +2,7 @@ package com.lock.data.repo.auth
 
 import com.lock.data.model.AppsModel
 import com.lock.data.model.Data
+
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
 import kotlinx.coroutines.flow.Flow
@@ -17,4 +18,8 @@ interface AuthRepo {
 //    suspend fun getApplications() : Flow<Response<AppsModel>>
 
     suspend fun updateUserData(deviceID: String): Response<Data>
+
+    suspend fun newUpdateUserData(deviceId: String): Response<Data>
 }
+
+

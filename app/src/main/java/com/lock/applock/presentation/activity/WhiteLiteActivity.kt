@@ -55,6 +55,7 @@ import com.patient.data.cashe.PreferencesGateway
 fun  WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController){
     viewModel.getAllApps()
     val newList= viewModel.articlesItems.collectAsState().value
+    Log.d("abdo", " this is list of apps $newList")
     WhiteAppList(newList, viewModel,onBackPressed = { navController.popBackStack() })
     
 }

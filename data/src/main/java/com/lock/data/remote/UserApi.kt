@@ -1,5 +1,6 @@
 package com.lock.data.remote
 
+
 import com.lock.data.model.Data
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
@@ -8,6 +9,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 // UserApi interface
 interface UserApi {
@@ -20,7 +22,13 @@ interface UserApi {
     @GET("api/Devices/{id}")
     suspend fun updateUserData(
         @Path("id")
-        id : String,
+        deviceID : String,
+    ) : Response<Data>
+
+    @GET("api/Devices/GetDeviceConfigurations")
+    suspend fun newUpdateUserData(
+        @Query("deviceId")
+        deviceId : String,
     ) : Response<Data>
 
 }

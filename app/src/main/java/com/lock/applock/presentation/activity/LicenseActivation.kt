@@ -2,8 +2,12 @@ package com.lock.applock.presentation.activity
 
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
@@ -41,8 +46,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
+import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.data.model.DeviceDTO
 import com.patient.data.cashe.PreferencesGateway
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 import java.net.Inet4Address
 import java.net.NetworkInterface
@@ -51,7 +58,7 @@ import java.net.NetworkInterface
 @RequiresApi(34)
 @Composable
 fun LicenseActivation(
-    navController: NavController, lifecycle: LifecycleOwner,
+    navController: NavController, lifecycle: LifecycleOwner, context: Context,
     authViewModel: AuthViewModel = hiltViewModel()
 
 
@@ -61,7 +68,7 @@ fun LicenseActivation(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
         headerLicense(onBackPressed = { navController.popBackStack() })
-        licenseKey(lifecycle, authViewModel)
+        licenseKey(lifecycle, context, navController, authViewModel)
 
     }
 }
@@ -69,10 +76,15 @@ fun LicenseActivation(
 @SuppressLint("FlowOperatorInvokedInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
+fun licenseKey(
+    lifecycle: LifecycleOwner,
+    context: Context,
+    navController: NavController,
+    authViewModel: AuthViewModel
+) {
 
     val preference = PreferencesGateway(LocalContext.current)
-    var responseID = remember { preference.load("responseID", "") }
+    var deviceId = remember { preference.load("responseID", "") }
 //    val loginResponse by authViewModel.loginFlow.collectAsState(initial = null)
 //    val updateResponse by authViewModel.updateFlow.collectAsState(initial = null)
 
@@ -119,7 +131,8 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
 //    val macAddress = getMacAddress()
     val ipAddress = getIpAddress()
 
-    var deviceId by remember { mutableStateOf<String?>(null) }
+
+
     var text by remember { mutableStateOf("") }
     val deviceDto = DeviceDTO(
         deviceName = deviceName,
@@ -166,11 +179,27 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
             )
 
         }
-        Column {
+        Column(modifier = Modifier.wrapContentSize(align = Alignment.Center)) {
+
             ElevatedButton(
                 onClick = {
-
+                    if (!isNetworkAvailable(context)) {
+                        Toast.makeText(
+                            context,
+                            "Please connect to the internet",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@ElevatedButton
+                    }
                     authViewModel.getUserLogin(text, deviceDto)
+                if (text.isEmpty()){
+                    Toast.makeText(
+                        context,
+                        "Add License Key",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ElevatedButton
+                }else{
                     authViewModel._loginFlow.observe(lifecycle, Observer { response ->
                         if (response.isSuccessful) {
                             Log.d("abdo", response.body().toString())
@@ -179,89 +208,114 @@ fun licenseKey(lifecycle: LifecycleOwner, authViewModel: AuthViewModel) {
                             Log.d("abdo", "this is new response ${deviceId!!}")
 
                             preference.save("responseID", deviceId!!)
-
-
+                            Toast.makeText(
+                                context,
+                                "License Activate Successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            navController.navigate(Screen.AdminAccess.route)
+                            return@Observer
                         } else {
-                            Log.d("abdo", response.message())
+                            Toast.makeText(
+                                context,
+                                "Invalid License Activate Key",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
                         }
-                        // Move the following code inside the Observer block
-                        authViewModel.updateUserData(deviceId!!)
-                        authViewModel._updateFlow.observe(lifecycle, Observer {responseID ->
-                            if (responseID.isSuccessful) {
-                                Log.d("abdo", "all Responses body Mgd ${responseID.body()?.deviceInfo}")
-                                //Log.d("abdo", "all Responses body ${responseID.body()}")
 
-
-                       /*         preference.update(
-                                    "Blacklist",
-                                    responseID.body()?.blockListApps!!
-
-                                )
-                                preference.update(
-                                    "Whitelist",
-                                    responseID.body()?.whiteListApps!!
-                                )
-                                preference.update(
-                                    "Browsers",
-                                    responseID.body()?.browsers!!
-                                )
-                                preference.update(
-                                    "WebBlacklist",
-                                    responseID.body()?.blockListURLs!!
-                                )
-                                preference.update(
-                                    "WebWhitelist",
-                                    responseID.body()?.whiteListURLs!!
-                                )
-                                preference.update(
-                                    "WifiBlocked",
-                                    responseID.body()?.blockWiFi!!
-                                )
-                                preference.update(
-                                    "WifiWhite",
-                                    responseID.body()?.whiteListWiFi!!
-                                )*/
-
-                            } else {
-                                Log.d("abdo", "kolo error ${responseID.message()}")
-                            }
-                        })
-                    })
+                    })}
                 }, modifier = Modifier.padding(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
             ) {
                 Text("Activate", fontSize = 16.sp, color = Color.White)
             }
 
-//            ElevatedButton(
-//                onClick = {
-
-
-//                            authViewModel.updateUserData(responseID!!)
-//                            authViewModel._updateFlow.observe(lifecycle, Observer { response2 ->
-//                                if (response2.isSuccessful) {
-//                                    Log.d("abdo", "all Responses body ${response2.body()}")
-//                                    preference.update("Blacklist",response2.body()?.BlockListApps ?: true)
-//                                    preference.update("Whitelist",response2.body()?.WhiteListApps ?: false)
-//                                    preference.update("Browsers",response2.body()?.Browsers ?: false)
-//                                    preference.update("WebBlacklist",response2.body()?.BlockListURLs ?: false)
-//                                    preference.update("WebWhitelist",response2.body()?.WhiteListURLs ?: false)
-//                                    preference.update("WifiBlocked",response2.body()?.BlockWiFi ?: false)
-//                                    preference.update("WifiWhite",response2.body()?.WhiteListWiFi ?: false)
-//
-//                                } else {
-//                                    Log.d("abdo", "kolo error ${response2.message()}")
-//                                }
-//                            })
-
-//                }, modifier = Modifier.padding(vertical = 16.dp),
-//                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-//            ) {
-//                Text("SynC", fontSize = 16.sp, color = Color.White)
-//            }
+            ElevatedButton(
+                onClick = {
+                    if (!isNetworkAvailable(context)) {
+                        Toast.makeText(
+                            context,
+                            "Please connect to the internet",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@ElevatedButton
+                    }
+                    if (deviceId.isNullOrEmpty()) {
+                        Toast.makeText(
+                            context,
+                            "Enter a Valid Key First",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        authViewModel.newUpdateUserData(deviceId!!)
+                        authViewModel._newFlow.observe(lifecycle, Observer { responseId ->
+                            if (responseId.isSuccessful) {
+                                Log.d("abdo", "new response query ${responseId.body()?.data}")
+                                preference.update(
+                                    "Blacklist",
+                                    responseId.body()?.data?.blockListApps!!
+                                )
+                                preference.update(
+                                    "Whitelist",
+                                    responseId.body()?.data?.whiteListApps!!
+                                )
+                                preference.update(
+                                    "Browsers",
+                                    responseId.body()?.data?.browsers!!
+                                )
+                                preference.update(
+                                    "WebBlacklist",
+                                    responseId.body()?.data?.blockListURLs!!
+                                )
+                                preference.update(
+                                    "WebWhitelist",
+                                    responseId.body()?.data?.whiteListURLs!!
+                                )
+                                preference.update(
+                                    "WifiBlocked",
+                                    responseId.body()?.data?.blockWiFi!!
+                                )
+                                preference.update(
+                                    "WifiWhite",
+                                    responseId.body()?.data?.whiteListWiFi!!
+                                )
+                                Toast.makeText(
+                                    context,
+                                    "Data Synchronized Successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                Log.d("abdo", "kolo error ${responseId.message()}")
+                            }
+                        })
+                    }
+                }, modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally),
+                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
+            ) {
+                Text("SYNC", fontSize = 16.sp, color = Color.White)
+            }
         }
 
 
+    }
+}
+
+// Function to check if the device is connected to the internet
+@SuppressLint("ServiceCast")
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null &&
+                (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+    } else {
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.data.remote.NetWorkState
 import com.lock.data.model.Data
+
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
 import com.lock.domain.AuthUseCase
@@ -26,6 +27,7 @@ import retrofit2.Response
 class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : ViewModel() {
     var _loginFlow: MutableLiveData<Response<String>> = MutableLiveData()
     var _updateFlow: MutableLiveData<Response<Data>> = MutableLiveData()
+    var _newFlow: MutableLiveData<Response<Data>> = MutableLiveData()
 
     //    val loginFlow = _loginFlow.asSharedFlow()
     /////
@@ -44,6 +46,8 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         }
     }
 
+
+
 //    fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
 //        viewModelScope.launch {
 //            _loginFlow.value = useCase.getUserLogin(activationKey, deviceDto)
@@ -60,6 +64,14 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         viewModelScope.launch {
             val response2 = useCase.updateUserData(deviceID)
             _updateFlow.value = response2
+
+        }
+    }
+
+    fun newUpdateUserData(deviceId: String) {
+        viewModelScope.launch {
+            val response = useCase.updateUserData(deviceId)
+            _newFlow.value = response
 
         }
     }

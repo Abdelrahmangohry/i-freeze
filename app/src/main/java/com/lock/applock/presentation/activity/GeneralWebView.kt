@@ -3,12 +3,14 @@
     import android.annotation.SuppressLint
     import android.os.Build
     import android.util.Log
+    import android.view.KeyEvent
     import android.view.View
     import android.webkit.CookieManager
     import android.webkit.WebResourceRequest
     import android.webkit.WebSettings
     import android.webkit.WebView
     import android.webkit.WebViewClient
+    import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
     import androidx.annotation.RequiresApi
     import androidx.compose.foundation.layout.Column
     import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +67,7 @@
         blockedWebsites: List<String>,
         allowedWebsites: List<String>
     ) {
+
         AndroidView(
             factory = { context ->
                 WebView(context).apply {
@@ -114,6 +117,8 @@
                             return false
                         }
 
+
+
                         private fun isWhitelistWebsite(url: String): Boolean {
                             for (allowedWebsite in allowedWebsites) {
                                 if (url.contains(allowedWebsite, true)) {
@@ -125,7 +130,9 @@
                     }
 
                     loadUrl("https://www.google.com/") // Load initial URL
+
                 }
+
             },
             modifier = Modifier.fillMaxSize()
         )
