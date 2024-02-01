@@ -123,8 +123,13 @@ class WebBlocklistActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         if (myWebView.canGoBack())
             myWebView.goBack()
+        else {
+            myWebView.destroy()
+            finish()
+            onDestroy()
+        }
+
     }
 }
