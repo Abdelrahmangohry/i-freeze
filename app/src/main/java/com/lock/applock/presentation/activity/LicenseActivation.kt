@@ -3,6 +3,7 @@ package com.lock.applock.presentation.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -47,6 +48,7 @@ import androidx.navigation.NavController
 import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
 import com.lock.applock.presentation.nav_graph.Screen
+import com.lock.applock.service.NetworkMonitoringService
 import com.lock.data.model.DeviceDTO
 import com.patient.data.cashe.PreferencesGateway
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
@@ -85,6 +87,7 @@ fun licenseKey(
 
     val preference = PreferencesGateway(LocalContext.current)
     var deviceId = remember { preference.load("responseID", "") }
+    val serviceIntent = Intent(LocalContext.current, NetworkMonitoringService::class.java)
 //    val loginResponse by authViewModel.loginFlow.collectAsState(initial = null)
 //    val updateResponse by authViewModel.updateFlow.collectAsState(initial = null)
 
@@ -98,7 +101,6 @@ fun licenseKey(
 
 
     fun getIpAddress(): String {
-
         var ipAddress = ""
         try {
             val networkInterfaces = NetworkInterface.getNetworkInterfaces()
@@ -203,7 +205,7 @@ fun licenseKey(
                     authViewModel._loginFlow.observe(lifecycle, Observer { response ->
                         if (response.isSuccessful) {
                             Log.d("abdo", response.body().toString())
-
+//                            OutlinedTextField.visability.gone
                             deviceId = response.body().toString().trim()
                             Log.d("abdo", "this is new response ${deviceId!!}")
 
@@ -276,6 +278,14 @@ fun licenseKey(
                                     "WifiBlocked",
                                     responseId.body()?.data?.blockWiFi!!
                                 )
+
+                                if(responseId.body()?.data?.blockWiFi!!){
+                                    context.startService(serviceIntent)
+                                }
+                                else{
+                                    context.stopService(serviceIntent)
+                                }
+
                                 preference.update(
                                     "WifiWhite",
                                     responseId.body()?.data?.whiteListWiFi!!
