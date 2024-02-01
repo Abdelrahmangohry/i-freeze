@@ -50,7 +50,8 @@ fun GeneralWebView(navController: NavController) {
                     isBlacklistedChecked = it,
                     isWhitelistedChecked = it1,
                     blockedWebsites = blockedWebsites,
-                    allowedWebsites = allowedWebsites, navController
+                    allowedWebsites = allowedWebsites,
+                    navController
                 )
             }
         }
@@ -66,7 +67,7 @@ fun startWebView(
     allowedWebsites: List<String>,
     navController: NavController
 ) {
-    var backEnabled by remember { mutableStateOf(true) }
+    val backEnabled by remember { mutableStateOf(true) }
     var webView: WebView? = null
 
     AndroidView(
@@ -133,7 +134,8 @@ fun startWebView(
 
             }
         },
-        modifier = Modifier.fillMaxSize(), update = {
+        modifier = Modifier.fillMaxSize(),
+        update = {
             webView = it
         }
     )
