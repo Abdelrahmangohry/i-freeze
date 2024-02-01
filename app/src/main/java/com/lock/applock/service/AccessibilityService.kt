@@ -16,6 +16,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Toast
 import com.lock.data.dp.AppsDB
 import com.lock.data.model.AppsModel
 import com.lock.di.RoomDBModule
@@ -29,11 +30,12 @@ import kotlinx.coroutines.withContext
 
 
 class AccessibilityServices : AccessibilityService() {
+    private  val TAG = "Mgd"
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var appsList: List<AppsModel>
     private val handler = Handler()
-    lateinit var serviceIntent: Intent
-    var serviceApp: ForceCloseService? = null
+    private lateinit var serviceIntent: Intent
+    private var serviceApp: ForceCloseService? = null
     private lateinit var preferenc: PreferencesGateway
     private fun isLauncherPackage(packageName: String): Boolean {
         val launcherPackages = listOf(
@@ -84,11 +86,11 @@ class AccessibilityServices : AccessibilityService() {
         }
         // Get the package name from the AccessibilityEvent
         val packageName = p0?.packageName.toString()
-        Log.d("islam", "packageName $packageName")
+        Log.d(TAG, "packageName $packageName")
 
         // Check if the event type is a window state change
         if (p0?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            Log.d("islam", "packageName $packageName")
+            Log.d(TAG, "packageName $packageName")
             if (!isLauncherPackage(packageName)) {
                 // Handle the app based on lists using the ForceCloseService intent
                 handleAppBasedOnLists(packageName, serviceIntent)
@@ -97,7 +99,7 @@ class AccessibilityServices : AccessibilityService() {
         }
     }
 
-    fun killThisPackageIfRunning(context: Context, packageName: String?) {
+    private fun killThisPackageIfRunning(context: Context, packageName: String?) {
         val activityManager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
 
         // Create an intent to launch the home screen (main launcher)
@@ -130,22 +132,22 @@ class AccessibilityServices : AccessibilityService() {
         }
         val isAppInWhitelist = isAppInList(packageName, appsList.filter { it.statusWhite == true })
         val isAppInBlacklist = isAppInList(packageName, appsList.filter { it.status == true })
-        Log.d("islam", "isWhitelistEnabled $isWhitelistEnabled")
-        Log.d("islam", "isBlacklistEnabled $isBlacklistEnabled")
-        Log.d("islam", "isAppInBlacklist $isAppInBlacklist")
+        Log.d(TAG, "isWhitelistEnabled $isWhitelistEnabled")
+        Log.d(TAG, "isBlacklistEnabled $isBlacklistEnabled")
+        Log.d(TAG, "isAppInBlacklist $isAppInBlacklist")
         if (isWhitelistEnabled) {
             if (isSystemApp(packageName)) {
-                Log.d("islam", "Not white List ${isSystemApp(packageName)}")
+                Log.d(TAG, "Not white List ${isSystemApp(packageName)}")
                 applicationContext.stopService(serviceIntent)
                 removeOverlayAndViewBinding()
             } else if (!isAppInWhitelist) {
-                Log.d("islam", "close applications Not white list ${isAppInWhitelist}")
+                Log.d(TAG, "close applications Not white list ${isAppInWhitelist}")
 
                 applicationContext.startService(serviceIntent)
                 killAppAndShowOverlay(packageName)
             }
         } else if (isBlacklistEnabled && isAppInBlacklist) {
-            Log.d("islam", "isAppInBlacklist ${isAppInBlacklist}")
+            Log.d(TAG, "isAppInBlacklist ${isAppInBlacklist}")
 
             applicationContext.startService(serviceIntent)
             killAppAndShowOverlay(packageName)
@@ -175,8 +177,10 @@ class AccessibilityServices : AccessibilityService() {
         handler.postDelayed({ serviceApp?.removeChatHeadView() }, 5000)
     }
 
+
     override fun onServiceConnected() {
         super.onServiceConnected()
+        serviceApp = ForceCloseService()
         val info = AccessibilityServiceInfo()
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN
@@ -184,11 +188,12 @@ class AccessibilityServices : AccessibilityService() {
         this.serviceInfo = info
     }
 
+
     private fun isAppInList(packageName: String, list: List<AppsModel>): Boolean {
         return list.any { it.packageName == packageName }
     }
 
     override fun onInterrupt() {
-        Log.d("islam", "onInterrupt: ")
+        Log.d(TAG, "onInterrupt: ")
     }
 }
