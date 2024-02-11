@@ -15,10 +15,6 @@ interface AuthRepo {
                              ,deviceDto: DeviceDTO ):
             Response<String>
 
-//    suspend fun getApplications() : Flow<Response<AppsModel>>
-
-    suspend fun updateUserData(deviceID: String): Response<Data>
-
     suspend fun newUpdateUserData(deviceId: String): Response<Data>
 }
 

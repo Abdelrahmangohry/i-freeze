@@ -64,23 +64,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
+
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.work.BackoffPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.compse.ui.SetupNavGraph
-import com.lock.applock.presentation.AuthViewModel
+
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.AdminService
-import com.lock.applock.service.NetworkMonitoringService
+import com.lock.applock.service.AutoSyncWorker
 import com.lock.applock.ui.theme.AppLockTheme
 import com.lock.applock.ui.theme.Shape
-import com.lock.data.model.AppsModel
+
 import com.patient.data.cashe.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.Duration
 import java.util.regex.Pattern
 
 @AndroidEntryPoint
@@ -107,15 +108,25 @@ class MainActivity : ComponentActivity() {
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
 
+        val workRequest = OneTimeWorkRequestBuilder<AutoSyncWorker>()
+            .setInitialDelay(Duration.ofSeconds(10))
+            .setBackoffCriteria(
+                backoffPolicy = BackoffPolicy.LINEAR,
+                duration = Duration.ofSeconds(15)
+            ).build()
+        WorkManager.getInstance(applicationContext).enqueue(workRequest)
+
         when {
             ContextCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
             }
+
             else -> {
                 requestPermissionLauncher.launch(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                )
             }
         }
         when {
@@ -191,6 +202,7 @@ class MainActivity : ComponentActivity() {
     fun permissions() {
 
     }
+
 
     fun wifiCheck() {
 //        val broadcastNetworkReceiver = NetworkReceiver()

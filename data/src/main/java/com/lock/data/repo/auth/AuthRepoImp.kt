@@ -21,12 +21,6 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
            getUserLogin(activationKey,deviceDto)
     }
 
-    override suspend fun updateUserData(
-        deviceID : String,
-    ) :Response<Data> {
-        return api.updateUserData(deviceID)
-    }
-
     override suspend fun newUpdateUserData(deviceId: String): Response<Data> {
         return api.newUpdateUserData(deviceId)
     }

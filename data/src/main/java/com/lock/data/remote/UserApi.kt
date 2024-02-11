@@ -13,22 +13,18 @@ import retrofit2.http.Query
 
 // UserApi interface
 interface UserApi {
-    @POST("api/Licenses/ActivateDevice/{activationKey}")
+
+    @POST("api/Licenses/ActivateMobile/{activationKey}")
     suspend fun getUserLogin(
         @Path("activationKey") activationKey: String,
         @Body deviceDto: DeviceDTO
     ): Response<String>
 
-    @GET("api/Devices/{id}")
-    suspend fun updateUserData(
-        @Path("id")
-        deviceID : String,
-    ) : Response<Data>
 
-    @GET("api/Devices/GetDeviceConfigurations")
+    @GET("api/Devices/GetMobileConfigurations")
     suspend fun newUpdateUserData(
-        @Query("deviceId")
-        deviceId : String,
+        @Query("mobileId")
+        mobileId : String,
     ) : Response<Data>
 
 }

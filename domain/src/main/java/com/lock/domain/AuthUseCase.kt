@@ -20,9 +20,10 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
       return repo.getUserLogin(activationKey, deviceDto)
     }
 
-    suspend fun updateUserData(
-        deviceID : String,
+    suspend fun newUpdateUserData(
+        mobileId : String
     ) : Response<Data> {
-        return repo.updateUserData(deviceID)
+        return repo.newUpdateUserData(mobileId)
     }
+
 }

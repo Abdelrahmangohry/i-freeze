@@ -93,6 +93,8 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-service:2.7.0")
+    implementation("androidx.hilt:hilt-common:1.1.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -111,6 +113,8 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.5.7")
     implementation("androidx.activity:activity-ktx:1.7.1")
     implementation("io.coil-kt:coil:2.4.0")
+
+
     implementation("androidx.navigation:navigation-runtime:2.7.0")
     implementation("com.github.bumptech.glide:glide:4.14.2")
     kapt ("com.github.bumptech.glide:compiler:4.12.0")
