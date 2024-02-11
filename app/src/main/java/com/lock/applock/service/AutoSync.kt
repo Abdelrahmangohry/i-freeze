@@ -86,7 +86,7 @@ class AutoSyncWorker @AssistedInject constructor(
                     return Result.failure(Data.Builder().putString("error", e.toString()).build())
                 }
             }
-            delay(10000  ) // Wait for 10 seconds before next iteration
+            delay(10*60*10000 ) // Wait for 10 seconds before next iteration
         }
     }
 

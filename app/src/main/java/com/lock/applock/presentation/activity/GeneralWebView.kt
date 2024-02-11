@@ -10,7 +10,15 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +28,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.patient.data.cashe.PreferencesGateway
+import java.net.URL
+
+
+
 
 
 @RequiresApi(34)
@@ -30,6 +42,7 @@ fun GeneralWebView(navController: NavController) {
     val isWhitelistedChecked = remember { mutableStateOf(preference.load("WebWhitelist", false)) }
     var blockedWebsites = preference.getList("blockedWebsites")
     var allowedWebsites = preference.getList("allowedWebsites")
+
 
     Log.d("abd", "isBlacklistedChecked $isBlacklistedChecked")
     Log.d("abd", "isWhitelistedChecked $isWhitelistedChecked")
@@ -66,10 +79,26 @@ fun startWebView(
     blockedWebsites: List<String>,
     allowedWebsites: List<String>,
     navController: NavController
-) {
-    val backEnabled by remember { mutableStateOf(true) }
-    var webView: WebView? = null
 
+) {
+
+
+
+   TabManager(navController)
+
+
+
+}
+
+@Composable
+fun TabContent(url: String,navController: NavController) {
+    val preference = PreferencesGateway(LocalContext.current)
+    val isBlacklistedChecked: MutableState<Boolean?> = remember { mutableStateOf(preference.load("WebBlacklist", false)) }
+    val isWhitelistedChecked: MutableState<Boolean?> = remember { mutableStateOf(preference.load("WebWhitelist", false)) }
+    var blockedWebsites = preference.getList("blockedWebsites")
+    var allowedWebsites = preference.getList("allowedWebsites")
+    var webView: WebView? = null
+    val backEnabled by remember { mutableStateOf(true) }
     AndroidView(
         factory = { context ->
             WebView(context).apply {
@@ -93,15 +122,14 @@ fun startWebView(
                     ): Boolean {
                         val url = request?.url?.toString()
 
-
                         // Check against the blacklist
-                        if (isBlacklistedChecked && url != null && isBlockedWebsite(url)) {
+                        if (isBlacklistedChecked.value == true && url != null && isBlockedWebsite(url)) {
                             loadUrl("this file:///$url") // Load default page
                             return true // Prevent loading the original URL
                         }
 
                         // Check against the whitelist
-                        if (isWhitelistedChecked && url != null && isWhitelistWebsite(url)) {
+                        if (isWhitelistedChecked.value == true && url != null && isWhitelistWebsite(url)) {
                             loadUrl("file:///android_asset/error_page.html") // Load default page
                             return true // Prevent loading the original URL
                         }
@@ -146,10 +174,37 @@ fun startWebView(
             navController.popBackStack()
 
     }
-
-
 }
 
+@Composable
+fun TabManager(navController: NavController) {
+    val u = "www.facebook.com/lol"
+    val url = URL(u)
+    val host = url.host
+    var tabs by remember { mutableStateOf(listOf("https://example.com")) }
+    var currentTab by remember { mutableStateOf(0) }
+
+    Column {
+        // Tab bar UI
+        TabRow(selectedTabIndex = currentTab) {
+            tabs.forEachIndexed { index, tabUrl ->
+                Tab(
+                    selected = currentTab == index,
+                    onClick = { currentTab = index }
+                ) {
+                    Text(tabUrl)
+                }
+            }
+            // Add new tab button
+            IconButton(onClick = { tabs = tabs + "https://example.com" }) {
+                Icon(Icons.Default.Add, contentDescription = "Add Tab")
+            }
+        }
+
+        // Tab content
+        TabContent(url = tabs[currentTab], navController)
+    }
+}
 
 
 
