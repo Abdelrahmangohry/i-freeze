@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -178,11 +179,11 @@ fun TabContent(url: String,navController: NavController) {
 
 @Composable
 fun TabManager(navController: NavController) {
-    val u = "www.facebook.com/lol"
+    val u = "https://www.facebook.com/"
     val url = URL(u)
     val host = url.host
     var tabs by remember { mutableStateOf(listOf("https://example.com")) }
-    var currentTab by remember { mutableStateOf(0) }
+    var currentTab by remember { mutableIntStateOf(0) }
 
     Column {
         // Tab bar UI
@@ -196,7 +197,7 @@ fun TabManager(navController: NavController) {
                 }
             }
             // Add new tab button
-            IconButton(onClick = { tabs = tabs + "https://example.com" }) {
+            IconButton(onClick = { tabs = tabs + "$currentTab" }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Tab")
             }
         }

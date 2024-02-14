@@ -87,7 +87,7 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.constraintlayout:constraintlayout-core:1.0.4")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.work:work-runtime-ktx:2.7.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
@@ -129,7 +129,11 @@ dependencies {
     implementation(project(":base"))
     implementation(project(":data"))
     implementation(project(":di"))
+    implementation("com.vmadalin:easypermissions-ktx:1.0.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     // pagination
+
 
     val room_version = "2.4.2" // Use the latest version
 

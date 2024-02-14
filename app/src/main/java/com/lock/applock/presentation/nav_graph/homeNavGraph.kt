@@ -17,6 +17,7 @@ import com.lock.applock.presentation.activity.BlackListWeb
 import com.lock.applock.presentation.activity.GeneralWebView
 import com.lock.applock.presentation.activity.LicenseActivation
 import com.lock.applock.presentation.activity.Login
+import com.lock.applock.presentation.activity.Scan
 import com.lock.applock.presentation.activity.SettingScreen
 import com.lock.applock.presentation.activity.WebManager
 import com.lock.applock.presentation.screen.SplashScreen
@@ -118,6 +119,11 @@ fun NavGraphBuilder.homeNavGraph(
             route = Screen.NetworkControl.route
         ) {
             NetworkControl(navController = navController,wifi)
+        }
+        composable(
+            route = Screen.Scan.route
+        ) {
+            Scan()
         }
     }
 }

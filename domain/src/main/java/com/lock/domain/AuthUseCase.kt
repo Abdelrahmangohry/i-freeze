@@ -1,11 +1,14 @@
 package com.lock.domain
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import com.lock.data.model.AppsModel
 import com.lock.data.model.Data
 
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
+import com.lock.data.model.Location
+import com.lock.data.model.LocationModel
 import com.lock.data.repo.auth.AuthRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -25,5 +28,14 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
     ) : Response<Data> {
         return repo.newUpdateUserData(mobileId)
     }
+
+    suspend fun userLocation(
+        location: LocationModel
+    ) : Response<Location> {
+        return repo.userLocation(location)
+    }
+
+
+
 
 }

@@ -1,9 +1,12 @@
 package com.lock.data.remote
 
 
+import androidx.lifecycle.LiveData
 import com.lock.data.model.Data
 import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
+import com.lock.data.model.Location
+import com.lock.data.model.LocationModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -26,6 +29,13 @@ interface UserApi {
         @Query("mobileId")
         mobileId : String,
     ) : Response<Data>
+
+    @POST("api/MobileLocation")
+    suspend fun userLocation(
+        @Body location: LocationModel
+    ) : Response<Location>
+
+
 
 }
 

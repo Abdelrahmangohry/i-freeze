@@ -3,128 +3,81 @@ package com.lock.applock.service
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.work.HiltWorker
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.work.CoroutineWorker
 import androidx.work.Data
-import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.lock.applock.presentation.AuthViewModel
+import com.lock.data.model.LocationData
+import com.lock.data.model.LocationDataAddress
+import com.lock.data.model.LocationModel
 import com.lock.data.remote.UserApi
+import com.lock.data.repo.auth.LocationRepository
+import com.lock.data.repo.auth.LocationViewModel
 import com.patient.data.cashe.PreferencesGateway
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.delay
 import java.net.UnknownHostException
 
 
-@HiltWorker
 class AutoSyncWorker @AssistedInject constructor(
     @Assisted private val api: UserApi,
     @Assisted context: Context,
-    @Assisted workerParameter: WorkerParameters
+    @Assisted workerParameter: WorkerParameters,
+
 ) : CoroutineWorker(context, workerParameter) {
-    val preference = PreferencesGateway(context)
-    val deviceId = preference.load("responseID", "")
+    private val preference = PreferencesGateway(context)
+    private val deviceId = preference.load("responseID", "")
+    private val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+//    private val userLocation = LocationModel(
+//        location = "Giza",
+//        deviceId = deviceId!!
+//    )
 
-    val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
-//    val context = LocalContext.current
     override suspend fun doWork(): Result {
-        while (true) {
-            try {
-                val response = api.newUpdateUserData(deviceId!!)
-                if (response.isSuccessful) {
-                    Log.d("abdo", "device id$deviceId")
-                    Log.d("abdo", "result success")
-                    Log.d("abdo", "Id: ${response.body()?.data}")
-                    preference.update(
-                        "Blacklist",
-                        response.body()?.data?.device?.blockListApps!!
-                    )
-                    preference.update(
-                        "Whitelist",
-                        response.body()?.data?.device?.whiteListApps!!
-                    )
-                    preference.update(
-                        "Browsers",
-                        response.body()?.data?.device?.browsers!!
-                    )
-                    preference.update(
-                        "WebBlacklist",
-                        response.body()?.data?.device?.blockListURLs!!
-                    )
-                    preference.update(
-                        "WebWhitelist",
-                        response.body()?.data?.device?.whiteListURLs!!
-                    )
-                    preference.update(
-                        "WifiBlocked",
-                        response.body()?.data?.device?.blockWiFi!!
-                    )
+        try {
+            // Use the fetched address or default to "Giza"
+            val userLocation = LocationModel(
+                location = "Giza", // Use fetched address or default
+                deviceId = deviceId!!
+            )
 
-                    if (response.body()?.data?.device?.blockWiFi!!) {
+            val response = api.newUpdateUserData(deviceId!!)
+            val userLocationResponse = api.userLocation(userLocation)
+            if (userLocationResponse.isSuccessful) {
+                Log.d("abdo", "important thing ${userLocationResponse.body()}")
+            }
+            if (response.isSuccessful) {
+                Log.d("abdo", "device id $deviceId")
+                Log.d("abdo", "result success")
+                Log.d("abdo", "Id: ${response.body()?.data}")
+                val responseData = response.body()?.data?.device
+                responseData?.let {
+                    preference.update("Blacklist", it.blockListApps)
+                    preference.update("Whitelist", it.whiteListApps)
+                    preference.update("Browsers", it.browsers)
+                    preference.update("WebBlacklist", it.blockListURLs)
+                    preference.update("WebWhitelist", it.whiteListURLs)
+                    preference.update("WifiBlocked", it.blockWiFi)
+                    if (it.blockWiFi) {
                         applicationContext.startService(serviceIntent)
                     } else {
                         applicationContext.stopService(serviceIntent)
                     }
-                    preference.update(
-                        "WifiWhite",
-                        response.body()?.data?.device?.whiteListWiFi!!
-                    )
-                    preference.save("time", response.body()?.data?.device?.time!!)
-                } else {
-                    Log.d("abdo", "retrying....")
+                    preference.update("WifiWhite", it.whiteListWiFi)
+                    preference.save("time", it.time)
                 }
-            } catch (e: Exception) {
-                if (e is UnknownHostException) {
-                    Log.d("abdo", "retrying....")
-                } else {
-                    Log.d("abdo", "Error")
-                    return Result.failure(Data.Builder().putString("error", e.toString()).build())
-                }
+            } else {
+                Log.d("abdo", "retrying....")
             }
-            delay(10*60*10000 ) // Wait for 10 seconds before next iteration
+        } catch (e: Exception) {
+            if (e is UnknownHostException) {
+                Log.d("abdo", "retrying....")
+            } else {
+                Log.d("abdo", "Error")
+                return Result.failure(Data.Builder().putString("error", e.toString()).build())
+            }
         }
+        return Result.success()
     }
-
 }
-    //    private fun clickSyncButton() {
-//        val deviceId = preference.load("responseID", "")
-//        val serviceIntent = Intent(this, NetworkMonitoringService::class.java)
-//        if (!isNetworkAvailable(this)) {
-//            Toast.makeText(
-//                this,
-//                "Please connect to the internet",
-//                Toast.LENGTH_SHORT
-//            ).show()
-//        } else if (deviceId.isNullOrEmpty()) {
-//            Toast.makeText(
-//                this,
-//                "Enter a Valid Key First",
-//                Toast.LENGTH_SHORT
-//            ).show()
-//        } else {
-//            viewModel.newUpdateUserData(deviceId)
-//            viewModel._newFlow.observe(this, Observer { responseId ->
-//                if (responseId.isSuccessful) {
-//                    Log.d("abdo", "new response query ${responseId.body()?.data}")
-//                    Toast.makeText(
-//                        this,
-//                        "Data Synchronized Successfully",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                } else {
-//                    Log.d("abdo", "kolo error ${responseId.message()}")
-//                    Toast.makeText(
-//                        this,
-//                        "Failed to Synchronize",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//            })
-//        }
-//    }
+
 

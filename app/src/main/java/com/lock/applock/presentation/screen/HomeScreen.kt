@@ -6,13 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lock.applock.Demo_DropDownMenu
 import com.lock.applock.GeneralOptionsUI
 import com.lock.applock.HeaderLogo
+import com.lock.applock.presentation.AppsViewModel
 
 @Composable
-fun HomeScreen(navController: NavController ,wifi: () -> Unit) {
+fun HomeScreen(navController: NavController, wifi: () -> Unit) {
     Column (
         modifier = Modifier.background(Color(0xFF175AA8))
             .fillMaxSize()

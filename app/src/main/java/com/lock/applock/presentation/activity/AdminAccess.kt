@@ -125,7 +125,7 @@ fun GeneralOptionsUI(navController: NavController) {
             mainText = "System Scan",
             subText = "Keep Your Mobile Secure and Initiate a Scan",
             onClick = {
-
+                navController.navigate(Screen.Scan.route)
             }
         )
 
