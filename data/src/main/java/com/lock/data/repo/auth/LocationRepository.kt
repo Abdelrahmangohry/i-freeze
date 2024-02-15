@@ -30,6 +30,8 @@ class LocationRepository(private val context: Context) {
                         val geoCoder = Geocoder(context)
 
                         val currentLocation = geoCoder.getFromLocation(locationState.latitude, locationState.longitude, 1)
+                        currentLocation?.get(0)?.adminArea
+
                         LocationDataAddress(currentLocation?.first()?.getAddressLine(0), null)
                     } else {
                         LocationDataAddress(null, "Location is null")
