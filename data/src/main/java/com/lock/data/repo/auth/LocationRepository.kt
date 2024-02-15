@@ -28,6 +28,7 @@ class LocationRepository(private val context: Context) {
                     val locationState = getLastLocation()
                     if (locationState != null) {
                         val geoCoder = Geocoder(context)
+
                         val currentLocation = geoCoder.getFromLocation(locationState.latitude, locationState.longitude, 1)
                         LocationDataAddress(currentLocation?.first()?.getAddressLine(0), null)
                     } else {

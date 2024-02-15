@@ -58,6 +58,7 @@ dependencies {
 
     implementation( "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 
     // hilt
     implementation( "com.google.dagger:hilt-android:2.44")

@@ -40,7 +40,7 @@ class AutoSyncWorker @AssistedInject constructor(
                 deviceId = deviceId!!
             )
 
-            val response = api.newUpdateUserData(deviceId!!)
+            val response = api.newUpdateUserData(deviceId)
             val userLocationResponse = api.userLocation(userLocation)
             if (userLocationResponse.isSuccessful) {
                 Log.d("abdo", "important thing ${userLocationResponse.body()}")
