@@ -1,10 +1,7 @@
 package com.lock.data.repo.auth
 
 import android.Manifest
-import android.R
-import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
@@ -13,7 +10,6 @@ import android.location.Location
 import android.location.LocationManager
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -59,11 +55,13 @@ object LocationHelper {
                         if (latitude != null && longitude != null) {
                             val geocoder = Geocoder(context, Locale.ENGLISH)
                             try {
-                                val addresses: MutableList<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+                                val addresses: MutableList<Address>? =
+                                    geocoder.getFromLocation(latitude, longitude, 1)
                                 if (addresses?.isNotEmpty() == true) {
                                     val address = addresses[0]
                                     val addressLine = address.getAddressLine(0)
-                                    val locationData = LocationDataAddress(addressLine, latitude, longitude)
+                                    val locationData =
+                                        LocationDataAddress(addressLine, latitude, longitude)
                                     GlobalScope.launch {
                                         callback.onLocationFetched(locationData)
                                     }
@@ -81,10 +79,10 @@ object LocationHelper {
                         // Handle case when location is not available
                     }
                 }
-            }else{
+            } else {
                 Log.d("abdo", "getLocation: error")
                 // TODO: add message overdraw
-               // Toast.makeText(context,"enable gps", Toast.LENGTH_LONG).show()
+                // Toast.makeText(context,"enable gps", Toast.LENGTH_LONG).show()
             }
         } else {
             // Request location permissions
@@ -111,17 +109,10 @@ object LocationHelper {
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun requestPermissions(context: Context) {
-        ActivityCompat.requestPermissions(
-            context as AppCompatActivity,
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ),
-            permissionId
-        )
-    }
+
+
     private fun createLocationRequest(context: Context) {
+        val activity: AppCompatActivity = context as AppCompatActivity
         val MY_PERMISSIONS_REQUEST_LOCATION = 99
         if (ContextCompat.checkSelfPermission(
                 context,
@@ -145,25 +136,27 @@ object LocationHelper {
                 AlertDialog.Builder(context).setCancelable(false)
                     .setTitle("Error")
                     .setMessage("please accept the location permission")
-                    .setPositiveButton("OK",
-                        DialogInterface.OnClickListener { dialogInterface, i -> //Prompt the user once explanation has been shown
-                            ActivityCompat.requestPermissions(
-                                context,
-                                arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                                MY_PERMISSIONS_REQUEST_LOCATION
-                            )
-                        })
+                    .setPositiveButton(
+                        "OK"
+                    ) { dialogInterface, i -> //Prompt the user once explanation has been shown
+                        ActivityCompat.requestPermissions(
+                            activity,
+                            arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                            MY_PERMISSIONS_REQUEST_LOCATION
+                        )
+                    }
                     .create()
                     .show()
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(
-                    context, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     MY_PERMISSIONS_REQUEST_LOCATION
                 )
             }
         }
     }
+
     private fun showLocationDisabledMessage(context: Context) {
         val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
         context.startActivity(intent)
