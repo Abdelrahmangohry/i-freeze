@@ -14,6 +14,8 @@ import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
 import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
+import com.lock.data.model.MobileApps
+import com.lock.data.model.MobileResponse
 import com.lock.data.remote.UserApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -22,9 +24,8 @@ import retrofit2.http.Body
 import java.util.Locale
 import javax.inject.Inject
 
-class AuthRepoImp @Inject constructor(private val api: UserApi, private val application: Application):AuthRepo {
-    private val mFusedLocationClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(application)
+class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
+
     override suspend fun getUserLogin(
         activationKey: String,
         deviceDto: DeviceDTO
@@ -42,6 +43,9 @@ class AuthRepoImp @Inject constructor(private val api: UserApi, private val appl
         return api.userLocation(location)
     }
 
+    override suspend fun mobileApps(apps: MobileApps): Response<MobileResponse> {
+        return api.mobileApps(apps)
+    }
 
 
 }

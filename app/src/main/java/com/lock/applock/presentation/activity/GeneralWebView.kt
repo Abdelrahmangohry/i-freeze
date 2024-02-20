@@ -1,5 +1,6 @@
 package com.lock.applock.presentation.activity
 
+import androidx.compose.material3.Tab
 import android.annotation.SuppressLint
 import android.util.Log
 import android.view.View
@@ -29,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.patient.data.cashe.PreferencesGateway
+import java.net.MalformedURLException
 import java.net.URL
 
 
@@ -177,35 +179,46 @@ fun TabContent(url: String,navController: NavController) {
     }
 }
 
+data class WebTabData(val url: String)
 @Composable
 fun TabManager(navController: NavController) {
-    val u = "https://www.facebook.com/"
-    val url = URL(u)
-    val host = url.host
-    var tabs by remember { mutableStateOf(listOf("https://example.com")) }
-    var currentTab by remember { mutableIntStateOf(0) }
+    var tabs by remember { mutableStateOf(listOf(WebTabData("https://example.com"))) }
+    var currentTab by remember { mutableStateOf(0) }
 
     Column {
         // Tab bar UI
         TabRow(selectedTabIndex = currentTab) {
-            tabs.forEachIndexed { index, tabUrl ->
+            tabs.forEachIndexed { index, tabData ->
                 Tab(
                     selected = currentTab == index,
-                    onClick = { currentTab = index }
+                    onClick = { currentTab = index },
+                    // Close icon for each tab
+//                    onCloseClick = { tabs = tabs.filterIndexed { i, _ -> i != index } }
                 ) {
-                    Text(tabUrl)
+                    Text(getHostFromUrl(tabData.url))
                 }
             }
             // Add new tab button
-            IconButton(onClick = { tabs = tabs + "$currentTab" }) {
+            IconButton(onClick = {
+                tabs = tabs.toMutableList().apply {
+                    add(WebTabData("https://newtab.com"))
+                }
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Tab")
             }
         }
 
         // Tab content
-        TabContent(url = tabs[currentTab], navController)
+        TabContent(url = tabs[currentTab].url, navController)
     }
 }
 
-
+fun getHostFromUrl(url: String): String {
+    return try {
+        val urlObject = URL(url)
+        urlObject.host
+    } catch (e: MalformedURLException) {
+        "Invalid URL"
+    }
+}
 

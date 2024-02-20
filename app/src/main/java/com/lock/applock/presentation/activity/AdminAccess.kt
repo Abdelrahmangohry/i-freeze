@@ -3,6 +3,7 @@ package com.lock.applock.presentation.activity
 import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -18,6 +19,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -53,6 +60,7 @@ import com.lock.applock.R
 import com.lock.applock.helper.getListApps
 import com.lock.applock.presentation.AppsViewModel
 import com.lock.applock.presentation.nav_graph.Screen
+import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.Shape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -67,11 +75,31 @@ fun AdminAccess(navController: NavController, viewModel: AppsViewModel = hiltVie
             .fillMaxSize()
             .background(Color(0xFF175AA8))
     ) {
+        autoSyncButton()
         HeaderLogo()
         GeneralOptionsUI(navController)
     }
 }
 
+@Composable
+fun autoSyncButton(){
+    val context = LocalContext.current
+//    val viewModel: AppsViewModel = hiltViewModel()
+    Row (modifier = Modifier.padding(15.dp)) {
+        Button(onClick = {
+            startAutoSyncWorker(context)
+            Toast.makeText(context, "Data Synchronized Successfully", Toast.LENGTH_SHORT).show()
+        },colors = ButtonDefaults.buttonColors(Color.White),
+                modifier = Modifier.clip(CircleShape)){
+            Icon(
+                imageVector = Icons.Default.Sync,
+                contentDescription = null,
+                tint = Color(0xFF175AA8)
+            )
+        }
+
+    }
+}
 @Composable
 fun HeaderLogo() {
     val logoImage = painterResource(id = R.drawable.ifreezelogo22)

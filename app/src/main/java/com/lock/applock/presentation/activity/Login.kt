@@ -86,17 +86,7 @@ fun Login(
 ) {
     var auth: FirebaseAuth = Firebase.auth
     val preference = PreferencesGateway(LocalContext.current)
-  /*  viewModel.getUserLogin(
-        "67E62E91-E758-42BA-C508-08DB4BB9CDC7",
 
-        DeviceDTO(
-            "192.168.1.1",
-            "HESHAM",
-            "005056C00001",
-            "Microsoft windows 11 pro"
-        )
-    )*/
-//    Log.d("islam", "Login: ${viewModel.loginFlow.collectAsState(initial = NetWorkState.Loading)}")
     MaterialTheme(
         colorScheme = MaterialTheme.colorScheme.copy(
             primary = Color.White, // Set the primary color to white

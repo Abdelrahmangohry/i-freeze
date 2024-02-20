@@ -9,7 +9,6 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import com.lock.data.remote.UserApi
-import com.lock.data.repo.auth.LocationRepository
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 

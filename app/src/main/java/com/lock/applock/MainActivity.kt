@@ -107,14 +107,10 @@ class MainActivity : ComponentActivity() {
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
-//        viewModel.getLocation().observe(this, Observer {
-//            Log.d("abdo", "address ${it.address}")
-//
-//        })
 
 
 
-        val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(20, TimeUnit.MINUTES)
+        val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(360, TimeUnit.MINUTES)
             .setInitialDelay(10, TimeUnit.SECONDS)
             .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
             .build()

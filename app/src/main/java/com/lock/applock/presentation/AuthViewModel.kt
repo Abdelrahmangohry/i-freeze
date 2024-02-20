@@ -12,6 +12,8 @@ import com.lock.data.model.DeviceDTO
 import com.lock.data.model.DeviceInfo
 import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
+import com.lock.data.model.MobileApps
+import com.lock.data.model.MobileResponse
 import com.lock.domain.AuthUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,12 +27,16 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : ViewModel() {
     var _loginFlow: MutableLiveData<Response<String>> = MutableLiveData()
     var _newFlow: MutableLiveData<Response<Data>> = MutableLiveData()
     var _locationFlow: MutableLiveData<Response<Location>> = MutableLiveData()
+
+    var _mobileAppsFlow: MutableLiveData<Response<MobileResponse>> = MutableLiveData()
 
 
     fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
@@ -54,6 +60,14 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         viewModelScope.launch {
             val response4 = useCase.userLocation(location)
             _locationFlow.value = response4
+
+        }
+    }
+
+    fun mobileApps(apps: MobileApps) {
+        viewModelScope.launch {
+            val response5 = useCase.mobileApps(apps)
+            _mobileAppsFlow.value = response5
 
         }
     }

@@ -1,10 +1,24 @@
 package com.lock.data.model
 
+import android.net.Uri
+
 data class LocationModel(
     val location: String,
+    val address: String,
     val deviceId: String
 )
 
+//send device apps
+data class MobileApps(
+    val appName: List<String>,
+    val deviceId: String
+
+)
+//response
+data class MobileResponse(
+    val data: String,
+
+)
 
 //ViewModelResponse
 data class Location(
@@ -20,5 +34,6 @@ data class LocationData(
 
 data class LocationDataAddress(
     val address: String?,
-    val errorMessage: String?
+    val latitude: Double?,
+    val longitude: Double?
 )
