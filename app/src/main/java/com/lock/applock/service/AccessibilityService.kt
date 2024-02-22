@@ -3,20 +3,13 @@ package com.lock.applock.service
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.ActivityManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Handler
-import android.os.IBinder
-import android.provider.Settings
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
 import com.lock.data.dp.AppsDB
 import com.lock.data.model.AppsModel
 import com.lock.di.RoomDBModule
@@ -24,9 +17,7 @@ import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class AccessibilityServices : AccessibilityService() {
@@ -123,10 +114,10 @@ class AccessibilityServices : AccessibilityService() {
             }
         }
         val isAppInBrowserList = isBrowsers(packageName)
-        if (isBrowsersEnabled && isAppInBrowserList) {
+        if (isBrowsersEnabled && isAppInBrowserList){
             applicationContext.startService(serviceIntent)
             killAppAndShowOverlay(packageName)
-        } else {
+        }else{
             applicationContext.stopService(serviceIntent)
             removeOverlayAndViewBinding()
         }

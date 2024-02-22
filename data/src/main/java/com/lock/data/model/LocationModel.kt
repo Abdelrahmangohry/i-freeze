@@ -1,6 +1,7 @@
 package com.lock.data.model
 
 import android.net.Uri
+import com.google.gson.annotations.SerializedName
 
 data class LocationModel(
     val location: String,
@@ -9,10 +10,12 @@ data class LocationModel(
 )
 
 //send device apps
-data class MobileApps(
-    val appName: List<String>,
-    val deviceId: String
 
+//z
+data class MobileApps (
+    @SerializedName("id"       ) var id       : String?           = null,
+    @SerializedName("appName"  ) var appName  : List<String> = listOf(),
+    @SerializedName("deviceId" ) var deviceId : String?           = null
 )
 //response
 data class MobileResponse(
@@ -20,14 +23,14 @@ data class MobileResponse(
 
 )
 
-//ViewModelResponse
-data class Location(
-    val data: LocationData,
-)
 
-data class LocationData(
-    val location: String?,
-    val deviceId: String?,
+//////////////////////////////////////
+data class Location (
+    @SerializedName("data"    ) var data    : LocationData?   = LocationData(),
+)
+data class LocationData (
+    @SerializedName("location" ) var location : String? = null,
+    @SerializedName("deviceId" ) var deviceId : String? = null
 )
 //////
 
