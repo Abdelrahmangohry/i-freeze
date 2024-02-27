@@ -1,17 +1,60 @@
 package com.lock.applock
 
-import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
+import android.util.Log
+import androidx.work.Configuration
+import androidx.work.ListenableWorker
+import androidx.work.WorkerFactory
+import androidx.work.WorkerParameters
+import com.lock.applock.service.AutoSyncWorker
+import com.lock.data.remote.UserApi
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 @HiltAndroidApp
-class AppLication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-    }
+class AppLication : Application(), Configuration.Provider{
+    @Inject
+    lateinit var workerFactory: CustomWorkerFactory
+    override fun getWorkManagerConfiguration() =
+                Configuration.Builder()
+            .setMinimumLoggingLevel(Log.DEBUG)
+            .setWorkerFactory(workerFactory)
+            .build()
+}
+
+class CustomWorkerFactory @Inject constructor(
+    private val api: UserApi,
+
+    ): WorkerFactory(){
+
+    override fun createWorker(
+        appContext: Context,
+        workerClassName: String,
+        workerParameters: WorkerParameters
+    ): ListenableWorker = AutoSyncWorker(api, appContext, workerParameters)
 
 }
+//    , Configuration.Provider {
+//
+//    @Inject
+//    lateinit var workerFactory: CustomWorkerFactory
+//    override fun getWorkManagerConfiguration() =
+//        Configuration.Builder()
+//            .setMinimumLoggingLevel(Log.DEBUG)
+//            .setWorkerFactory(workerFactory)
+//            .build()
+//
+//}
+//
+//class CustomWorkerFactory @Inject constructor(
+//    private val api:UserApi,
+//
+//    ): WorkerFactory(){
+//    override fun createWorker(
+//        appContext: Context,
+//        workerClassName: String,
+//        workerParameters: WorkerParameters
+//    ): ListenableWorker = AutoSyncWorker(api, appContext, workerParameters)
+//
+//}

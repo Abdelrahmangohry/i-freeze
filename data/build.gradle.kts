@@ -53,7 +53,7 @@ dependencies {
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.1"))
     implementation ("com.squareup.okhttp3:okhttp-urlconnection")
     implementation( "com.squareup.okhttp3:logging-interceptor")
-
+    implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation( "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
 

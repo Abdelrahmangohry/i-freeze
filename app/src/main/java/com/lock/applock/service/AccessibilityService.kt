@@ -3,19 +3,13 @@ package com.lock.applock.service
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.ActivityManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Handler
-import android.os.IBinder
-import android.provider.Settings
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
 import com.lock.data.dp.AppsDB
 import com.lock.data.model.AppsModel
 import com.lock.di.RoomDBModule
@@ -23,9 +17,7 @@ import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class AccessibilityServices : AccessibilityService() {
@@ -96,7 +88,13 @@ class AccessibilityServices : AccessibilityService() {
         activityManager.killBackgroundProcesses(packageName)
     }
 
+    private suspend fun getAppsList(): List<AppsModel> {
+        return getAppDatabaseInstance().daoApps().getAppsList()
+    }
     private fun handleAppBasedOnLists(packageName: String, serviceIntent: Intent) {
+        serviceScope.launch {
+            // Ensure appsList is initialized before proceeding
+            appsList = getAppsList()
         val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
         val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
         val isBrowsersEnabled = preferenc.load("Browsers", false) ?: false
@@ -138,7 +136,7 @@ class AccessibilityServices : AccessibilityService() {
             applicationContext.stopService(serviceIntent)
             removeOverlayAndViewBinding()
         }
-    }
+    }}
 
     private fun isSystemApp(packageName: String): Boolean {
         val packageManager = applicationContext.packageManager

@@ -1,42 +1,64 @@
 package com.lock.applock.presentation
 
-import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.data.remote.NetWorkState
+import com.lock.data.model.Data
 import com.lock.data.model.DeviceDTO
+import com.lock.data.model.Location
+import com.lock.data.model.LocationModel
+import com.lock.data.model.MobileApps
+import com.lock.data.model.MobileResponse
 import com.lock.domain.AuthUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import javax.inject.Inject
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : ViewModel() {
-    private val _loginFlow = MutableStateFlow<NetWorkState>(NetWorkState.Loading)
-    val loginFlow = _loginFlow.asSharedFlow()
+    var _loginFlow: MutableLiveData<Response<String>> = MutableLiveData()
+    var _newFlow: MutableLiveData<Response<Data>> = MutableLiveData()
+    var _locationFlow: MutableLiveData<Response<Location>> = MutableLiveData()
+
+    var _mobileAppsFlow: MutableLiveData<Response<MobileResponse>> = MutableLiveData()
+
+
     fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
         viewModelScope.launch {
-            useCase.getUserLogin(activationKey, deviceDto).onStart {
-                _loginFlow.emit(NetWorkState.Loading)
-            }
-                .catch {
-                    _loginFlow.emit(NetWorkState.Error(it))
-                }
-                .onCompletion {
-                    _loginFlow.emit(NetWorkState.StopLoading)
-                }
-                .collectLatest {
-                    Log.d("islam", "getUserLogin: ${it}")
-                    _loginFlow.emit(NetWorkState.Success(it))
-                }
+            val response = useCase.getUserLogin(activationKey, deviceDto)
+            _loginFlow.value = response
+
         }
     }
 
 
+    fun newUpdateUserData(deviceId: String) {
+        viewModelScope.launch {
+            val response3 = useCase.newUpdateUserData(deviceId)
+            _newFlow.value = response3
+
+        }
+    }
+
+    fun userLocation(location: LocationModel) {
+        viewModelScope.launch {
+            val response4 = useCase.userLocation(location)
+            _locationFlow.value = response4
+
+        }
+    }
+
+    fun mobileApps(apps: MobileApps) {
+        viewModelScope.launch {
+            val response5 = useCase.mobileApps(apps)
+            _mobileAppsFlow.value = response5
+
+        }
+    }
+
 
 }
+
+
+

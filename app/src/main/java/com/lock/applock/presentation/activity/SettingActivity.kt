@@ -5,9 +5,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.admin.DevicePolicyManager
-import android.content.Context
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -32,10 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.lock.applock.GeneralSettingItem
 import com.lock.applock.R
@@ -117,7 +118,6 @@ fun GeneralOptionsUISetting(
                     Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_LONG).show()
                 }
                 Log.d("islam", "GeneralOptionsUISetting :admin ")
-//                AdminAction()
             }
         )
         GeneralSettingItem(
@@ -155,6 +155,27 @@ fun GeneralOptionsUISetting(
                 }
             }
         )
+
+        GeneralSettingItem(
+            icon = R.drawable.location,
+            mainText = "Location Permission",
+            subText = "Enable location access for better functionality",
+            onClick = {
+                val locationPermissionRequestCode = 123
+                // Check if location permission is already granted
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // Location permission is not granted, request it
+                    ActivityCompat.requestPermissions(context as Activity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        locationPermissionRequestCode
+                    )
+                } else {
+                    // Location permission is already granted
+                    Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_LONG).show()
+                }
+            }
+        )
+
     }
 
 

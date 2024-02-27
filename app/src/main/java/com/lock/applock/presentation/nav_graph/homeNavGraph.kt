@@ -3,6 +3,7 @@ package com.lock.applock.presentation.nav_graph
 import android.app.Activity
 import android.content.Context
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.example.compse.ui.*
@@ -14,23 +15,24 @@ import com.lock.applock.presentation.activity.BlackListWeb
 import com.lock.applock.presentation.activity.GeneralWebView
 import com.lock.applock.presentation.activity.LicenseActivation
 import com.lock.applock.presentation.activity.Login
+import com.lock.applock.presentation.activity.Scan
 import com.lock.applock.presentation.activity.SettingScreen
 import com.lock.applock.presentation.activity.WebManager
-import com.lock.applock.presentation.screen.SplashScreen
 import com.lock.applock.presentation.activity.WhiteList
 import com.lock.applock.presentation.activity.WhiteListWeb
 import com.lock.applock.presentation.activity.WhiteListWifi
-import com.lock.applock.presentation.screen.NetworkControl
 import com.lock.applock.presentation.screen.HomeScreen
+import com.lock.applock.presentation.screen.NetworkControl
+import com.lock.applock.presentation.screen.SplashScreen
 
 @RequiresApi(34)
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
-    activity : Activity, context:Context, wifi: () -> Unit
-
+    activity : Activity, context:Context, wifi: () -> Unit,
+    lifecycle: LifecycleOwner
 ) {
     navigation(
-        startDestination = Screen.Home.route,
+        startDestination = Screen.AdminAccess.route,
         route = HOME_GRAPH_ROUTE
     ) {
         composable(
@@ -103,7 +105,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.LicenseActivation.route
         ) {
-            LicenseActivation(navController = navController)
+            LicenseActivation(navController = navController, lifecycle,context)
         }
         composable(
             route = Screen.AppManager.route
@@ -121,6 +123,12 @@ fun NavGraphBuilder.homeNavGraph(
             route = Screen.NetworkControl.route
         ) {
             NetworkControl(navController = navController,wifi)
+        }
+
+        composable(
+            route = Screen.Scan.route
+        ) {
+            Scan(navController = navController)
         }
     }
 }

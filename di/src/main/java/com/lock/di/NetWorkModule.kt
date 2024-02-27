@@ -14,6 +14,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
+
 const val TAG = "NetWorkModule"
 
 @Module
@@ -37,7 +38,7 @@ object NetWorkModule {
             val original = chain.request()
             val requestBuilder = original.newBuilder()
                 .method(original.method, original.body)
-            requestBuilder.addHeader("Content-Type", "application/json")
+//            requestBuilder.addHeader("Content-Type", "application/json")
             val request = requestBuilder
                 .build()
             Log.d(TAG, "provideOkHttpClient: ${request}")
@@ -56,9 +57,8 @@ object NetWorkModule {
 
     @Provides
     fun providesBaseUrl(): String {
-        return "http://184.174.37.115:44500/api/Licenses/"
+        return "https://security.flothers.com:8443/"
     }
-
     @Provides
     fun provideRetrofitClient(
         okHttpClient: OkHttpClient,
@@ -71,6 +71,7 @@ object NetWorkModule {
             .addConverterFactory(converterFactory)
             .build()
     }
+    //ScalarsConverterFactory
 
     @Provides
     fun provideWeatherApi(retrofit: Retrofit): UserApi {

@@ -1,29 +1,27 @@
 package com.lock.applock.presentation.activity
 
-import SecondaryColor
-import android.Manifest
-import android.app.Activity
-import android.app.admin.DevicePolicyManager
+
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.ComponentName
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,68 +40,292 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
-import com.lock.applock.GeneralSettingItem
 import com.lock.applock.R
-import com.lock.applock.SupportItem
-import com.lock.applock.service.AdminService
+import com.lock.applock.presentation.AuthViewModel
+import com.lock.applock.service.NetworkMonitoringService
+import com.lock.data.model.DeviceDTO
+import com.patient.data.cashe.PreferencesGateway
+import java.net.Inet4Address
+import java.net.NetworkInterface
 
 
 @RequiresApi(34)
 @Composable
-fun LicenseActivation(navController: NavController) {
+fun LicenseActivation(
+    navController: NavController, lifecycle: LifecycleOwner, context: Context,
+    authViewModel: AuthViewModel = hiltViewModel()
+
+
+) {
+
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
         headerLicense(onBackPressed = { navController.popBackStack() })
-        licenseKey()
+        licenseKey(lifecycle, context, navController, authViewModel)
 
     }
 }
 
+@SuppressLint("FlowOperatorInvokedInComposition", "HardwareIds")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun licenseKey() {
+fun licenseKey(
+    lifecycle: LifecycleOwner,
+    context: Context,
+    navController: NavController,
+    authViewModel: AuthViewModel
+) {
+
+    val preference = PreferencesGateway(LocalContext.current)
+    val deviceId = preference.load("responseID", "")
+    val syncTime = preference.load("time", "")
+    val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+    var isVisible by remember { mutableStateOf(preference.load("IsVisible", false)) }
+    var showActivationBox by remember { mutableStateOf(true) }
+
+    var text by remember { mutableStateOf("") }
+
+
+    //getting the device Name
+    val deviceName: String = Build.BRAND + Build.MODEL
+    //getting the operating system version
+    val operatingSystemVersion: String = "Android " + Build.VERSION.RELEASE
+    //getting the AndroidID
+    val androidId: String =
+        Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+
+    //getting the IP Adress
+    fun getIpAddress(): String {
+        var ipAddress = ""
+        try {
+            val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+            while (networkInterfaces.hasMoreElements()) {
+                val networkInterface = networkInterfaces.nextElement()
+                val inetAddresses = networkInterface.inetAddresses
+                while (inetAddresses.hasMoreElements()) {
+                    val inetAddress = inetAddresses.nextElement()
+                    if (inetAddress is Inet4Address && !inetAddress.isLoopbackAddress) {
+                        ipAddress = inetAddress.hostAddress
+                        break
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ipAddress
+    }
+
+    val ipAddress = getIpAddress()
+
+    val deviceDto = DeviceDTO(
+        deviceName = deviceName,
+        operatingSystemVersion = operatingSystemVersion,
+        deviceIp = ipAddress,
+        macAddress = androidId
+    )
+
+
+    Row(
+        modifier = Modifier.padding(top = 100.dp, bottom = 30.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "License Activation",
+            color = Color.White,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 20.sp
+        )
+    }
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(modifier = Modifier.background(color = Color.White)) {
-            var text by remember { mutableStateOf("") }
 
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text("xxxx-xxxx-xxxx-xxxx") },
-                maxLines = 1,
-
-
-                textStyle = TextStyle(color = Color.Blue, fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(20.dp),
-
-
-
+        Box(modifier = Modifier.background(color = Color.White)) {
+            if (showActivationBox) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("xxxx-xxxx-xxxx-xxxx", color = Color.Black) },
+                    maxLines = 1,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = Color.Black, // Text color // Color of the leading icon
+                        unfocusedBorderColor = Color.LightGray, // Border color when unfocused
+                        focusedBorderColor = Color.Black,
+                        cursorColor = Color.Black
+                    ),
+                    modifier = Modifier.padding(20.dp),
                 )
+            }
+            if (!showActivationBox) {
+                Text(
+                    text = "License Activated Successfully",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
+                )
+            }
 
         }
-        Column {
-            ElevatedButton(onClick = {}, modifier = Modifier.padding(vertical = 16.dp),
+        Column(modifier = Modifier.wrapContentSize(align = Alignment.Center)) {
+
+            ElevatedButton(
+                onClick = {
+
+                    if (!isNetworkAvailable(context)) {
+                        Toast.makeText(
+                            context,
+                            "Please connect to the internet",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@ElevatedButton
+                    }
+
+                    if (text.isEmpty()) {
+                        Toast.makeText(
+                            context,
+                            "Add License Key",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@ElevatedButton
+                    } else {
+                        authViewModel.getUserLogin(text, deviceDto)
+                        authViewModel._loginFlow.observe(lifecycle, Observer { response ->
+                            if (response.isSuccessful) {
+                                Log.d("abdo", response.body().toString())
+                                val deviceId = response.body().toString().trim()
+                                Log.d("abdo", "this is new response $deviceId")
+
+                                preference.save("responseID", deviceId)
+                                Toast.makeText(
+                                    context,
+                                    "License Activate Successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                preference.save("IsVisible", true)
+                                showActivationBox = false
+
+//                                navController.navigate(Screen.AdminAccess.route)
+                                authViewModel.newUpdateUserData(deviceId)
+                                authViewModel._newFlow.observe(lifecycle, Observer { responseId ->
+                                    if (responseId.isSuccessful) {
+
+                                        Log.d("abdo", "response body from license ${responseId.body()}")
+                                        preference.update(
+                                            "Blacklist",
+                                            responseId.body()?.data?.device?.blockListApps!!
+                                        )
+                                        preference.update(
+                                            "Whitelist",
+                                            responseId.body()?.data?.device?.whiteListApps!!
+                                        )
+                                        preference.update(
+                                            "Browsers",
+                                            responseId.body()?.data?.device?.browsers!!
+                                        )
+                                        preference.update(
+                                            "WebBlacklist",
+                                            responseId.body()?.data?.device?.blockListURLs!!
+                                        )
+                                        preference.update(
+                                            "WebWhitelist",
+                                            responseId.body()?.data?.device?.whiteListURLs!!
+                                        )
+                                        preference.update(
+                                            "WifiBlocked",
+                                            responseId.body()?.data?.device?.blockWiFi!!
+                                        )
+
+                                        if (responseId.body()?.data?.device?.blockWiFi!!) {
+                                            context.startService(serviceIntent)
+                                        } else {
+                                            context.stopService(serviceIntent)
+                                        }
+                                        preference.update(
+                                            "WifiWhite",
+                                            responseId.body()?.data?.device?.whiteListWiFi!!
+                                        )
+                                        Toast.makeText(
+                                            context,
+                                            "Data Synchronized Successfully",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                })
+                            } else {
+                                Toast.makeText(
+                                    context,context.resources.getString(R.string.invalid_license_activate_key),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@Observer
+                            }
+
+                        })
+                    }
+                },
+                modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-                ) {
+            ) {
                 Text("Activate", fontSize = 16.sp, color = Color.White)
             }
+
+
+            ElevatedButton(
+                onClick = {
+                    if (!showActivationBox) {
+                        preference.save("IsVisible", false)
+                        showActivationBox = true
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Box Already Showed",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
+                modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally),
+                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
+            ) {
+                Text("Show Activation Box", fontSize = 16.sp, color = Color.White)
+
+            }
+            Text("Last Update : $syncTime", fontSize = 16.sp, color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
+
         }
     }
 }
+
+// Function to check if the device is connected to the internet
+@SuppressLint("ServiceCast")
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null &&
+                (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+    } else {
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
+    }
+}
+
 
 @Composable
 fun headerLicense(onBackPressed: () -> Unit) {
@@ -114,16 +337,7 @@ fun headerLicense(onBackPressed: () -> Unit) {
                 tint = Color.White
             )
         }
-        Text(
-            text = "License Activation",
-            color = Color.White,
 
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp).padding(horizontal = 70.dp),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
-        )
     }
 }
 

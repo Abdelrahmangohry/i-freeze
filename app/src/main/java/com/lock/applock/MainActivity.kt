@@ -1,7 +1,6 @@
 package com.lock.applock
 
 import LightPrimaryColor
-import PrimaryColor
 import SecondaryColor
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
@@ -18,15 +17,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -53,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -65,16 +60,19 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.work.BackoffPolicy
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.compse.ui.SetupNavGraph
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.AdminService
-import com.lock.applock.service.NetworkMonitoringService
+import com.lock.applock.service.AutoSyncWorker
 import com.lock.applock.ui.theme.AppLockTheme
 import com.lock.applock.ui.theme.Shape
-import com.lock.data.model.AppsModel
 import com.patient.data.cashe.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.regex.Pattern
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -99,17 +97,17 @@ class MainActivity : ComponentActivity() {
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
 
-//        when {
-//            ContextCompat.checkSelfPermission(
-//                this,
-//                android.Manifest.permission.ACCESS_FINE_LOCATION
-//            ) == PackageManager.PERMISSION_GRANTED -> {
-//            }
-//            else -> {
-//                requestPermissionLauncher.launch(
-//                    android.Manifest.permission.ACCESS_FINE_LOCATION)
-//            }
-//        }
+        val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(360, TimeUnit.MINUTES)
+            .setInitialDelay(10, TimeUnit.SECONDS)
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "AutoSync",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest
+        )
+
         when {
             ContextCompat.checkSelfPermission(
                 this,
@@ -131,7 +129,7 @@ class MainActivity : ComponentActivity() {
                 navController = rememberNavController()
                 SetupNavGraph(
                     navController = navController,
-                    this, this, { wifiCheck() }
+                    this, this, { wifiCheck() }, this
                 )
             }
         }
@@ -306,6 +304,7 @@ fun GeneralOptionsUI(
             mainText = "System Scan",
             subText = "Keep Your Mobile Secure and Initiate a Scan",
             onClick = {
+                navController.navigate(Screen.Scan.route)
 
             }
         )
