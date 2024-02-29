@@ -1,6 +1,14 @@
 package com.lock.applock.presentation.activity
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,6 +32,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +46,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lock.applock.R
@@ -43,6 +54,7 @@ import com.lock.applock.presentation.AppsViewModel
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.Shape
+import com.patient.data.cashe.PreferencesGateway
 
 @Composable
 fun AdminAccess(navController: NavController, viewModel: AppsViewModel = hiltViewModel()) {
@@ -59,23 +71,69 @@ fun AdminAccess(navController: NavController, viewModel: AppsViewModel = hiltVie
 }
 
 @Composable
-fun autoSyncButton(){
+fun autoSyncButton() {
     val context = LocalContext.current
-    Row (modifier = Modifier.padding(15.dp)) {
-        Button(onClick = {
-            startAutoSyncWorker(context)
-            Toast.makeText(context, "Data Synchronized Successfully", Toast.LENGTH_SHORT).show()
-        },colors = ButtonDefaults.buttonColors(Color.White),
-            modifier = Modifier.clip(CircleShape)){
+    val preference = PreferencesGateway(context)
+    val deviceId = preference.load("responseID", "")
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val isLocationEnabled = remember { mutableStateOf(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) }
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission is granted. Continue the action or workflow in your app.
+        } else {
+
+        }
+    }
+    Row(modifier = Modifier.padding(15.dp)) {
+        Button(
+            onClick = {
+                if(deviceId.isNullOrEmpty()){
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                if (!isOnline(context)) {
+                    return@Button
+                }
+                when (PackageManager.PERMISSION_GRANTED) {
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) -> {
+                        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                            startAutoSyncWorker(context)
+                            Toast.makeText(
+                                context,
+                                "Data Synchronized Successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                            context.startActivity(intent)
+                        }
+                    }
+
+                    else -> {
+                        requestPermissionLauncher.launch(
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        )
+                    }
+                }
+            },
+            colors = ButtonDefaults.buttonColors(Color.White),
+            modifier = Modifier.clip(CircleShape)
+        ) {
             Icon(
                 imageVector = Icons.Default.Sync,
                 contentDescription = null,
                 tint = Color(0xFF175AA8)
             )
         }
-
     }
 }
+
 
 @Composable
 fun HeaderLogo() {

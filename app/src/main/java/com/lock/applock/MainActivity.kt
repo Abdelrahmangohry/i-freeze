@@ -97,16 +97,31 @@ class MainActivity : ComponentActivity() {
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
 
-        val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(360, TimeUnit.MINUTES)
-            .setInitialDelay(10, TimeUnit.SECONDS)
-            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
-            .build()
 
-        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
-            "AutoSync",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            workRequest
-        )
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                Log.d("abdo", "autoSync started")
+                val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(360, TimeUnit.MINUTES)
+                    .setInitialDelay(10, TimeUnit.SECONDS)
+                    .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
+                    .build()
+
+                WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+                    "AutoSync",
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    workRequest
+                )
+            }
+
+            else -> {
+                requestPermissionLauncher.launch(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            }
+        }
 
         when {
             ContextCompat.checkSelfPermission(

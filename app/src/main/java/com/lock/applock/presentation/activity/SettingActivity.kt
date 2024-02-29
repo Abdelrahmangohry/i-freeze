@@ -109,15 +109,16 @@ fun GeneralOptionsUISetting(
             mainText = "Admin Permission",
             subText = "For get access and control over apps",
             onClick = {
-                if (!deviceManager.isDeviceOwnerApp(activity.getPackageName())){
-                    val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                    intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-                    activity.startActivityForResult(intent, 1)
+                if (!deviceManager.isAdminActive(compName)){
+                    val adminIntent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                    adminIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+                    adminIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin")
+                    activity.startActivityForResult(adminIntent, 1)
                 }else{
                     Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_LONG).show()
                 }
                 Log.d("islam", "GeneralOptionsUISetting :admin ")
+//                AdminAction()
             }
         )
         GeneralSettingItem(
@@ -127,13 +128,13 @@ fun GeneralOptionsUISetting(
             onClick = {
                 Log.d("islam", "GeneralOptionsUISetting :drawAction ")
 
-                    if (!Settings.canDrawOverlays(context)) {
-                        val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                        myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(myIntent)
-                    }else{
-                        Toast.makeText(
-                            context,"its already here ", Toast.LENGTH_LONG).show()
+                if (!Settings.canDrawOverlays(context)) {
+                    val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(myIntent)
+                }else{
+                    Toast.makeText(
+                        context,"its already here ", Toast.LENGTH_LONG).show()
                 }
             }
         )
@@ -143,13 +144,12 @@ fun GeneralOptionsUISetting(
             subText = "This is essential part of Android's",
             onClick = {
                 Log.d("islam", "GeneralOptionsUISetting :accessibility ")
-                val enabledServicesSetting = Settings.Secure.getString(
-                    context.contentResolver,
+                val enabledServicesSetting = Settings.Secure.getString(context.contentResolver,
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
                 )
                 if (enabledServicesSetting?.contains("com.lock.applock.service.AccessibilityServices") != true){
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        context.startActivity(intent)
+                    context.startActivity(intent)
                 }else{
                     Toast.makeText(context,"its already isAccessibilityServiceEnabled ", Toast.LENGTH_LONG).show()
                 }
@@ -175,10 +175,7 @@ fun GeneralOptionsUISetting(
                 }
             }
         )
-
     }
-
-
 }
 
 

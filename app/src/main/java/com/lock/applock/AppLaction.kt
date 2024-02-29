@@ -35,26 +35,3 @@ class CustomWorkerFactory @Inject constructor(
     ): ListenableWorker = AutoSyncWorker(api, appContext, workerParameters)
 
 }
-//    , Configuration.Provider {
-//
-//    @Inject
-//    lateinit var workerFactory: CustomWorkerFactory
-//    override fun getWorkManagerConfiguration() =
-//        Configuration.Builder()
-//            .setMinimumLoggingLevel(Log.DEBUG)
-//            .setWorkerFactory(workerFactory)
-//            .build()
-//
-//}
-//
-//class CustomWorkerFactory @Inject constructor(
-//    private val api:UserApi,
-//
-//    ): WorkerFactory(){
-//    override fun createWorker(
-//        appContext: Context,
-//        workerClassName: String,
-//        workerParameters: WorkerParameters
-//    ): ListenableWorker = AutoSyncWorker(api, appContext, workerParameters)
-//
-//}
