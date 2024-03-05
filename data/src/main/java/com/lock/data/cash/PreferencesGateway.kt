@@ -22,6 +22,7 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
             .apply()
     }
 
+
     fun createLockedAppsList(appList: List<String>) {
         for (i in appList.indices) {
             save("app_$i", appList[i])
