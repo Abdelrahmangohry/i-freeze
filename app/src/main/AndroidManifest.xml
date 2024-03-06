@@ -60,6 +60,10 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+        <activity
+            android:name=".presentation.activity.MainWebActivity"
+
+            android:exported="false"/>
 
         <service
             android:name=".service.ForceCloseService"

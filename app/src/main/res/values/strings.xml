@@ -13,4 +13,5 @@
     <string name="title_activity_black_list_web">BlackListWeb</string>
     <string name="title_activity_white_list_web">WhiteListWeb</string>
     <string name="invalid_license_activate_key">Invalid License Activate Key</string>
+    <string name="enter_url">Enter URL</string>
 </resources>

@@ -65,6 +65,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.compse.ui.SetupNavGraph
+import com.lock.applock.presentation.activity.MainWebActivity
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.AdminService
 import com.lock.applock.service.AutoSyncWorker
@@ -90,12 +91,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
     @RequiresApi(34)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
+
 
 
         when {
@@ -145,7 +148,7 @@ class MainActivity : ComponentActivity() {
                 SetupNavGraph(
                     navController = navController,
                     this, this, { wifiCheck() }, this
-                )
+                ) { webActivity() }
             }
         }
     }
@@ -190,6 +193,15 @@ class MainActivity : ComponentActivity() {
 
     fun permissions() {
 
+    }
+
+    fun webActivity(){
+        this.startActivity(
+            Intent(
+                this,
+                MainWebActivity::class.java
+            )
+        )
     }
 
     fun wifiCheck() {

@@ -29,7 +29,7 @@ import com.lock.applock.presentation.screen.SplashScreen
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
     activity : Activity, context:Context, wifi: () -> Unit,
-    lifecycle: LifecycleOwner
+    lifecycle: LifecycleOwner, webStart : () -> Unit
 ) {
     navigation(
         startDestination = Screen.AdminAccess.route,
@@ -38,7 +38,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.AdminAccess.route
         ) {
-            AdminAccess(navController = navController)
+            AdminAccess(navController = navController, webStart)
         }
         composable(
             route = Screen.Login.route

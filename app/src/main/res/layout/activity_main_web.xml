@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:layoutDescription="@xml/activity_main_scene"
     tools:context=".presentation.activity.MainWebActivity">
 
     <LinearLayout
@@ -32,7 +33,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/custom_design"
-                android:hint="enter_url"
+                android:hint="@string/enter_url"
                 android:paddingHorizontal="5dp"
                 android:singleLine="true"
                 android:textColorHint="#757575" />
@@ -51,7 +52,7 @@
 
             <ImageButton
                 android:id="@+id/refreshBtn"
-                android:layout_width="40dp"
+                android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="refresh_btn"

@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lock.applock.R
@@ -57,7 +58,7 @@ import com.lock.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
 
 @Composable
-fun AdminAccess(navController: NavController, viewModel: AppsViewModel = hiltViewModel()) {
+fun AdminAccess(navController: NavController, webStart: () -> Unit, viewModel: AppsViewModel = hiltViewModel()) {
 
     Column(
         modifier = Modifier
@@ -66,7 +67,7 @@ fun AdminAccess(navController: NavController, viewModel: AppsViewModel = hiltVie
     ) {
         autoSyncButton()
         HeaderLogo()
-        GeneralOptionsUI(navController)
+        GeneralOptionsUI(navController, webStart)
     }
 }
 
@@ -76,7 +77,8 @@ fun autoSyncButton() {
     val preference = PreferencesGateway(context)
     val deviceId = preference.load("responseID", "")
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    val isLocationEnabled = remember { mutableStateOf(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) }
+    val isLocationEnabled =
+        remember { mutableStateOf(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -90,8 +92,9 @@ fun autoSyncButton() {
     Row(modifier = Modifier.padding(15.dp)) {
         Button(
             onClick = {
-                if(deviceId.isNullOrEmpty()){
-                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT).show()
+                if (deviceId.isNullOrEmpty()) {
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                        .show()
                     return@Button
                 }
                 if (!isOnline(context)) {
@@ -175,7 +178,7 @@ fun HeaderLogo() {
 }
 
 @Composable
-fun GeneralOptionsUI(navController: NavController) {
+fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
 
     Column(
         modifier = Modifier
@@ -198,7 +201,7 @@ fun GeneralOptionsUI(navController: NavController) {
             mainText = "Web Access",
             subText = "Roam within the Allowed Boundaries",
             onClick = {
-                navController.navigate(Screen.GeneralWebView.route)
+                webStart()
             }
         )
 

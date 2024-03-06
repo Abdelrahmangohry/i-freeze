@@ -13,8 +13,13 @@ import com.lock.applock.presentation.nav_graph.homeNavGraph
 
 @RequiresApi(34)
 @Composable
-fun SetupNavGraph(navController: NavHostController,
-                  activity:Activity, context:Context, wifi: () -> Unit, lifecycle: LifecycleOwner
+fun SetupNavGraph(
+    navController: NavHostController,
+    activity: Activity,
+    context: Context,
+    wifi: () -> Unit,
+    lifecycle: LifecycleOwner,
+    webStart: () -> Unit
 
 ){
     NavHost(
@@ -22,6 +27,6 @@ fun SetupNavGraph(navController: NavHostController,
         startDestination = HOME_GRAPH_ROUTE,
         route = ROOT_GRAPH_ROUTE
     ) {
-        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle)
+        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle,webStart)
     }
 }
