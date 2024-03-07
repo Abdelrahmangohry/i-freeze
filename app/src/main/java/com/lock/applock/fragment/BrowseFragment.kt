@@ -1,4 +1,4 @@
-package com.example.browser.fragment
+package com.lock.applock.fragment
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -15,6 +15,9 @@ import android.text.SpannableStringBuilder
 import android.util.Base64
 import android.view.*
 import android.webkit.*
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ShareCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -24,6 +27,7 @@ import com.lock.applock.R
 import com.lock.applock.databinding.FragmentBrowseBinding
 import com.lock.applock.presentation.activity.MainWebActivity
 import com.lock.applock.presentation.activity.changeTab
+import com.patient.data.cashe.PreferencesGateway
 import java.io.ByteArrayOutputStream
 
 class BrowseFragment(private var urlNew: String) : Fragment() {
@@ -36,6 +40,11 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
         val view = inflater.inflate(R.layout.fragment_browse, container, false)
         binding = FragmentBrowseBinding.bind(view)
         registerForContextMenu(binding.webView)
+        val preference = PreferencesGateway(LocalContext.current)
+        val isBlacklistedChecked = remember { mutableStateOf(preference.load("WebBlacklist", false)) }
+        val isWhitelistedChecked = remember { mutableStateOf(preference.load("WebWhitelist", false)) }
+        var blockedWebsites = preference.getList("blockedWebsites")
+        var allowedWebsites = preference.getList("allowedWebsites")
 
         binding.webView.apply {
             when{

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.core.graphics.drawable.toDrawable
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.example.browser.fragment.BrowseFragment
+import com.lock.applock.fragment.BrowseFragment
 import com.lock.applock.R
 import com.lock.applock.databinding.BookmarkViewBinding
 import com.lock.applock.databinding.LongBookmarkViewBinding
@@ -48,7 +48,8 @@ class BookmarkAdapter(private val context: Context, private val isActivity: Bool
             when{
                 checkForInternet(context) -> {
                     changeTab(MainWebActivity.bookmarkList[position].name,
-                BrowseFragment(urlNew = MainWebActivity.bookmarkList[position].url))
+                BrowseFragment(urlNew = MainWebActivity.bookmarkList[position].url)
+                    )
                     if(isActivity) (context as Activity).finish()
                 }
                 else -> Snackbar.make(holder.root, "Internet Not Connected\uD83D\uDE03", 3000).show()

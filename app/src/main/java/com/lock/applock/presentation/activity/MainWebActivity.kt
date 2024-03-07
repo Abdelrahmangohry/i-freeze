@@ -29,8 +29,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.browser.adapter.TabAdapter
-import com.example.browser.fragment.BrowseFragment
-import com.example.browser.fragment.HomeFragment
+import com.lock.applock.fragment.BrowseFragment
+import com.lock.applock.fragment.HomeFragment
 import com.example.browser.model.Bookmark
 import com.example.browser.model.Tab
 import com.google.android.material.button.MaterialButton

@@ -1,4 +1,4 @@
-package com.example.browser.fragment
+package com.lock.applock.fragment
 
 import android.content.Intent
 import android.os.Bundle
