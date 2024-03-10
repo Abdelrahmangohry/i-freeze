@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -206,7 +207,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
         )
 
         GeneralSettingItem(
-            icon = R.drawable.admin_panel,
+            icon = R.drawable.admin,
             mainText = "Admin Login",
             subText = "Administrative Privileges",
             onClick = {

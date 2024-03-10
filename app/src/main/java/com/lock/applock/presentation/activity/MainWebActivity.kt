@@ -125,14 +125,18 @@ class MainWebActivity : AppCompatActivity() {
 
             val dialogTabs = MaterialAlertDialogBuilder(this, R.style.Theme_AppLock).setView(viewTabs)
                 .setTitle("Select Tab")
-                .setPositiveButton("Home"){self, _ ->
+                .setNeutralButton("New Tab"){self, _ ->
                     changeTab("Home", HomeFragment())
                     self.dismiss()
                 }
-                .setNeutralButton("Google"){self, _ ->
-                    changeTab("Google", BrowseFragment(urlNew = "www.google.com"))
-                    self.dismiss()
-                }
+//                .setPositiveButton("Home"){self, _ ->
+//                    changeTab("Home", HomeFragment())
+//                    self.dismiss()
+//                }
+//                .setNeutralButton("Google"){self, _ ->
+//                    changeTab("Google", BrowseFragment(urlNew = "www.google.com"))
+//                    self.dismiss()
+//                }
                 .create()
 
             bindingTabs.tabsRV.setHasFixedSize(true)

@@ -31,25 +31,24 @@ class AutoSyncWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, workerParameter), LocationHelper.LocationCallback {
 
     private val preference = PreferencesGateway(context)
+    private val allowedList = preference.getList("allowedWifiList")
+
     private val deviceId = preference.load("responseID", "")
     private val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
 
     private val installedAppsList = getInstalledApps(context)
+
     init {
         LocationHelper.getLocation(context, this)
     }
 
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
-
-            Log.d("abdo", "In AutoSyncClass")
             val address = locationData.address ?: "Unknown Address"
             val latitude = locationData.latitude ?: 0.0
             val longitude = locationData.longitude ?: 0.0
             val mapUri = Uri.parse("https://maps.google.com/maps/search/$latitude,$longitude")
-            Log.d("abdo", "Address: $address, Latitude: $latitude, Longitude: $longitude")
-            Log.d("abdo", "mapUri $mapUri")
-            Log.d("abdo", "$installedAppsList")
+
             val userLocation = LocationModel(
                 location = mapUri.toString(),
                 address = address,
@@ -62,10 +61,10 @@ class AutoSyncWorker @AssistedInject constructor(
 
             val mobileApplication = MobileApps(
                 deviceId = deviceId,
-                appName=installedAppsList
+                appName = installedAppsList
             )
             val mobileApplications = api.mobileApps(mobileApplication)
-            if (mobileApplications.isSuccessful){
+            if (mobileApplications.isSuccessful) {
                 Log.d("abdo", "mobile application sent successfully")
             }
 
@@ -73,7 +72,15 @@ class AutoSyncWorker @AssistedInject constructor(
                 Log.d("abdo", "User location updated successfully")
             }
             if (response.isSuccessful) {
-                Log.d("abdo", "Device ID: $deviceId")
+                val cloudList = response.body()?.data?.exceptionWifi
+                val newList = ArrayList<String>().apply {
+                    addAll(cloudList!!)
+                    addAll(allowedList)
+                }
+                Log.d("abdo", "newList $newList")
+                preference.saveList("allowedWifiList", newList)
+                Log.d("abdo", "Cloud listssss: $cloudList")
+
                 Log.d("abdo", "Result success")
                 val responseData = response.body()?.data?.device
                 responseData?.let {
@@ -130,7 +137,8 @@ fun startAutoSyncWorker(context: Context) {
 
 fun getInstalledApps(context: Context): List<String> {
     val packageManager: PackageManager = context.packageManager
-    val installedApplications = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+    val installedApplications =
+        packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
 
     val appNames = mutableListOf<String>()
     for (appInfo in installedApplications) {

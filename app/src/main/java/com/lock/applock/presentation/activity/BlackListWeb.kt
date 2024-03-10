@@ -1,6 +1,7 @@
 package com.lock.applock.presentation.activity
 
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -126,12 +127,16 @@ fun ListItemBlackListWeb(webSites: WebSiteBlack, onDeleteClick: () -> Unit) {
                 modifier = Modifier.fillMaxSize().background(colorResource(R.color.RedButtons)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = webSites.name, modifier = Modifier.weight(1f).padding(8.dp), color = Color.Black)
+                Text(
+                    text = webSites.name,
+                    modifier = Modifier.weight(1f).padding(8.dp),
+                    color = Color.Black
+                )
                 IconButton(
                     onClick = onDeleteClick,
                     modifier = Modifier.size(30.dp).padding(end = 8.dp),
 
-                ) {
+                    ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
@@ -148,7 +153,7 @@ fun ListItemBlackListWeb(webSites: WebSiteBlack, onDeleteClick: () -> Unit) {
 @Composable
 fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit) {
     val text2 = remember { mutableStateOf("") }
-
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = text2.value,
@@ -167,9 +172,13 @@ fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit) {
 
         Button(
             onClick = {
-                onValidMacSubmit(text2.value)
-                text2.value = "" // Clear the text field
+                if (text2.value.isNullOrEmpty()) {
+                    Toast.makeText(context, "Please Enter a Valid Web Name", Toast.LENGTH_SHORT).show()
 
+                } else {
+                    onValidMacSubmit(text2.value)
+                    text2.value = "" // Clear the text field
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -183,7 +192,7 @@ fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit) {
 
 @Composable
 fun webBlackListTitle(onBackPressed: () -> Unit) {
-    Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,

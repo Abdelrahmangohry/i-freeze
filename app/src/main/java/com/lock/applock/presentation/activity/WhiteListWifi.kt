@@ -1,5 +1,6 @@
 package com.lock.applock.presentation.activity
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -68,6 +69,7 @@ fun WhiteListWifi(navController: NavController) {
             ) {
                 items(allowedWifi) { wifi ->
                     listItemWifi(
+
                         wifi = WifiData(name = wifi),
                         onDeleteClick = {
                             // Handle delete action here
@@ -116,7 +118,7 @@ fun listItemWifi(wifi: WifiData, onDeleteClick: () -> Unit) {
 @Composable
 fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit) {
     val text2 = remember { mutableStateOf("") }
-
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = text2.value,
@@ -136,9 +138,12 @@ fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit) {
 
         Button(
             onClick = {
+                if (text2.value.isNullOrEmpty()){
+                    Toast.makeText(context, "Please Enter A valid Wifi Name", Toast.LENGTH_SHORT).show()
+                }else{
                 onValidMacSubmit(text2.value)
                 text2.value = "" // Clear the text field
-
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()

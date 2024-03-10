@@ -68,10 +68,10 @@ class HomeFragment : Fragment() {
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
         binding.recyclerView.adapter = BookmarkAdapter(requireContext())
 
-        if(MainWebActivity.bookmarkList.size < 1)
-            binding.viewAllBtn.visibility = View.GONE
-        binding.viewAllBtn.setOnClickListener {
-            startActivity(Intent(requireContext(), BookmarkActivity::class.java))
-        }
+//        if(MainWebActivity.bookmarkList.size < 1)
+//            binding.viewAllBtn.visibility = View.GONE
+//        binding.viewAllBtn.setOnClickListener {
+//            startActivity(Intent(requireContext(), BookmarkActivity::class.java))
+//        }
     }
 }

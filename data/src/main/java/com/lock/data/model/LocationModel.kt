@@ -6,6 +6,7 @@ data class Data(
 )
 data class Device(
     val device: DeviceConfigurations,
+    val exceptionWifi: List<String>?
 )
 data class DeviceConfigurations(
     val blockWiFi : Boolean,
@@ -16,6 +17,7 @@ data class DeviceConfigurations(
     val blockListApps : Boolean,
     val whiteListApps : Boolean,
     val time: String,
+
 )
 //////////////////////////////////
 
@@ -46,9 +48,10 @@ data class MobileApps (
 )
 //response
 data class MobileResponse(
-    val data: String,
-
-    )
+    val data: MobileApps,
+    val status: Int,
+    val message: String
+)
 
 
 

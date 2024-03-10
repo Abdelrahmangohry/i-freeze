@@ -155,6 +155,8 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     override fun onResume() {
         super.onResume()
+        blockedWebsites = preference.getList("blockedWebsites")
+        allowedWebsites = preference.getList("allowedWebsites")
         MainWebActivity.tabsList[MainWebActivity.myPager.currentItem].name =
             binding.webView.url.toString()
         MainWebActivity.tabsBtn.text = MainWebActivity.tabsList.size.toString()
@@ -293,7 +295,8 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
         menuInfo: ContextMenu.ContextMenuInfo?
     ) {
         super.onCreateContextMenu(menu, v, menuInfo)
-
+        blockedWebsites = preference.getList("blockedWebsites")
+        allowedWebsites = preference.getList("allowedWebsites")
         val result = binding.webView.hitTestResult
         when (result.type) {
             WebView.HitTestResult.IMAGE_TYPE -> {
@@ -321,7 +324,8 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-
+        blockedWebsites = preference.getList("blockedWebsites")
+        allowedWebsites = preference.getList("allowedWebsites")
         val message = Handler().obtainMessage()
         binding.webView.requestFocusNodeHref(message)
         val url = message.data.getString("url")
