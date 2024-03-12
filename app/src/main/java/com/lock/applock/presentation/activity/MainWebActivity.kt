@@ -15,6 +15,7 @@ import android.print.PrintManager
 import android.view.Gravity
 import android.view.WindowManager
 import android.webkit.WebView
+import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -66,6 +67,7 @@ class MainWebActivity : AppCompatActivity() {
         var bookmarkIndex: Int = -1
         lateinit var myPager: ViewPager2
         lateinit var tabsBtn: MaterialTextView
+        lateinit var backArrow : ImageView
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,9 +86,14 @@ class MainWebActivity : AppCompatActivity() {
         binding.myPager.isUserInputEnabled = false
         myPager = binding.myPager
         tabsBtn = binding.tabsBtn
+        backArrow  = binding.backArrow
 
         initializeView()
         changeFullscreen(enable = true)
+
+        binding.backArrow.setOnClickListener {
+            onBackPressed()
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")

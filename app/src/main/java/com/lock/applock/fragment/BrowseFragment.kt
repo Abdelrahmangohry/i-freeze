@@ -71,7 +71,8 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
                 binding.webView.loadUrl("file:///android_asset/error_page.html")
 
             } else {
-                binding.webView.loadUrl("https://www.google.com/search?q=$urlNew")
+
+                binding.webView.loadUrl("https://$urlNew")
 
             }
 
@@ -96,13 +97,13 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
 
             // Check against the blacklist
             if (isBlacklistedChecked == true && isBlockedWebsite(url)) {
-                view?.loadUrl("this file:///$url") // Load default page
+                view?.loadUrl("this file://$url") // Load default page
                 return true // Prevent loading the original URL
             }
 
             // Check against the whitelist
             if (isWhitelistedChecked == true && isWhitelistWebsite(url)) {
-                view?.loadUrl("file:///android_asset/error_page.html") // Load default page
+                view?.loadUrl("file://android_asset/error_page.html") // Load default page
                 return true // Prevent loading the original URL
             }
 
@@ -155,6 +156,7 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     override fun onResume() {
         super.onResume()
+
         blockedWebsites = preference.getList("blockedWebsites")
         allowedWebsites = preference.getList("allowedWebsites")
         MainWebActivity.tabsList[MainWebActivity.myPager.currentItem].name =
@@ -176,6 +178,7 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
         mainRef.binding.refreshBtn.setOnClickListener {
             binding.webView.reload()
         }
+
 
         binding.webView.apply {
             settings.javaScriptEnabled = true

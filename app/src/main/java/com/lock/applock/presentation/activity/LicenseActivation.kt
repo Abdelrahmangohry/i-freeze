@@ -1,9 +1,13 @@
 package com.lock.applock.presentation.activity
 
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -43,12 +47,15 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
+import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.NetworkMonitoringService
 import com.lock.data.model.DeviceDTO
 import com.patient.data.cashe.PreferencesGateway
@@ -85,11 +92,11 @@ fun licenseKey(
 ) {
 
     val preference = PreferencesGateway(LocalContext.current)
-    val deviceId = preference.load("responseID", "")
+    var deviceId = preference.load("responseID", "")
     val syncTime = preference.load("time", "")
     val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
-    var isVisible by remember { mutableStateOf(preference.load("IsVisible", false)) }
-    var showActivationBox by remember { mutableStateOf(true) }
+//    var isVisible by remember { mutableStateOf(preference.load("IsVisible", true)) }
+//    var showActivationBox = remember { mutableStateOf(preference.load("BoxShowed", true)) }
 
     var text by remember { mutableStateOf("") }
 
@@ -154,7 +161,7 @@ fun licenseKey(
     ) {
 
         Box(modifier = Modifier.background(color = Color.White)) {
-            if (showActivationBox) {
+            if (deviceId.isNullOrEmpty()) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
@@ -168,8 +175,7 @@ fun licenseKey(
                     ),
                     modifier = Modifier.padding(20.dp),
                 )
-            }
-            if (!showActivationBox) {
+            } else {
                 Text(
                     text = "License Activated Successfully",
                     color = Color.White,
@@ -183,7 +189,15 @@ fun licenseKey(
 
             ElevatedButton(
                 onClick = {
-
+                    var locationPermissionRequestCode = 123
+                    if (!deviceId.isNullOrEmpty()) {
+                        Toast.makeText(
+                            context,
+                            "Licence Already Activated",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@ElevatedButton
+                    }
                     if (!isNetworkAvailable(context)) {
                         Toast.makeText(
                             context,
@@ -193,6 +207,24 @@ fun licenseKey(
                         return@ElevatedButton
                     }
 
+                    if (!isLocationPermissionGranted(context)) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            locationPermissionRequestCode
+                        )
+
+                    }
+                    if (!isLocationEnabled(context)) {
+
+                            context.startService(serviceIntent)
+                    }
+//                    else {
+//                            context.stopService(serviceIntent)
+//                        }
+//                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+
+//// location permission check
                     if (text.isEmpty()) {
                         Toast.makeText(
                             context,
@@ -205,25 +237,27 @@ fun licenseKey(
                         authViewModel._loginFlow.observe(lifecycle, Observer { response ->
                             if (response.isSuccessful) {
                                 Log.d("abdo", response.body().toString())
-                                val deviceId = response.body().toString().trim()
-                                Log.d("abdo", "this is new response $deviceId")
+                                deviceId = response.body().toString().trim()
 
-                                preference.save("responseID", deviceId)
+                                preference.save("responseID", deviceId!!)
                                 Toast.makeText(
                                     context,
                                     "License Activate Successfully",
                                     Toast.LENGTH_SHORT
                                 ).show()
 
-                                preference.save("IsVisible", true)
-                                showActivationBox = false
+                                preference.save("IsVisible", false)
+                                preference.save("BoxShowed", false)
 
-//                                navController.navigate(Screen.AdminAccess.route)
-                                authViewModel.newUpdateUserData(deviceId)
+                                navController.navigate(Screen.AdminAccess.route)
+                                authViewModel.newUpdateUserData(deviceId!!)
                                 authViewModel._newFlow.observe(lifecycle, Observer { responseId ->
                                     if (responseId.isSuccessful) {
 
-                                        Log.d("abdo", "response body from license ${responseId.body()}")
+                                        Log.d(
+                                            "abdo",
+                                            "response body from license ${responseId.body()}"
+                                        )
                                         preference.update(
                                             "Blacklist",
                                             responseId.body()?.data?.device?.blockListApps!!
@@ -258,6 +292,10 @@ fun licenseKey(
                                             "WifiWhite",
                                             responseId.body()?.data?.device?.whiteListWiFi!!
                                         )
+                                        preference.save(
+                                            "time",
+                                            "${responseId.body()?.data?.device?.time}"
+                                        )
                                         Toast.makeText(
                                             context,
                                             "Data Synchronized Successfully",
@@ -267,7 +305,8 @@ fun licenseKey(
                                 })
                             } else {
                                 Toast.makeText(
-                                    context,context.resources.getString(R.string.invalid_license_activate_key),
+                                    context,
+                                    context.resources.getString(R.string.invalid_license_activate_key),
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 return@Observer
@@ -283,26 +322,31 @@ fun licenseKey(
             }
 
 
-            ElevatedButton(
-                onClick = {
-                    if (!showActivationBox) {
-                        preference.save("IsVisible", false)
-                        showActivationBox = true
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "Box Already Showed",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                },
-                modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-            ) {
-                Text("Show Activation Box", fontSize = 16.sp, color = Color.White)
-
-            }
-            Text("Last Update : $syncTime", fontSize = 16.sp, color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
+//            ElevatedButton(
+//                onClick = {
+//                    if (showActivationBox.value == false) {
+//                        preference.save("IsVisible", false)
+//                        showActivationBox.value = true
+//                    } else {
+//                        Toast.makeText(
+//                            context,
+//                            "Box Already Showed",
+//                            Toast.LENGTH_SHORT
+//                        ).show()
+//                    }
+//                },
+//                modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally),
+//                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
+//            ) {
+//                Text("Show Activation Box", fontSize = 16.sp, color = Color.White)
+//
+//            }
+            Text(
+                "Last Update : $syncTime",
+                fontSize = 16.sp,
+                color = Color.White,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
 
         }
     }
@@ -326,6 +370,18 @@ fun isNetworkAvailable(context: Context): Boolean {
     }
 }
 
+ fun isLocationPermissionGranted(context: Context): Boolean {
+    return ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+}
+
+ fun isLocationEnabled(context: Context): Boolean {
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+            locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+}
 
 @Composable
 fun headerLicense(onBackPressed: () -> Unit) {

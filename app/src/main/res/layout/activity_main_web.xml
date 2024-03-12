@@ -7,14 +7,24 @@
     app:layoutDescription="@xml/activity_main_scene"
     tools:context=".presentation.activity.MainWebActivity">
 
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/myPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/myPager">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,25 +47,50 @@
                 android:paddingHorizontal="5dp"
                 android:singleLine="true"
                 android:textColorHint="#757575" />
+<!--            <Button-->
+<!--                android:id="@+id/settingBtn"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_weight="0.3"-->
+<!--                android:contentDescription="@string/settings_btn"-->
+<!--                android:src="@drawable/ic_settings"-->
+<!--                android:backgroundTint="@color/white"-->
+<!--                android:background="@drawable/custom_to_button"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                 />-->
+
+            <ImageView
+                android:id="@+id/settingBtn"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_marginVertical="8dp"
+                android:src="@drawable/ic_settings"
+                android:background="@drawable/custom_tabs_textview"
+                android:gravity="center"
+                android:textColor="@color/black"
+                tools:ignore="RedundantDescriptionCheck" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tabsBtn"
                 android:layout_width="40dp"
                 android:layout_height="match_parent"
-                android:background="@drawable/custom_tabs_textview"
-                android:text="one"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:layout_marginVertical="8dp"
                 android:layout_marginHorizontal="4dp"
+                android:layout_marginVertical="8dp"
+                android:background="@drawable/custom_tabs_textview"
+                android:gravity="center"
+                android:text="@string/one"
+                android:textColor="@color/black"
                 tools:ignore="RedundantDescriptionCheck" />
 
             <ImageButton
                 android:id="@+id/refreshBtn"
-                android:layout_width="40dp"
+                android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="refresh_btn"
+                android:contentDescription="@string/refresh_btn"
                 android:src="@drawable/ic_refresh"
                 tools:ignore="RedundantDescriptionCheck" />
 
@@ -64,10 +99,9 @@
                 android:layout_width="40dp"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"
-                android:contentDescription="go_btn"
+                android:contentDescription="@string/go_btn"
                 android:src="@drawable/ic_forward"
-                tools:ignore="RedundantDescriptionCheck"
-                />
+                tools:ignore="RedundantDescriptionCheck" />
 
 
         </LinearLayout>
@@ -81,30 +115,25 @@
 
     </LinearLayout>
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/myPager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/settingBtn"
+
+    <ImageView
+        android:id="@+id/back_arrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="settings_btn"
-        android:src="@drawable/ic_settings"
-        app:backgroundTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        android:src="@drawable/ic_back"
+        android:background="@drawable/custom_round_shape"
+        android:padding="10dp"
+        app:tint="@color/black"
+        app:circularflow_defaultRadius="100dp"
+        android:contentDescription="@string/back_arrow_description"
+        android:clickable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9"
-        tools:ignore="RedundantDescriptionCheck" />
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="50dp"
+         />
 
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

@@ -2,6 +2,8 @@ package com.lock.applock
 
 import LightPrimaryColor
 import SecondaryColor
+import android.Manifest
+import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
@@ -56,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -66,9 +69,12 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.compse.ui.SetupNavGraph
 import com.lock.applock.presentation.activity.MainWebActivity
+import com.lock.applock.presentation.activity.isLocationEnabled
+import com.lock.applock.presentation.activity.isLocationPermissionGranted
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.AdminService
 import com.lock.applock.service.AutoSyncWorker
+import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.AppLockTheme
 import com.lock.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
@@ -98,43 +104,44 @@ class MainActivity : ComponentActivity() {
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
+//var locationPermissionRequestCode = 456
+//
+//        if (!isLocationPermissionGranted(this)) {
+//            ActivityCompat.requestPermissions(
+//                this,
+//                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+//                locationPermissionRequestCode
+//            )
+//        }
+//
+//        if (!isLocationEnabled(this)) {
+//            startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+//        }
 
-
-
-        when {
+        when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) -> {
                 Log.d("abdo", "autoSync started")
-                val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(360, TimeUnit.MINUTES)
-                    .setInitialDelay(10, TimeUnit.SECONDS)
-                    .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
-                    .build()
-
-                WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
-                    "AutoSync",
-                    ExistingPeriodicWorkPolicy.REPLACE,
-                    workRequest
-                )
+                startAutoSyncWorker(this)
             }
-
             else -> {
                 requestPermissionLauncher.launch(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                    Manifest.permission.ACCESS_FINE_LOCATION
                 )
+
             }
         }
 
-        when {
+        when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.ACCESS_NETWORK_STATE
             )
-                    == PackageManager.PERMISSION_GRANTED -> {
+            -> {
 
             }
-
             else -> {
                 requestPermissionLauncher.launch(
                     android.Manifest.permission.ACCESS_NETWORK_STATE

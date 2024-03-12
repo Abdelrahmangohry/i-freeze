@@ -1,6 +1,7 @@
 package com.lock.applock.presentation.activity
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,6 +56,7 @@ import androidx.navigation.NavController
 import com.lock.applock.R
 import com.lock.applock.presentation.AppsViewModel
 import com.lock.applock.presentation.nav_graph.Screen
+import com.lock.applock.service.NetworkMonitoringService
 import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
@@ -78,21 +81,13 @@ fun autoSyncButton() {
     val preference = PreferencesGateway(context)
     val deviceId = preference.load("responseID", "")
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    val isLocationEnabled =
-        remember { mutableStateOf(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) }
+    val isLocationEnabled = remember { mutableStateOf(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) }
 
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Permission is granted. Continue the action or workflow in your app.
-        } else {
-
-        }
-    }
     Row(modifier = Modifier.padding(15.dp)) {
         Button(
             onClick = {
+                val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+                val locationPermissionRequestCode = 456
                 if (deviceId.isNullOrEmpty()) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
                         .show()
@@ -101,30 +96,27 @@ fun autoSyncButton() {
                 if (!isOnline(context)) {
                     return@Button
                 }
-                when (PackageManager.PERMISSION_GRANTED) {
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) -> {
-                        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                            startAutoSyncWorker(context)
-                            Toast.makeText(
-                                context,
-                                "Data Synchronized Successfully",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                            context.startActivity(intent)
-                        }
+                if (isLocationPermissionGranted(context)) {
+                    if (isLocationEnabled.value) {
+                        Log.d("abdo", "autoSync started")
+//                        context.stopService(serviceIntent)
+                        startAutoSyncWorker(context)
+                    }
+                    else {
+                        Log.d("abdo", "i must start service")
+                        context.startService(serviceIntent)
+//                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     }
 
-                    else -> {
-                        requestPermissionLauncher.launch(
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        )
-                    }
+                } else {
+                    Log.d("abdo", "i must request granted permission")
+                    ActivityCompat.requestPermissions(
+                        context as Activity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        locationPermissionRequestCode
+                    )
                 }
+
             },
             colors = ButtonDefaults.buttonColors(Color.White),
             modifier = Modifier.clip(CircleShape)
