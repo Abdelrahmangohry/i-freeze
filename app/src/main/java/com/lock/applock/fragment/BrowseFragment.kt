@@ -13,6 +13,7 @@ import android.os.Handler
 import android.provider.MediaStore
 import android.text.SpannableStringBuilder
 import android.util.Base64
+import android.util.Log
 import android.view.*
 import android.webkit.*
 import android.widget.Toast
@@ -30,7 +31,8 @@ import java.io.ByteArrayOutputStream
 
 
 class BrowseFragment(private var urlNew: String) : Fragment() {
-
+    private var isBlacklistedChecked: Boolean = false
+    private var isWhitelistedChecked: Boolean = false
     lateinit var binding: FragmentBrowseBinding
     var webIcon: Bitmap? = null
 
@@ -49,12 +51,13 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
         binding = FragmentBrowseBinding.bind(view)
         registerForContextMenu(binding.webView)
         preference = PreferencesGateway(requireContext())
-        val isBlacklistedChecked: Boolean? = preference.load("WebBlacklist", false)
-        val isWhitelistedChecked = preference.load("WebWhitelist", false)
+        isBlacklistedChecked = preference.load("WebBlacklist", false) ?: false
+        isWhitelistedChecked = preference.load("WebWhitelist", false) ?: false
 
 
         blockedWebsites = preference.getList("blockedWebsites")
         allowedWebsites = preference.getList("allowedWebsites")
+
         WebView.setWebContentsDebuggingEnabled(true)
         binding.webView.settings.javaScriptEnabled = true
         binding.webView.settings.javaScriptCanOpenWindowsAutomatically = true
@@ -64,15 +67,16 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
 
         // binding.webView.loadUrl(urlNew)
         //  binding.webView.loadUrl("https://www.google.com/search?q=$urlNew")
+
         binding.webView.post {
-            if (isBlacklistedChecked == true && isBlockedWebsite(urlNew)) {
+            if (isBlacklistedChecked && isBlockedWebsite(urlNew)) {
                 binding.webView.loadUrl("file:///android_asset/error_page.html")
-            } else if (isWhitelistedChecked == true && isWhitelistWebsite(urlNew)) {
+            } else if (isWhitelistedChecked && isWhitelistWebsite(urlNew)) {
                 binding.webView.loadUrl("file:///android_asset/error_page.html")
 
             } else {
 
-                binding.webView.loadUrl("https://$urlNew")
+                binding.webView.loadUrl("https://www.google.com/search?q=$urlNew")
 
             }
 
@@ -157,8 +161,7 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        blockedWebsites = preference.getList("blockedWebsites")
-        allowedWebsites = preference.getList("allowedWebsites")
+
         MainWebActivity.tabsList[MainWebActivity.myPager.currentItem].name =
             binding.webView.url.toString()
         MainWebActivity.tabsBtn.text = MainWebActivity.tabsList.size.toString()
@@ -187,16 +190,6 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
             settings.displayZoomControls = false
             webViewClient = object : WebViewClient() {
 
-                override fun onLoadResource(view: WebView?, url: String?) {
-                    super.onLoadResource(view, url)
-                    if (MainWebActivity.isDesktopSite)
-                        view?.evaluateJavascript(
-                            "document.querySelector('meta[name=\"viewport\"]').setAttribute('content'," +
-                                    " 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));",
-                            null
-                        )
-                }
-
                 override fun doUpdateVisitedHistory(
                     view: WebView?,
                     url: String?,
@@ -207,72 +200,14 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
                     MainWebActivity.tabsList[MainWebActivity.myPager.currentItem].name =
                         url.toString()
                 }
-
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    mainRef.binding.progressBar.progress = 0
-                    mainRef.binding.progressBar.visibility = View.VISIBLE
-                    if (url!!.contains(
-                            "you",
-                            ignoreCase = false
-                        )
-                    ) mainRef.binding.root.transitionToEnd()
-                }
-
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    mainRef.binding.progressBar.visibility = View.GONE
-                    binding.webView.zoomOut()
-                }
-            }
-            webChromeClient = object : WebChromeClient() {
-                //for setting icon to our search bar
-                override fun onReceivedIcon(view: WebView?, icon: Bitmap?) {
-                    super.onReceivedIcon(view, icon)
-                    try {
-                        mainRef.binding.webIcon.setImageBitmap(icon)
-                        webIcon = icon
-                        MainWebActivity.bookmarkIndex = mainRef.isBookmarked(view?.url!!)
-                        if (MainWebActivity.bookmarkIndex != -1) {
-                            val array = ByteArrayOutputStream()
-                            icon!!.compress(Bitmap.CompressFormat.PNG, 100, array)
-                            MainWebActivity.bookmarkList[MainWebActivity.bookmarkIndex].image =
-                                array.toByteArray()
-                        }
-                    } catch (e: Exception) {
-                    }
-                }
-
-                override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
-                    super.onShowCustomView(view, callback)
-                    binding.webView.visibility = View.GONE
-                    binding.customView.visibility = View.VISIBLE
-                    binding.customView.addView(view)
-                    mainRef.binding.root.transitionToEnd()
-                }
-
-                override fun onHideCustomView() {
-                    super.onHideCustomView()
-                    binding.webView.visibility = View.VISIBLE
-                    binding.customView.visibility = View.GONE
-
-                }
-
-                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    super.onProgressChanged(view, newProgress)
-                    mainRef.binding.progressBar.progress = newProgress
-                }
             }
 
             binding.webView.setOnTouchListener { _, motionEvent ->
                 mainRef.binding.root.onTouchEvent(motionEvent)
                 return@setOnTouchListener false
             }
-
             binding.webView.reload()
         }
-
-
     }
 
     override fun onPause() {

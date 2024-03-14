@@ -212,9 +212,9 @@ class MainWebActivity : AppCompatActivity() {
 
 
 
-            dialogBinding.backBtn.setOnClickListener {
-                onBackPressed()
-            }
+//            dialogBinding.backBtn.setOnClickListener {
+//                onBackPressed()
+//            }
 
             dialogBinding.forwardBtn.setOnClickListener {
                 frag?.apply {
