@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -119,7 +120,7 @@ fun ListItemWhiteListWeb(webSitesWhite: WebSiteWhiteList, onDeleteClick: () -> U
 @Composable
 fun textWithButtonWhiteListWebView(onValidMacSubmit: (String) -> Unit) {
     val text2 = remember { mutableStateOf("") }
-    val context = LocalContext.current
+
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = text2.value,
@@ -128,20 +129,26 @@ fun textWithButtonWhiteListWebView(onValidMacSubmit: (String) -> Unit) {
                 .background(color = Color.White)
                 .padding(15.dp),
 
-
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = Color.Black, // Text color // Color of the leading icon
+                unfocusedBorderColor = Color.LightGray, // Border color when unfocused
+                focusedBorderColor = Color.Black,
+                cursorColor = Color.Black,
+            ),
+            maxLines = 1,
             onValueChange = { newText ->
                 text2.value = newText
             },
-            label = { Text(text = "Address") },
+            label = { Text(text = "Address", color = Color.Black) },
             placeholder = { Text(text = "Enter Address", color = Color.Black) },
         )
 
         Button(
             onClick = {
-                if (text2.value.isNullOrEmpty()){
-                    Toast.makeText(context, "Please Enter A valid Web Name", Toast.LENGTH_SHORT).show()
-                }else {
-                    onValidMacSubmit(text2.value)
+                val newWebsite = text2.value.trim()
+                if (newWebsite.isNotEmpty()) {
+                    // Only add to the list if not empty
+                    onValidMacSubmit(newWebsite)
                     text2.value = "" // Clear the text field
                 }
             },
@@ -154,7 +161,6 @@ fun textWithButtonWhiteListWebView(onValidMacSubmit: (String) -> Unit) {
         }
     }
 }
-
 @Composable
 fun webWhiteListTitle(onBackPressed: () -> Unit) {
     Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){

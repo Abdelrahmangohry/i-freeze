@@ -238,16 +238,13 @@ fun Demo_DropDownMenu(navController: NavController) {
     name = parts[0]
 
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().padding(12.dp),
+        horizontalArrangement = Arrangement.End
 
     ) {
-        Text(text = "Admin Portal", color = Color.White, fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(horizontal = 105.dp).padding(top = 10.dp)
-        )
+
         IconButton(
             onClick = { expanded = !expanded },
-            modifier = Modifier.wrapContentSize(Alignment.TopEnd)
         ) {
             Image(
                 modifier = Modifier.size(30.dp)
@@ -258,25 +255,26 @@ fun Demo_DropDownMenu(navController: NavController) {
                 contentDescription = "More",
                 colorFilter = ColorFilter.tint(Color(0xFF175AA8))
             )
-        }
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text(name) },
-                onClick = { }
-            )
-            DropdownMenuItem(
-                text = { Text("Logout") },
-                onClick = {
-                    navController.navigate(Screen.AdminAccess.route)
-                    Toast.makeText(context, "Logout Successfully", Toast.LENGTH_SHORT).show()
-                }
-            )
-        }
 
+            DropdownMenu(
+
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(name) },
+                    onClick = { }
+                )
+                DropdownMenuItem(
+                    text = { Text("Logout") },
+                    onClick = {
+                        navController.navigate(Screen.AdminAccess.route)
+                        Toast.makeText(context, "Logout Successfully", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
     }
 }
 

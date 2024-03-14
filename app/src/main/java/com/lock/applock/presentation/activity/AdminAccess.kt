@@ -104,8 +104,8 @@ fun autoSyncButton() {
                     }
                     else {
                         Log.d("abdo", "i must start service")
-                        context.startService(serviceIntent)
-//                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+//                        context.startService(serviceIntent)
+                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     }
 
                 } else {
