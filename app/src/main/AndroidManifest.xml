@@ -60,7 +60,7 @@
         </activity>
         <activity
             android:name=".presentation.activity.MainWebActivity"
-
+            android:windowSoftInputMode="adjustPan"
             android:exported="false"/>
 
         <service
