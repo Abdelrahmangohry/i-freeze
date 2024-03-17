@@ -137,7 +137,8 @@ fun licenseKey(
         deviceName = deviceName,
         operatingSystemVersion = operatingSystemVersion,
         deviceIp = ipAddress,
-        macAddress = androidId
+        macAddress = androidId,
+        serialNumber = androidId
     )
 
 

@@ -26,8 +26,10 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,21 +53,21 @@ import com.patient.data.cashe.PreferencesGateway
 
 @Composable
 fun  WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController){
-    viewModel.getAllApps()
-    val newList= viewModel.articlesItems.collectAsState()
-    WhiteAppList(newList.value, viewModel,onBackPressed = { navController.popBackStack() })
+    val preference = PreferencesGateway(LocalContext.current)
+    var allowedAppsList by remember { mutableStateOf(preference.getList("allowedAppsList") ?: mutableListOf()) }
+    WhiteAppList(allowedAppsList, viewModel,onBackPressed = { navController.popBackStack() })
     
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WhiteAppList(
-    listItems: List<AppsModel> = listOf(), viewModel: AppsViewModel, onBackPressed: () -> Unit) {
+    listItems: MutableList<String>, viewModel: AppsViewModel, onBackPressed: () -> Unit) {
 
     val searchText = remember { mutableStateOf("") }
 
     Column(modifier = Modifier
-        .fillMaxWidth()
+        .fillMaxSize()
         .background(Color(0xFF175AA8))) {
         Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){
             IconButton(onClick = { onBackPressed() }) {
@@ -101,10 +103,10 @@ fun WhiteAppList(
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             val filteredList = listItems.filter {
-                it.appName.contains(searchText.value, ignoreCase = true)
+                it.contains(searchText.value, ignoreCase = true)
             }
             items(filteredList.size) { it ->
-                WhiteListItem(filteredList[it], viewModel)
+                WhiteListItem(filteredList[it])
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -113,7 +115,7 @@ fun WhiteAppList(
 
 @Composable
 fun WhiteListItem(
-    app: AppsModel,viewModel: AppsViewModel) {
+    app: String) {
 
     Card(
         modifier = Modifier
@@ -125,7 +127,7 @@ fun WhiteListItem(
 
         shape = Shape.large
     ) {
-        val imageBitmap = LocalContext.current.getAppIconByPackageName(app.packageName)?.toImageBitmap()
+        val imageBitmap = LocalContext.current.getAppIconByPackageName(app)?.toImageBitmap()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -151,34 +153,9 @@ fun WhiteListItem(
             Spacer(modifier = Modifier.weight(1f))
             Column (modifier = Modifier.padding(start=10.dp)){
                 Text(
-                    text = app.appName,
+                    text = app,
                     style = TextStyle(fontWeight = FontWeight.Bold),
                     color = Color(0xFF175AA8)
-                )
-            }
-            var isToggle = remember { mutableStateOf(app.statusWhite) }
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.CenterEnd
-            ) {
-                Switch(
-                    checked = isToggle.value,
-                    onCheckedChange = {
-                        viewModel.updateApp(app.copy(status = false, statusWhite = it))
-                        isToggle.value = !isToggle.value
-
-                    },
-                    thumbContent = if (isToggle.value) {
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    }else {
-                        null
-                    }
                 )
             }
         }

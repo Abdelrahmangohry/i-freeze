@@ -29,8 +29,10 @@
  import androidx.compose.material3.Text
  import androidx.compose.runtime.Composable
  import androidx.compose.runtime.collectAsState
+ import androidx.compose.runtime.getValue
  import androidx.compose.runtime.mutableStateOf
  import androidx.compose.runtime.remember
+ import androidx.compose.runtime.setValue
  import androidx.compose.ui.Alignment
  import androidx.compose.ui.Modifier
  import androidx.compose.ui.draw.clip
@@ -54,16 +56,19 @@
 
  @Composable
 fun BlackList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController){
-     viewModel.getAllApps()
-     val newList= viewModel.articlesItems.collectAsState().value
-             .sortedBy { it.packageName }
-     BlackListApps(newList,viewModel,onBackPressed = { navController.popBackStack() } )
+
+     val preference = PreferencesGateway(LocalContext.current)
+     var blockedApps by remember { mutableStateOf(preference.getList("blockedAppsList") ?: mutableListOf()) }
+//     val newList= viewModel.articlesItems.collectAsState().value
+//             .sortedBy { it.packageName }
+
+     BlackListApps(blockedApps,onBackPressed = { navController.popBackStack() } )
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BlackListApps(listItems: List<AppsModel> = listOf(),viewModel: AppsViewModel,onBackPressed: () -> Unit) {
+fun BlackListApps(listItems: MutableList<String>,onBackPressed: () -> Unit) {
     val selectedApps = remember { mutableSetOf<String>() }
     val searchText = remember { mutableStateOf("") }
 
@@ -106,11 +111,11 @@ fun BlackListApps(listItems: List<AppsModel> = listOf(),viewModel: AppsViewModel
 
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     val filteredList = listItems.filter {
-                        it.appName.contains(searchText.value, ignoreCase = true)
+                        it.contains(searchText.value, ignoreCase = true)
                     }
 
                     items(filteredList.size) { it ->
-                        AppListItem(filteredList[it], viewModel)
+                        AppListItem(filteredList[it])
                         Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -119,8 +124,8 @@ fun BlackListApps(listItems: List<AppsModel> = listOf(),viewModel: AppsViewModel
 }
 
 @Composable
-fun AppListItem(app: AppsModel ,viewModel: AppsViewModel) {
-    val imageBitmap = LocalContext.current.getAppIconByPackageName(app.packageName)?.toImageBitmap()
+fun AppListItem(app: String) {
+    val imageBitmap = LocalContext.current.getAppIconByPackageName(app)?.toImageBitmap()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -155,37 +160,13 @@ fun AppListItem(app: AppsModel ,viewModel: AppsViewModel) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = app.appName,
+                    text = app,
                     style = TextStyle(fontWeight = FontWeight.Bold),
                     color = Color(0xFF175AA8)
                 )
 
             }
-            val isToggle =remember { mutableStateOf(app.status) }
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Switch(
-                    checked = isToggle.value,
-                    onCheckedChange = {
-                        viewModel.updateApp(app.copy(status = it, statusWhite = false))
-                        isToggle.value =!isToggle.value
-                    },
-                    thumbContent = if (isToggle.value) {
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    }else {
-                        null
-                    }
 
-                )
-            }
         }
     }
 

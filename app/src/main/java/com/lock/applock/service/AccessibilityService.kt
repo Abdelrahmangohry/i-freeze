@@ -22,7 +22,9 @@ import kotlinx.coroutines.launch
 
 class AccessibilityServices : AccessibilityService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private lateinit var appsList: List<AppsModel>
+    private lateinit var blockedAppList: List<String>
+    private lateinit var allowedAppsList: List<String>
+
     private val handler = Handler()
     lateinit var serviceIntent: Intent
     var serviceApp: ForceCloseService? = null
@@ -43,9 +45,9 @@ class AccessibilityServices : AccessibilityService() {
     }
 
     //////////////
-    private fun getAppDatabaseInstance(): AppsDB {
-        return RoomDBModule.provideRoomDB(applicationContext)
-    }
+//    private fun getAppDatabaseInstance(): AppsDB {
+//        return RoomDBModule.provideRoomDB(applicationContext)
+//    }
     ////////////////
 
 
@@ -55,19 +57,18 @@ class AccessibilityServices : AccessibilityService() {
         // Create an intent for ForceCloseService class
         serviceIntent = Intent(applicationContext, ForceCloseService::class.java)
 
-        // Use coroutine to asynchronously fetch the list of apps from the database
-        serviceScope.launch {
-            appsList = getAppDatabaseInstance().daoApps().getAppsList()
-        }
+        blockedAppList = preferenc.getList("blockedAppsList")
+        allowedAppsList = preferenc.getList("allowedAppsList")
+
         // Get the package name from the AccessibilityEvent
         val packageName = p0?.packageName.toString()
-        Log.d("islam", "packageName $packageName")
+        Log.d("abdo", "this issssss packageName $packageName")
 
         // Check if the event type is a window state change
         if (p0?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             Log.d("islam", "packageName $packageName")
             if (!isLauncherPackage(packageName)) {
-                // Handle the app based on lists using the ForceCloseService intent
+//                 Handle the app based on lists using the ForceCloseService intent
                 handleAppBasedOnLists(packageName, serviceIntent)
 
             }
@@ -88,21 +89,19 @@ class AccessibilityServices : AccessibilityService() {
         activityManager.killBackgroundProcesses(packageName)
     }
 
-    private suspend fun getAppsList(): List<AppsModel> {
-        return getAppDatabaseInstance().daoApps().getAppsList()
-    }
     private fun handleAppBasedOnLists(packageName: String, serviceIntent: Intent) {
         serviceScope.launch {
             // Ensure appsList is initialized before proceeding
-            appsList = getAppsList()
+            blockedAppList = preferenc.getList("blockedAppsList")
+            allowedAppsList = preferenc.getList("allowedAppsList")
         val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
         val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
         val isBrowsersEnabled = preferenc.load("Browsers", false) ?: false
-        if (!::appsList.isInitialized){
-            serviceScope.launch {
-                appsList = getAppDatabaseInstance().daoApps().getAppsList()
-            }
-        }
+//        if (!::blockedAppList.isInitialized){
+//            serviceScope.launch {
+//                blockedAppList = preferenc.getList("blockedAppsList")
+//            }
+//        }
         val isAppInBrowserList = isBrowsers(packageName)
         if (isBrowsersEnabled && isAppInBrowserList){
             applicationContext.startService(serviceIntent)
@@ -111,25 +110,23 @@ class AccessibilityServices : AccessibilityService() {
             applicationContext.stopService(serviceIntent)
             removeOverlayAndViewBinding()
         }
-        val isAppInWhitelist = isAppInList(packageName, appsList.filter { it.statusWhite == true })
-        val isAppInBlacklist = isAppInList(packageName, appsList.filter { it.status == true })
-        Log.d("islam", "isWhitelistEnabled $isWhitelistEnabled")
-        Log.d("islam", "isBlacklistEnabled $isBlacklistEnabled")
-        Log.d("islam", "isAppInBlacklist $isAppInBlacklist")
+        val isAppInWhitelist = isAppInList(packageName, allowedAppsList)
+        val isAppInBlacklist = isAppInList(packageName, blockedAppList)
+        Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
+        Log.d("abdo", "isBlacklistEnabled $isBlacklistEnabled")
+//        Log.d("islam", "isAppInBlacklist $isAppInBlacklist")
         if (isWhitelistEnabled) {
             if (isSystemApp(packageName)) {
-                Log.d("islam", "Not white List ${isSystemApp(packageName)}")
+                Log.d("abdo", "this is system app ${isSystemApp(packageName)}")
                 applicationContext.stopService(serviceIntent)
                 removeOverlayAndViewBinding()
-            } else if (!isAppInWhitelist) {
-                Log.d("islam", "close applications Not white list ${isAppInWhitelist}")
-
+            } else if (!isAppInWhitelist){
+                Log.d("abdo", "else is white list enabled")
                 applicationContext.startService(serviceIntent)
                 killAppAndShowOverlay(packageName)
             }
         } else if (isBlacklistEnabled && isAppInBlacklist) {
-            Log.d("islam", "isAppInBlacklist ${isAppInBlacklist}")
-
+            Log.d("abdo", "blacklist enabled")
             applicationContext.startService(serviceIntent)
             killAppAndShowOverlay(packageName)
         } else {
@@ -167,8 +164,8 @@ class AccessibilityServices : AccessibilityService() {
         this.serviceInfo = info
     }
 
-    private fun isAppInList(packageName: String, list: List<AppsModel>): Boolean {
-        return list.any { it.packageName == packageName }
+    private fun isAppInList(packageName: String, list: List<String>): Boolean {
+        return list.any { it == packageName }
     }
 
     override fun onInterrupt() {

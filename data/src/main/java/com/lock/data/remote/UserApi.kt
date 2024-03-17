@@ -15,7 +15,7 @@ import retrofit2.http.Query
 
 //Api data base GET / POST
 interface UserApi {
-    @POST("api/Licenses/ActivateMobile/{activationKey}")
+        @POST("api/Licenses/ActivateMobile/{activationKey}")
     suspend fun getUserLogin(
         @Path("activationKey") activationKey: String,
         @Body deviceDto: DeviceDTO

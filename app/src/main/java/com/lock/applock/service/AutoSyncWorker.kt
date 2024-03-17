@@ -83,6 +83,20 @@ class AutoSyncWorker @AssistedInject constructor(
 
                 Log.d("abdo", "Result success")
                 val responseData = response.body()?.data?.device
+                var blockedAppsList = response.body()?.data?.blockedApps
+                if (blockedAppsList != null) { // Check for null
+                    preference.saveList("blockedAppsList", blockedAppsList)
+                    Log.d("abdo", "this is blocked apps list $blockedAppsList")
+                } else {
+                    Log.d("abdo", "Blocked apps list is null")
+                }
+                var allowedAppsList = response.body()?.data?.exceptionApps
+                if (allowedAppsList != null) { // Check for null
+                    preference.saveList("allowedAppsList", allowedAppsList)
+                    Log.d("abdo", "this is blocked apps list $allowedAppsList")
+                } else {
+                    Log.d("abdo", "Blocked apps list is null")
+                }
                 responseData?.let {
                     preference.update("Blacklist", it.blockListApps)
                     preference.update("Whitelist", it.whiteListApps)
