@@ -42,6 +42,8 @@ import com.lock.applock.GeneralSettingItem
 import com.lock.applock.R
 import com.lock.applock.SupportItem
 import com.lock.applock.service.AdminService
+import com.lock.applock.service.NetworkMonitoringService
+import com.patient.data.cashe.PreferencesGateway
 
 
 @RequiresApi(34)
@@ -85,9 +87,13 @@ fun GeneralOptionsUISetting(
     activity:Activity,
 ) {
     val context = LocalContext.current
+    val preference = PreferencesGateway(LocalContext.current)
     val deviceManager = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(activity, AdminService::class.java)
     val isAdminPermissionGranted = remember { mutableStateOf(false) }
+    val isLocationEnabled = preference.load("locationBlocked", false)
+    val locationBlockedState = remember { mutableStateOf(isLocationEnabled) }
+    val serviceIntent = Intent(LocalContext.current, NetworkMonitoringService::class.java)
     val launcher =  rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult ={
@@ -175,6 +181,34 @@ fun GeneralOptionsUISetting(
                 }
             }
         )
+        locationBlockedState.value?.let {
+            com.lock.applock.presentation.screen.ToggleSettingItem(
+                icon = R.drawable.wifi_icon,
+                mainText = "Block Location",
+                subText = "Click Here to Block Location",
+                isChecked = it,
+                onCheckedChange = { isChecked ->
+                    Log.d("abdo", "i out here")
+                    locationBlockedState.value = it
+                    preference.update("locationBlocked", isChecked)
+                    locationBlockedState.value = isChecked
+                    if (isChecked) {
+                        Log.d("abdo", "i am here")
+                        context.startService(serviceIntent)
+                    } else {
+                        Log.d("abdo", "iam in else")
+                        context.stopService(serviceIntent)
+                    }
+//                    if (wifiAllowedState.value!!) {
+//                        preference.update("WifiWhite", it)
+//                        wifiAllowedState.value = it
+//                    }
+                },
+                onClick = {
+
+                }
+            )
+        }
     }
 }
 

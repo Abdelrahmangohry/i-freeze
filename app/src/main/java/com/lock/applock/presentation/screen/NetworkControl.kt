@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -25,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,12 +35,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.lock.applock.R
-import com.lock.applock.presentation.activity.WhiteListItem
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.NetworkMonitoringService
 import com.lock.applock.ui.theme.Shape
@@ -57,9 +53,11 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
 
     val isWifiBlocked = preference.load("WifiBlocked", false)
     val wifiBlockedState = remember { mutableStateOf(isWifiBlocked) }
-
+Log.d("abdo", "Wifibloced ${wifiBlockedState.value}")
     val isWifiWhiteListing = preference.load("WifiWhite", false)
     val wifiAllowedState = remember { mutableStateOf(isWifiWhiteListing) }
+    Log.d("abdo", "wifiAllowedState ${wifiAllowedState.value}")
+
 
     var wifiListAllowed = preference.getList("WifiList")
 

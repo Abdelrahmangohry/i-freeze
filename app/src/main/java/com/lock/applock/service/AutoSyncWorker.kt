@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
+import androidx.compose.ui.text.toLowerCase
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.CoroutineWorker
@@ -32,6 +33,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
     private val preference = PreferencesGateway(context)
     private val allowedList = preference.getList("allowedWifiList")
+    private val blockedWebsites = preference.getList("blockedWebsites")
 
     private val deviceId = preference.load("responseID", "")
     private val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
@@ -74,16 +76,34 @@ class AutoSyncWorker @AssistedInject constructor(
             if (response.isSuccessful) {
                 val cloudList = response.body()?.data?.exceptionWifi
                 val newList = ArrayList<String>().apply {
-                    addAll(cloudList!!)
-                    addAll(allowedList)
+                    addAll(allowedList ?: emptyList())
+                    cloudList?.forEach{it
+                        if (it !in allowedList.orEmpty()) {
+                            add(it.toLowerCase().trim())
+                        }
+                    }
                 }
+
                 Log.d("abdo", "newList $newList")
                 preference.saveList("allowedWifiList", newList)
                 Log.d("abdo", "Cloud listssss: $cloudList")
 
+
+                val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
+                val newBlockedWebSites = ArrayList<String>().apply {
+                    addAll(blockedWebsites)
+                    cloudBlockedWebSites?.forEach {it
+                        if (it !in blockedWebsites){
+                            add(it.toLowerCase().trim())
+                        }
+                    }
+                }
+                preference.saveList("blockedWebsites", newBlockedWebSites)
+
                 Log.d("abdo", "Result success")
+
                 val responseData = response.body()?.data?.device
-                var blockedAppsList = response.body()?.data?.blockedApps
+                val blockedAppsList = response.body()?.data?.blockedApps
                 if (blockedAppsList != null) { // Check for null
                     preference.saveList("blockedAppsList", blockedAppsList)
                     Log.d("abdo", "this is blocked apps list $blockedAppsList")

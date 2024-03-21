@@ -99,17 +99,19 @@ fun autoSyncButton() {
                 if (isLocationPermissionGranted(context)) {
                     if (isLocationEnabled.value) {
                         Log.d("abdo", "autoSync started")
+                        Toast.makeText(context, "Data Synchronized Successfully", Toast.LENGTH_SHORT).show()
 //                        context.stopService(serviceIntent)
                         startAutoSyncWorker(context)
                     }
                     else {
                         Log.d("abdo", "i must start service")
 //                        context.startService(serviceIntent)
-                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                        Toast.makeText(context, "Please Enable Location", Toast.LENGTH_SHORT).show()
+//                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     }
 
                 } else {
-                    Log.d("abdo", "i must request granted permission")
+                    Toast.makeText(context, "Give I-Freeze The Location Permission", Toast.LENGTH_SHORT).show()
                     ActivityCompat.requestPermissions(
                         context as Activity,
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),

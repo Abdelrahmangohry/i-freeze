@@ -18,6 +18,6 @@
     <string name="refresh_btn">Refresh button</string>
     <string name="go_btn">GO button</string>
     <string name="settings_btn">Setting Button</string>
-    <string name="web">Web</string>
+    <string name="web">Web Access</string>
     <string name="back_arrow_description">back arrow\n</string>
 </resources>

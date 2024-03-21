@@ -58,6 +58,8 @@ class AccessibilityServices : AccessibilityService() {
         serviceIntent = Intent(applicationContext, ForceCloseService::class.java)
 
         blockedAppList = preferenc.getList("blockedAppsList")
+        Log.d("abdo", "this issssss blockedAppList $blockedAppList")
+
         allowedAppsList = preferenc.getList("allowedAppsList")
 
         // Get the package name from the AccessibilityEvent
@@ -66,7 +68,7 @@ class AccessibilityServices : AccessibilityService() {
 
         // Check if the event type is a window state change
         if (p0?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            Log.d("islam", "packageName $packageName")
+            Log.d("abdo", "packageName $packageName")
             if (!isLauncherPackage(packageName)) {
 //                 Handle the app based on lists using the ForceCloseService intent
                 handleAppBasedOnLists(packageName, serviceIntent)
@@ -93,6 +95,7 @@ class AccessibilityServices : AccessibilityService() {
         serviceScope.launch {
             // Ensure appsList is initialized before proceeding
             blockedAppList = preferenc.getList("blockedAppsList")
+            Log.d("abdo", " blockedAppList $blockedAppList")
             allowedAppsList = preferenc.getList("allowedAppsList")
         val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
         val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
@@ -112,6 +115,8 @@ class AccessibilityServices : AccessibilityService() {
         }
         val isAppInWhitelist = isAppInList(packageName, allowedAppsList)
         val isAppInBlacklist = isAppInList(packageName, blockedAppList)
+            Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
+
         Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
         Log.d("abdo", "isBlacklistEnabled $isBlacklistEnabled")
 //        Log.d("islam", "isAppInBlacklist $isAppInBlacklist")
@@ -137,8 +142,11 @@ class AccessibilityServices : AccessibilityService() {
 
     private fun isSystemApp(packageName: String): Boolean {
         val packageManager = applicationContext.packageManager
+        Log.d("abdo", "system app 0 $packageManager")
+
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            Log.d("abdo", "system app 1 $packageInfo")
             return packageInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
         } catch (e: PackageManager.NameNotFoundException) {
         }

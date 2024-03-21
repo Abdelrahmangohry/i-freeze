@@ -1,5 +1,6 @@
 package com.lock.applock.presentation.activity
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -60,10 +61,13 @@ fun WhiteListWifi(navController: NavController) {
             wifiHeaderMenu(onBackPressed = { navController.popBackStack() })
             var allowedWifi by remember { mutableStateOf(preference.getList("allowedWifiList") ?: mutableListOf()) }
 
-            SimpleInputTextWithButtonWifi(onValidMacSubmit = { value ->
-                allowedWifi = allowedWifi.toMutableList().apply { add(value.lowercase().trim()) }
-                preference.saveList("allowedWifiList", allowedWifi)
-            })
+            SimpleInputTextWithButtonWifi(
+                onValidMacSubmit = { value ->
+                    allowedWifi = allowedWifi.toMutableList().apply { add(value.lowercase().trim()) }
+                    preference.saveList("allowedWifiList", allowedWifi)
+                },
+                allowedWifi = allowedWifi // Pass allowedWifi here
+            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
@@ -117,7 +121,7 @@ fun listItemWifi(wifi: WifiData, onDeleteClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit) {
+fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit, allowedWifi: List<String>) {
     val text2 = remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -145,9 +149,11 @@ fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit) {
 
         Button(
             onClick = {
-                onValidMacSubmit(text2.value)
-                text2.value = "" // Clear the text field
-
+                val wifiName = text2.value.trim()
+                if (wifiName.isNotEmpty() && wifiName !in allowedWifi) {
+                    onValidMacSubmit(wifiName)
+                    text2.value = "" // Clear the text field
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()

@@ -92,7 +92,9 @@ fun BlackListWeb(navController: NavController) {
                 blockedWebsites =
                     blockedWebsites.toMutableList().apply { add(value.lowercase().trim()) }
                 preference.saveList("blockedWebsites", blockedWebsites)
-            })
+            },
+                blockedWebsites = blockedWebsites
+            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
@@ -105,6 +107,7 @@ fun BlackListWeb(navController: NavController) {
                             blockedWebsites =
                                 blockedWebsites.filterNot { it == website }.toMutableList()
                             preference.saveList("blockedWebsites", blockedWebsites)
+
                         }
                     )
                 }
@@ -152,7 +155,7 @@ fun ListItemBlackListWeb(webSites: WebSiteBlack, onDeleteClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit) {
+fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit, blockedWebsites: List<String>) {
     val text2 = remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -180,8 +183,8 @@ fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit) {
         Button(
             onClick = {
                 val newWebsite = text2.value.trim()
-                if (newWebsite.isNotEmpty()) {
-                    onValidMacSubmit(text2.value)
+                if (newWebsite.isNotEmpty() && newWebsite !in blockedWebsites) {
+                    onValidMacSubmit(newWebsite)
                     text2.value = "" // Clear the text field
                 }
             },
