@@ -10,9 +10,6 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import com.lock.data.dp.AppsDB
-import com.lock.data.model.AppsModel
-import com.lock.di.RoomDBModule
 import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +18,7 @@ import kotlinx.coroutines.launch
 
 
 class AccessibilityServices : AccessibilityService() {
+    private val TAG = "Mgd"
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var blockedAppList: List<String>
     private lateinit var allowedAppsList: List<String>
@@ -31,17 +29,31 @@ class AccessibilityServices : AccessibilityService() {
     private lateinit var preferenc: PreferencesGateway
     private fun isLauncherPackage(packageName: String): Boolean {
         val launcherPackages = listOf(
-            "com.android.launcher", "com.google.android.launcher",
-            "com.miui.home", "com.hihonor.android.launcher",
-            "com.huawei.android.launcher", "com.sec.android.app.launcher",
-            "com.samsung.android.app.launcher", "com.lock.applock","com.oppo.launcher","com.coloros.launcher"
+            "com.android.launcher",
+            "com.google.android.launcher",
+            "com.miui.home",
+            "com.hihonor.android.launcher",
+            "com.huawei.android.launcher",
+            "com.sec.android.app.launcher",
+            "com.samsung.android.app.launcher",
+            "com.lock.applock",
+            "com.oppo.launcher",
+            "com.coloros.launcher"
         )
         return launcherPackages.any { packageName.startsWith(it) }
     }
-    private fun isBrowsers(packageName: String):Boolean{
-        val browserList= listOf("com.android.chrome", "org.mozilla.firefox", "com.microsoft.emmx",
-            "com.opera.browser", "com.brave.browser", "com.sec.android.app.sbrowser", "com.UCMobile.intl")
-        return browserList.any{packageName.startsWith(it)}
+
+    private fun isBrowsers(packageName: String): Boolean {
+        val browserList = listOf(
+            "com.android.chrome",
+            "org.mozilla.firefox",
+            "com.microsoft.emmx",
+            "com.opera.browser",
+            "com.brave.browser",
+            "com.sec.android.app.sbrowser",
+            "com.UCMobile.intl"
+        )
+        return browserList.any { packageName.startsWith(it) }
     }
 
     //////////////
@@ -97,48 +109,50 @@ class AccessibilityServices : AccessibilityService() {
             blockedAppList = preferenc.getList("blockedAppsList")
             Log.d("abdo", " blockedAppList $blockedAppList")
             allowedAppsList = preferenc.getList("allowedAppsList")
-        val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
-        val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
-        val isBrowsersEnabled = preferenc.load("Browsers", false) ?: false
+            val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
+            val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
+            val isBrowsersEnabled = preferenc.load("Browsers", false) ?: false
 //        if (!::blockedAppList.isInitialized){
 //            serviceScope.launch {
 //                blockedAppList = preferenc.getList("blockedAppsList")
 //            }
 //        }
-        val isAppInBrowserList = isBrowsers(packageName)
-        if (isBrowsersEnabled && isAppInBrowserList){
-            applicationContext.startService(serviceIntent)
-            killAppAndShowOverlay(packageName)
-        }else{
-            applicationContext.stopService(serviceIntent)
-            removeOverlayAndViewBinding()
-        }
-        val isAppInWhitelist = isAppInList(packageName, allowedAppsList)
-        val isAppInBlacklist = isAppInList(packageName, blockedAppList)
-            Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
-
-        Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
-        Log.d("abdo", "isBlacklistEnabled $isBlacklistEnabled")
-//        Log.d("islam", "isAppInBlacklist $isAppInBlacklist")
-        if (isWhitelistEnabled) {
-            if (isSystemApp(packageName)) {
-                Log.d("abdo", "this is system app ${isSystemApp(packageName)}")
-                applicationContext.stopService(serviceIntent)
-                removeOverlayAndViewBinding()
-            } else if (!isAppInWhitelist){
-                Log.d("abdo", "else is white list enabled")
+            val isAppInBrowserList = isBrowsers(packageName)
+            if (isBrowsersEnabled && isAppInBrowserList) {
                 applicationContext.startService(serviceIntent)
                 killAppAndShowOverlay(packageName)
+            } else {
+                applicationContext.stopService(serviceIntent)
+                removeOverlayAndViewBinding()
             }
-        } else if (isBlacklistEnabled && isAppInBlacklist) {
-            Log.d("abdo", "blacklist enabled")
-            applicationContext.startService(serviceIntent)
-            killAppAndShowOverlay(packageName)
-        } else {
-            applicationContext.stopService(serviceIntent)
-            removeOverlayAndViewBinding()
+            val isAppInWhitelist = isAppInList(packageName, allowedAppsList)
+            val isAppInBlacklist = isAppInList(packageName, blockedAppList)
+
+            Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
+
+            Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
+            Log.d("abdo", "isBlacklistEnabled $isBlacklistEnabled")
+//        Log.d("islam", "isAppInBlacklist $isAppInBlacklist")
+            if (isWhitelistEnabled) {
+                if (isSystemApp(packageName)) {
+                    Log.d("abdo", "this is system app ${isSystemApp(packageName)}")
+                    applicationContext.stopService(serviceIntent)
+                    removeOverlayAndViewBinding()
+                } else if (!isAppInWhitelist) {
+                    Log.d("abdo", "else is white list enabled")
+                    applicationContext.startService(serviceIntent)
+                    killAppAndShowOverlay(packageName)
+                }
+            } else if (isBlacklistEnabled && isAppInBlacklist) {
+                Log.d("abdo", "blacklist enabled")
+                applicationContext.startService(serviceIntent)
+                killAppAndShowOverlay(packageName)
+            } else {
+                applicationContext.stopService(serviceIntent)
+                removeOverlayAndViewBinding()
+            }
         }
-    }}
+    }
 
     private fun isSystemApp(packageName: String): Boolean {
         val packageManager = applicationContext.packageManager
@@ -149,6 +163,7 @@ class AccessibilityServices : AccessibilityService() {
             Log.d("abdo", "system app 1 $packageInfo")
             return packageInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
         } catch (e: PackageManager.NameNotFoundException) {
+            Log.d(TAG, "isSystemApp: $e")
         }
         return false
     }
@@ -173,7 +188,14 @@ class AccessibilityServices : AccessibilityService() {
     }
 
     private fun isAppInList(packageName: String, list: List<String>): Boolean {
-        return list.any { it == packageName }
+        var isFound = false;
+        for (item in list) {
+            if (packageName.contains(item)) {
+                isFound = true
+                break
+            }
+        }
+        return isFound
     }
 
     override fun onInterrupt() {

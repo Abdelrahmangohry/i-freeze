@@ -36,7 +36,6 @@
  import androidx.compose.ui.graphics.Color
  import androidx.compose.ui.platform.LocalContext
  import androidx.compose.ui.res.colorResource
- import androidx.compose.ui.text.TextStyle
  import androidx.compose.ui.text.font.FontWeight
  import androidx.compose.ui.unit.dp
  import androidx.compose.ui.unit.sp
@@ -53,8 +52,9 @@
  @OptIn(ExperimentalMaterial3Api::class)
  @Composable
  fun BlackList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController) {
+
      val preference = PreferencesGateway(LocalContext.current)
-     var blockedApps by remember { mutableStateOf(preference.getList("blockedAppsList") ?: mutableListOf()) }
+     var blockedApps by remember { mutableStateOf(preference.getList("blockedAppsList")) }
 
      val selectedApps = remember { mutableSetOf<String>() }
      var inputText by remember { mutableStateOf("") }
@@ -108,7 +108,7 @@
                  onClick = {
                      if (inputText.isNotEmpty()) {
                          blockedApps =
-                             blockedApps.toMutableList().apply { add(inputText.lowercase().trim()) }
+                             blockedApps.toMutableList().apply { add(inputText.lowercase().trim()) } as ArrayList<String>
                          preference.saveList("blockedAppsList", blockedApps)
                          inputText = ""
                      }
@@ -130,7 +130,7 @@
                          // Handle delete action here
                          blockedApps = blockedApps.toMutableList().apply {
                              remove(blockedApps[index])
-                         }
+                         } as ArrayList<String>
                          preference.saveList("blockedAppsList", blockedApps)
                      }
                  )
