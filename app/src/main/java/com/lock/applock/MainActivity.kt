@@ -133,6 +133,21 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        when (PackageManager.PERMISSION_GRANTED) {
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_NETWORK_STATE
+            )
+            -> {
+
+            }
+            else -> {
+                requestPermissionLauncher.launch(
+                    android.Manifest.permission.ACCESS_NETWORK_STATE
+                )
+            }
+        }
+
 
         setContent {
             window.statusBarColor = getColor(R.color.blue)
