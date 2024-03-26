@@ -24,6 +24,7 @@ class NetworkMonitoringService : Service() {
 
     // Helper for managing notifications
     private val helper by lazy { NotificationHelper(this) }
+
     var serviceApp: ForceCloseWifi? = null
     lateinit var preferenc: PreferencesGateway
     private lateinit var wifiManager: WifiManager

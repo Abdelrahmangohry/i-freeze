@@ -1,5 +1,6 @@
 package com.lock.applock.service
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,8 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.lock.applock.presentation.activity.isLocationEnabled
+import com.lock.data.model.AppsModel
 import com.lock.data.model.LocationDataAddress
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
@@ -37,6 +40,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
     private val deviceId = preference.load("responseID", "")
     private val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+    private val locationService = Intent(context, LocationService::class.java)
 
     private val installedAppsList = getInstalledApps(context)
 
@@ -46,6 +50,12 @@ class AutoSyncWorker @AssistedInject constructor(
 
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
+            if (!isLocationEnabled(applicationContext)){
+                applicationContext.startService(locationService)
+            }
+            else{
+                applicationContext.stopService(locationService)
+            }
             val address = locationData.address ?: "Unknown Address"
             val latitude = locationData.latitude ?: 0.0
             val longitude = locationData.longitude ?: 0.0
@@ -134,12 +144,14 @@ class AutoSyncWorker @AssistedInject constructor(
                 }
             } else {
                 Log.d("abdo", "Retrying....")
+                applicationContext.startService(serviceIntent)
             }
         } catch (e: Exception) {
             if (e is UnknownHostException) {
                 Log.d("abdo", "Retrying....")
             } else {
                 Log.e("abdo", "Error", e)
+                applicationContext.startService(serviceIntent)
 //                val errorData = Data.Builder().putString("error", e.toString()).build()
 //                Result.failure(errorData)
             }
@@ -169,14 +181,18 @@ fun startAutoSyncWorker(context: Context) {
     )
 }
 
+@SuppressLint("SuspiciousIndentation")
 fun getInstalledApps(context: Context): List<String> {
-    val packageManager: PackageManager = context.packageManager
-    val installedApplications =
-        packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-
-    val appNames = mutableListOf<String>()
-    for (appInfo in installedApplications) {
-        appNames.add(appInfo.packageName)
+    val apps = mutableListOf<String>()
+    val pk = context.packageManager
+    val intent = Intent(Intent.ACTION_MAIN, null)
+    intent.addCategory(Intent.CATEGORY_LAUNCHER)
+    val resolveInfoList = pk.queryIntentActivities(intent, 0)
+    for (resolveInfo in resolveInfoList) {
+        val activityInfo = resolveInfo.activityInfo
+        val name = activityInfo.loadLabel(pk).toString()
+        val packageName = activityInfo.packageName
+            apps.add(name)
     }
-    return appNames
+    return apps
 }

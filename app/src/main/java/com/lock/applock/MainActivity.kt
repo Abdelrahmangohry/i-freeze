@@ -74,6 +74,7 @@ import com.lock.applock.presentation.activity.isLocationPermissionGranted
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.AdminService
 import com.lock.applock.service.AutoSyncWorker
+import com.lock.applock.service.ForceCloseWifi
 import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.AppLockTheme
 import com.lock.applock.ui.theme.Shape
@@ -104,19 +105,10 @@ class MainActivity : ComponentActivity() {
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, AdminService::class.java)
         preferenc = PreferencesGateway(applicationContext)
-//var locationPermissionRequestCode = 456
-//
-//        if (!isLocationPermissionGranted(this)) {
-//            ActivityCompat.requestPermissions(
-//                this,
-//                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                locationPermissionRequestCode
-//            )
-//        }
-//
-//        if (!isLocationEnabled(this)) {
-//            startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-//        }
+        val locationService = Intent(this, LOCATION_SERVICE::class.java)
+
+
+
 
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
@@ -124,8 +116,15 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
                 Log.d("abdo", "autoSync started")
+                if(!isLocationEnabled(this)){
+                    startService(locationService)
+                }
+                else{
+                    stopService(locationService)
                 startAutoSyncWorker(this)
+                }
             }
+
             else -> {
                 requestPermissionLauncher.launch(
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -134,20 +133,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.ACCESS_NETWORK_STATE
-            )
-            -> {
 
-            }
-            else -> {
-                requestPermissionLauncher.launch(
-                    android.Manifest.permission.ACCESS_NETWORK_STATE
-                )
-            }
-        }
         setContent {
             window.statusBarColor = getColor(R.color.blue)
             AppLockTheme {
@@ -202,7 +188,7 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    fun webActivity(){
+    fun webActivity() {
         this.startActivity(
             Intent(
                 this,
@@ -389,15 +375,14 @@ fun GeneralOptionsUI(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: () -> Unit) {
-    ElevatedCard(elevation = CardDefaults.cardElevation(
-        defaultElevation = 8.dp
-    ),
+    ElevatedCard(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        ),
         onClick = { onClick() },
         modifier = Modifier
             .padding(bottom = 12.dp)
             .fillMaxWidth()
-
-
     )
     {
         Box(
@@ -407,51 +392,45 @@ fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: ()
         ) {
             Row(
                 modifier = Modifier
-                    .padding(vertical = 10.dp, horizontal = 14.dp)
+                    .padding(vertical = 18.dp, horizontal = 14.dp)
                     .fillMaxWidth(),
 
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(shape = Shape.medium)
+                        .background(Color(0xFF175AA8))
                 ) {
-                Row(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(shape = Shape.medium)
-                            .background(Color(0xFF175AA8))
-                    ) {
-                        Icon(
-                            painter = painterResource(id = icon),
-                            contentDescription = "",
-                            tint = Color.White,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(9.dp))
-                    Column(
-                        modifier = Modifier.offset(y = (2).dp)
-                    ) {
-                        Text(
-                            text = mainText,
-                            color = Color(0xFF175AA8),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-
-                        Text(
-                            text = subText,
-                            color = Color(0xFF175AA8),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold,
-
-                            )
-                    }
-
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = "",
+                        tint = Color.White,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
 
+                Spacer(modifier = Modifier.width(9.dp))
+                Column(
+                    modifier = Modifier.offset(y = (2).dp)
+                ) {
+                    Text(
+                        text = mainText,
+                        color = Color(0xFF175AA8),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    Text(
+                        text = subText,
+                        color = Color(0xFF175AA8),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+
+                        )
+                }
 
             }
         }

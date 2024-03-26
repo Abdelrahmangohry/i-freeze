@@ -16,22 +16,32 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,7 +52,10 @@ import com.lock.applock.GeneralSettingItem
 import com.lock.applock.R
 import com.lock.applock.SupportItem
 import com.lock.applock.service.AdminService
+import com.lock.applock.service.ForceCloseWifi
+import com.lock.applock.service.LocationService
 import com.lock.applock.service.NetworkMonitoringService
+import com.lock.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
 
 
@@ -87,13 +100,16 @@ fun GeneralOptionsUISetting(
     activity:Activity,
 ) {
     val context = LocalContext.current
-    val preference = PreferencesGateway(LocalContext.current)
+    val preference = PreferencesGateway(context)
     val deviceManager = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(activity, AdminService::class.java)
     val isAdminPermissionGranted = remember { mutableStateOf(false) }
+
     val isLocationEnabled = preference.load("locationBlocked", false)
     val locationBlockedState = remember { mutableStateOf(isLocationEnabled) }
-    val serviceIntent = Intent(LocalContext.current, NetworkMonitoringService::class.java)
+    Log.d("abdo", "locationBlockedState ${locationBlockedState.value}")
+    val serviceIntent   = Intent(context, LocationService::class.java)
+
     val launcher =  rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult ={
@@ -181,77 +197,100 @@ fun GeneralOptionsUISetting(
                 }
             }
         )
-        locationBlockedState.value?.let {
-            com.lock.applock.presentation.screen.ToggleSettingItem(
-                icon = R.drawable.wifi_icon,
+
+            toggleLocationSettingItem(
+                icon = R.drawable.locationoff,
                 mainText = "Block Location",
                 subText = "Click Here to Block Location",
-                isChecked = it,
-                onCheckedChange = { isChecked ->
-                    Log.d("abdo", "i out here")
-                    locationBlockedState.value = it
-                    preference.update("locationBlocked", isChecked)
-                    locationBlockedState.value = isChecked
-                    if (isChecked) {
+                isChecked = locationBlockedState.value!!,
+                onCheckedChange = { isCheckedLocation ->
+
+                    preference.update("locationBlocked", isCheckedLocation)
+                    locationBlockedState.value = isCheckedLocation
+                    if (isCheckedLocation && !isLocationEnabled(context)) {
                         Log.d("abdo", "i am here")
                         context.startService(serviceIntent)
                     } else {
                         Log.d("abdo", "iam in else")
                         context.stopService(serviceIntent)
                     }
-//                    if (wifiAllowedState.value!!) {
-//                        preference.update("WifiWhite", it)
-//                        wifiAllowedState.value = it
-//                    }
                 },
                 onClick = {
 
                 }
             )
-        }
     }
 }
 
 
 @Composable
-fun SupportOptionsUISetting(moveToApps: () -> Unit, kisko: () -> Unit) {
-    Column(
+fun toggleLocationSettingItem(
+    icon: Int,
+    mainText: String,
+    subText: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onClick: () -> Unit
+) {
+    Card(
         modifier = Modifier
-            .padding(horizontal = 14.dp)
-            .padding(top = 10.dp)
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .background(Color(0xFF175AA8))
     ) {
-        Text(
-            text = "Support",
-            color = SecondaryColor,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
+        Box(
             modifier = Modifier
-                .padding(vertical = 8.dp)
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "Phone Applications ",
-            onClick = {
-                moveToApps()
+                .fillMaxWidth()
+                .background(Color.White)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+
+                // Icon
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(shape = Shape.medium)
+                        .background(Color(0xFF175AA8))
+                ) {
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = "",
+                        tint = Color.White,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                // Text and Switch
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = mainText,
+                        color = Color(0xFF175AA8),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    Text(
+                        text = subText,
+                        color = Color(0xFF175AA8),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+
+                        )
+                }
+
+                Switch(
+                    checked = isChecked,
+                    onCheckedChange = onCheckedChange,
+
+                    )
             }
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "kiosk mode",
-            onClick = {
-                kisko()
-            }
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "Privacy Policy",
-            onClick = {}
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "About",
-            onClick = {}
-        )
+        }
+
     }
 }
 

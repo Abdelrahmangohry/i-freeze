@@ -56,6 +56,7 @@ import androidx.navigation.NavController
 import com.lock.applock.R
 import com.lock.applock.presentation.AuthViewModel
 import com.lock.applock.presentation.nav_graph.Screen
+import com.lock.applock.service.LocationService
 import com.lock.applock.service.NetworkMonitoringService
 import com.lock.data.model.DeviceDTO
 import com.patient.data.cashe.PreferencesGateway
@@ -94,7 +95,7 @@ fun licenseKey(
     val preference = PreferencesGateway(LocalContext.current)
     var deviceId = preference.load("responseID", "")
     val syncTime = preference.load("time", "")
-    val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+    val serviceIntent = Intent(context, LocationService::class.java)
 //    var isVisible by remember { mutableStateOf(preference.load("IsVisible", true)) }
 //    var showActivationBox = remember { mutableStateOf(preference.load("BoxShowed", true)) }
 
@@ -220,12 +221,7 @@ fun licenseKey(
 
                             context.startService(serviceIntent)
                     }
-//                    else {
-//                            context.stopService(serviceIntent)
-//                        }
-//                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 
-//// location permission check
                     if (text.isEmpty()) {
                         Toast.makeText(
                             context,

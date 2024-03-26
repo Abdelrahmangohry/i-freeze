@@ -56,6 +56,7 @@ import androidx.navigation.NavController
 import com.lock.applock.R
 import com.lock.applock.presentation.AppsViewModel
 import com.lock.applock.presentation.nav_graph.Screen
+import com.lock.applock.service.LocationService
 import com.lock.applock.service.NetworkMonitoringService
 import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.Shape
@@ -80,13 +81,13 @@ fun autoSyncButton() {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
     val deviceId = preference.load("responseID", "")
-    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    val isLocationEnabled = remember { mutableStateOf(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) }
 
+
+    val locationService = Intent(context, LocationService::class.java)
     Row(modifier = Modifier.padding(15.dp)) {
         Button(
             onClick = {
-                val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+
                 val locationPermissionRequestCode = 456
                 if (deviceId.isNullOrEmpty()) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
@@ -97,15 +98,15 @@ fun autoSyncButton() {
                     return@Button
                 }
                 if (isLocationPermissionGranted(context)) {
-                    if (isLocationEnabled.value) {
+                    if (isLocationEnabled(context)) {
                         Log.d("abdo", "autoSync started")
                         Toast.makeText(context, "Data Synchronized Successfully", Toast.LENGTH_SHORT).show()
-//                        context.stopService(serviceIntent)
+                        context.stopService(locationService)
                         startAutoSyncWorker(context)
                     }
                     else {
                         Log.d("abdo", "i must start service")
-//                        context.startService(serviceIntent)
+                        context.startService(locationService)
                         Toast.makeText(context, "Please Enable Location", Toast.LENGTH_SHORT).show()
 //                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     }

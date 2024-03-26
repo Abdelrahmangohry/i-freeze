@@ -46,20 +46,20 @@ import com.patient.data.cashe.PreferencesGateway
 
 @Composable
 fun NetworkControl(navController: NavController, wifi: () -> Unit) {
-
-    val preference = PreferencesGateway(LocalContext.current)
-    val serviceIntent = Intent(LocalContext.current, NetworkMonitoringService::class.java)
     val context = LocalContext.current
+    val preference = PreferencesGateway(context)
+    val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+
 
     val isWifiBlocked = preference.load("WifiBlocked", false)
     val wifiBlockedState = remember { mutableStateOf(isWifiBlocked) }
-Log.d("abdo", "Wifibloced ${wifiBlockedState.value}")
+    Log.d("abdo", "Wifiblocked state ${wifiBlockedState.value}")
     val isWifiWhiteListing = preference.load("WifiWhite", false)
     val wifiAllowedState = remember { mutableStateOf(isWifiWhiteListing) }
     Log.d("abdo", "wifiAllowedState ${wifiAllowedState.value}")
 
 
-    var wifiListAllowed = preference.getList("WifiList")
+    val wifiListAllowed = preference.getList("WifiList")
 
     Column(
         modifier = Modifier
@@ -78,11 +78,11 @@ Log.d("abdo", "Wifibloced ${wifiBlockedState.value}")
                 mainText = "Block WiFi",
                 subText = "Click Here to Block WiFi",
                 isChecked = it,
-                onCheckedChange = {isChecked ->
-
-                    wifiBlockedState.value = it
+                onCheckedChange = { isChecked ->
                     preference.update("WifiBlocked", isChecked)
                     wifiBlockedState.value = isChecked
+                    Log.d("abdo", "wifiBlockedState.value = is checked ${wifiBlockedState.value}")
+
                     if (isChecked) {
                         Log.d("abdo", "i am here")
                         context.startService(serviceIntent)
@@ -117,8 +117,7 @@ Log.d("abdo", "Wifibloced ${wifiBlockedState.value}")
                 if (wifiAllowedState.value!! && wifiListAllowed.isEmpty()) {
                     Log.d("abdo", "i am here")
                     context.startService(serviceIntent)
-                }
-                else {
+                } else {
                     Log.d("abdo", "iam in else")
                     context.stopService(serviceIntent)
                 }
@@ -184,57 +183,53 @@ fun ToggleSettingItem(
                 .background(Color.White)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
 
-
+                // Icon
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(shape = Shape.medium)
+                        .background(Color(0xFF175AA8))
                 ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(16.dp)
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = "",
+                        tint = Color.White,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                // Text and Switch
+                Column(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    // Icon
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(shape = Shape.medium)
-                            .background(Color(0xFF175AA8))
-                    ) {
-                        Icon(
-                            painter = painterResource(id = icon),
-                            contentDescription = "",
-                            tint = Color.White,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    // Text and Switch
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = mainText,
-                            color = Color(0xFF175AA8),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
+                    Text(
+                        text = mainText,
+                        color = Color(0xFF175AA8),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
 
-                        Text(
-                            text = subText,
-                            color = Color(0xFF175AA8),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold,
-
-                            )
-                    }
-
-                    Switch(
-                        checked = isChecked,
-                        onCheckedChange = onCheckedChange,
+                    Text(
+                        text = subText,
+                        color = Color(0xFF175AA8),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
 
                         )
                 }
+
+                Switch(
+                    checked = isChecked,
+                    onCheckedChange = onCheckedChange,
+
+                    )
             }
         }
+
     }
 }
 
@@ -291,7 +286,7 @@ fun isMacAddress(mac: String): Boolean {
 
 @Composable
 fun HeaderMenu(onBackPressed: () -> Unit) {
-    Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -299,14 +294,15 @@ fun HeaderMenu(onBackPressed: () -> Unit) {
                 tint = Color.White
             )
         }
-    Text(
-        text = "Network Control",
-        color = Color.White,
+        Text(
+            text = "Network Control",
+            color = Color.White,
 
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 55.dp),
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 22.sp
-    )
-}}
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 55.dp),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 22.sp
+        )
+    }
+}
