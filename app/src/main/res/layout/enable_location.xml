@@ -16,6 +16,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
+        android:paddingBottom="20dp"
         >
 
         <TextView
@@ -25,19 +26,24 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:padding="40dp"
+            android:paddingTop="30dp"
+            android:paddingBottom="15dp"
             android:text="You Have to Enable Location"
             android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!--        <TextView-->
-        <!--            android:layout_width="80dp"-->
-        <!--            android:layout_height="55dp"-->
-        <!--            android:id="@+id/finish"-->
-        <!--            android:layout_margin="10dp"-->
-        <!--            android:background="@color/blue" />-->
+        <Button
+            android:id="@+id/tryHereAgain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/grayButton"
+            android:textColor="@color/white"
+            android:paddingHorizontal="10dp"
+            android:text="Try Again"
+
+            />
 
 
     </LinearLayout>

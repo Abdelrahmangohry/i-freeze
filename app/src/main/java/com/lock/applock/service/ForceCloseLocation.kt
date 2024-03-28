@@ -10,7 +10,10 @@
     import android.view.LayoutInflater
     import android.view.View
     import android.view.WindowManager
+    import android.widget.Button
+    import android.widget.Toast
     import com.lock.applock.R
+    import com.lock.applock.presentation.activity.isLocationEnabled
 
     class ForceCloseLocation : Service() {
         private var chatHeadView: View? = null
@@ -44,6 +47,22 @@
             // Ensure proper handling of overlay permissions and user experience
             chatHeadView = LayoutInflater.from(this).inflate(R.layout.enable_location, null)
             windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val locationService = Intent(this, LOCATION_SERVICE::class.java)
+
+            val btn = chatHeadView?.findViewById<Button>(R.id.tryHereAgain)
+            btn?.setOnClickListener {
+                if (isLocationEnabled(this)) {
+                    Log.d("button", "this is from the button")
+                    stopService(locationService)
+                    startAutoSyncWorker(this)
+                }
+                else {
+                    Log.d("button", "this is from the button stop service")
+                    startService(locationService)
+                    Toast.makeText(applicationContext, "Please Enable Location", Toast.LENGTH_SHORT).show()
+//                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+            }
             // Configure layout parameters for the overlay
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,

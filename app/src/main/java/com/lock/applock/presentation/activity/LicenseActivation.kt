@@ -218,8 +218,13 @@ fun licenseKey(
 
                     }
                     if (!isLocationEnabled(context)) {
-
+                        if (!Settings.canDrawOverlays(context)) {
+                            val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                            myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(myIntent)
+                        }else{
                             context.startService(serviceIntent)
+                        }
                     }
 
                     if (text.isEmpty()) {
