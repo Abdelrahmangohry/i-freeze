@@ -42,8 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.lock.applock.R
+import com.lock.applock.ui.theme.Shape
 
 import com.patient.data.cashe.PreferencesGateway
+
 @Composable
 fun WhiteListWifi(navController: NavController) {
     val preference = PreferencesGateway(LocalContext.current)
@@ -59,11 +61,16 @@ fun WhiteListWifi(navController: NavController) {
                 .padding(top = 10.dp),
         ) {
             wifiHeaderMenu(onBackPressed = { navController.popBackStack() })
-            var allowedWifi by remember { mutableStateOf(preference.getList("allowedWifiList") ?: mutableListOf()) }
+            var allowedWifi by remember {
+                mutableStateOf(
+                    preference.getList("allowedWifiList") ?: mutableListOf()
+                )
+            }
 
             SimpleInputTextWithButtonWifi(
                 onValidMacSubmit = { value ->
-                    allowedWifi = allowedWifi.toMutableList().apply { add(value.lowercase().trim()) }
+                    allowedWifi =
+                        allowedWifi.toMutableList().apply { add(value.lowercase().trim()) }
                     preference.saveList("allowedWifiList", allowedWifi)
                 },
                 allowedWifi = allowedWifi // Pass allowedWifi here
@@ -88,35 +95,43 @@ fun WhiteListWifi(navController: NavController) {
         }
     }
 }
+
 data class WifiData(val name: String, val icon: String? = null)
 
 @Composable
 fun listItemWifi(wifi: WifiData, onDeleteClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().background(Color.White),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF175AA8))
+            .padding(horizontal = 10.dp)
+            .padding(top = 10.dp),
+        shape = Shape.large
     ) {
-        Card(modifier = Modifier.fillMaxWidth().padding(8.dp).height(40.dp)) {
-            Row(
-                modifier = Modifier.fillMaxSize().background(colorResource(R.color.GreenButtons)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = wifi.name, modifier = Modifier.weight(1f).padding(8.dp), color = Color.Black)
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.size(30.dp).padding(end = 8.dp),
+        Row(
+            modifier = Modifier.fillMaxSize().background(Color.White).padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = wifi.name,
+                modifier = Modifier.weight(1f).padding(8.dp),
+                color = Color.Black
+            )
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(30.dp).padding(end = 8.dp),
 
-                    ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.Black
-                    )
-                }
+                ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.Black
+                )
             }
         }
     }
-    Spacer(modifier = Modifier.padding(bottom = 10.dp))
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,7 +182,7 @@ fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit, allowedWif
 
 @Composable
 fun wifiHeaderMenu(onBackPressed: () -> Unit) {
-    Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -176,12 +191,12 @@ fun wifiHeaderMenu(onBackPressed: () -> Unit) {
             )
         }
         Text(
-            text = "WiFi Whitelist",
+            text = "Whitelisted WiFi",
             color = Color.White,
 
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top=6.dp,bottom = 30.dp).padding(horizontal = 55.dp),
+                .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 55.dp),
             fontWeight = FontWeight.ExtraBold,
             fontSize = 22.sp
         )

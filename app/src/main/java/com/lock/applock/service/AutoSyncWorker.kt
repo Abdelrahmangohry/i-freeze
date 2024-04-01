@@ -93,34 +93,28 @@ class AutoSyncWorker @AssistedInject constructor(
                         }
                     }
                 }
-
-                Log.d("abdo", "newList $newList")
                 preference.saveList("allowedWifiList", newList)
-                Log.d("abdo", "Cloud listssss: $cloudList")
 
 
                 val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
-                val newBlockedWebSites = ArrayList<String>().apply {
-                    addAll(blockedWebsites)
-                    cloudBlockedWebSites?.forEach {it
-                        if (it !in blockedWebsites){
+                val newListCloudBlockedWebSites = ArrayList<String>().apply {
+                    addAll(blockedWebsites ?: emptyList())
+                    cloudBlockedWebSites?.forEach{it
+                        if (it !in blockedWebsites.orEmpty()) {
                             add(it.toLowerCase().trim())
                         }
                     }
                 }
-                preference.saveList("blockedWebsites", newBlockedWebSites)
-
-                Log.d("abdo", "Result success")
+                preference.saveList("blockedWebsites", newListCloudBlockedWebSites)
 
                 val responseData = response.body()?.data?.device
                 val blockedAppsList = response.body()?.data?.blockedApps
                 if (blockedAppsList != null) { // Check for null
                     preference.saveList("blockedAppsList", blockedAppsList)
                     Log.d("abdo", "this is blocked apps list $blockedAppsList")
-                } else {
-                    Log.d("abdo", "Blocked apps list is null")
                 }
-                var allowedAppsList = response.body()?.data?.exceptionApps
+
+                val allowedAppsList = response.body()?.data?.exceptionApps
                 if (allowedAppsList != null) { // Check for null
                     preference.saveList("allowedAppsList", allowedAppsList)
                     Log.d("abdo", "this is blocked apps list $allowedAppsList")

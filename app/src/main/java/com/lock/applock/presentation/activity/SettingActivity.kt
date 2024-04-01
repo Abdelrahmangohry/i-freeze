@@ -199,9 +199,9 @@ fun GeneralOptionsUISetting(
         )
 
             toggleLocationSettingItem(
-                icon = R.drawable.locationoff,
-                mainText = "Block Location",
-                subText = "Click Here to Block Location",
+                icon = R.drawable.map,
+                mainText = "Track Location",
+                subText = "Click Here to Track The Location",
                 isChecked = locationBlockedState.value!!,
                 onCheckedChange = { isCheckedLocation ->
 

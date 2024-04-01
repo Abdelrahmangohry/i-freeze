@@ -283,7 +283,7 @@ fun Demo_DropDownMenu(navController: NavController) {
 @Composable
 fun HeaderLogo() {
     val logoImage = painterResource(id = R.drawable.ifreezelogo22)
-    val fontAlger = FontFamily(Font(R.font.alger, FontWeight.Light))
+    val fontAlger = FontFamily(Font(R.font.arial, FontWeight.Bold))
 
     Column(
         modifier = Modifier.fillMaxWidth(),

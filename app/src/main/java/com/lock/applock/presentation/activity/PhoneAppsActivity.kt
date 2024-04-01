@@ -73,7 +73,7 @@
                  )
              }
              Text(
-                 text = "Blacklist Applications",
+                 text = "Blacklisted Application",
                  color = Color.White,
                  modifier = Modifier
                      .fillMaxWidth()

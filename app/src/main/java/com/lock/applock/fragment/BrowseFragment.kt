@@ -80,8 +80,8 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
                 binding.webView.loadUrl("file:///android_asset/error_page.html")
 
             } else {
-
-                binding.webView.loadUrl("https://www.google.com/search?q=$urlNew")
+                binding.webView.loadUrl("https://$urlNew")
+//                binding.webView.loadUrl("https://www.google.com/search?q=$urlNew")
 
             }
 

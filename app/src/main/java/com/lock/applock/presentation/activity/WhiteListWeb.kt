@@ -40,8 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.lock.applock.R
+import com.lock.applock.ui.theme.Shape
 
 import com.patient.data.cashe.PreferencesGateway
+
 @Composable
 fun WhiteListWeb(navController: NavController) {
     val preference = PreferencesGateway(LocalContext.current)
@@ -57,10 +59,15 @@ fun WhiteListWeb(navController: NavController) {
                 .padding(top = 10.dp),
         ) {
             webWhiteListTitle(onBackPressed = { navController.popBackStack() })
-            var allowedWebsites by remember { mutableStateOf(preference.getList("allowedWebsites") ?: mutableListOf()) }
+            var allowedWebsites by remember {
+                mutableStateOf(
+                    preference.getList("allowedWebsites") ?: mutableListOf()
+                )
+            }
 
             textWithButtonWhiteListWebView(onValidMacSubmit = { value ->
-                allowedWebsites = allowedWebsites.toMutableList().apply { add(value.lowercase().trim()) }
+                allowedWebsites =
+                    allowedWebsites.toMutableList().apply { add(value.lowercase().trim()) }
                 preference.saveList("allowedWebsites", allowedWebsites)
             })
 
@@ -72,7 +79,8 @@ fun WhiteListWeb(navController: NavController) {
                         webSitesWhite = WebSiteWhiteList(name = website),
                         onDeleteClick = {
                             // Handle delete action here
-                            allowedWebsites = allowedWebsites.filterNot { it == website }.toMutableList()
+                            allowedWebsites =
+                                allowedWebsites.filterNot { it == website }.toMutableList()
                             preference.saveList("allowedWebsites", allowedWebsites)
                         }
                     )
@@ -89,31 +97,38 @@ data class WebSiteWhiteList(val name: String, val icon: String? = null)
 
 @Composable
 fun ListItemWhiteListWeb(webSitesWhite: WebSiteWhiteList, onDeleteClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().background(Color.White),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF175AA8))
+            .padding(horizontal = 10.dp)
+            .padding(top = 10.dp),
+        shape = Shape.large
     ) {
-        Card(modifier = Modifier.fillMaxWidth().padding(8.dp).height(40.dp)) {
-            Row(
-                modifier = Modifier.fillMaxSize().background(colorResource(R.color.GreenButtons)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = webSitesWhite.name, modifier = Modifier.weight(1f).padding(8.dp), color = Color.Black)
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.size(30.dp).padding(end = 8.dp),
+        Row(
+            modifier = Modifier.fillMaxSize().background(Color.White).padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = webSitesWhite.name,
+                modifier = Modifier.weight(1f).padding(8.dp),
+                color = Color.Black
+            )
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(30.dp).padding(end = 8.dp),
 
-                    ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.Black
-                    )
-                }
+                ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.Black
+                )
             }
         }
     }
-    Spacer(modifier = Modifier.padding(bottom = 10.dp))
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,9 +176,10 @@ fun textWithButtonWhiteListWebView(onValidMacSubmit: (String) -> Unit) {
         }
     }
 }
+
 @Composable
 fun webWhiteListTitle(onBackPressed: () -> Unit) {
-    Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -172,7 +188,7 @@ fun webWhiteListTitle(onBackPressed: () -> Unit) {
             )
         }
         Text(
-            text = "Whitelist Websites",
+            text = "Whitelisted Websites",
             color = Color.White,
 
             modifier = Modifier

@@ -63,6 +63,7 @@ import com.lock.applock.presentation.AppsViewModel
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.presentation.screen.SimpleInputTextWithButton
 import com.lock.applock.presentation.screen.isMacAddress
+import com.lock.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
 import java.security.KeyStore.Entry
 
@@ -88,11 +89,12 @@ fun BlackListWeb(navController: NavController) {
                 )
             }
 
-            textWithButtonBlackListWebView(onValidMacSubmit = { value ->
-                blockedWebsites =
-                    blockedWebsites.toMutableList().apply { add(value.lowercase().trim()) }
-                preference.saveList("blockedWebsites", blockedWebsites)
-            },
+            textWithButtonBlackListWebView(
+                onValidMacSubmit = { value ->
+                    blockedWebsites =
+                        blockedWebsites.toMutableList().apply { add(value.lowercase().trim()) }
+                    preference.saveList("blockedWebsites", blockedWebsites)
+                },
                 blockedWebsites = blockedWebsites
             )
 
@@ -122,40 +124,46 @@ data class WebSiteBlack(val name: String, val icon: String? = null)
 
 @Composable
 fun ListItemBlackListWeb(webSites: WebSiteBlack, onDeleteClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().background(Color.White),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF175AA8))
+            .padding(horizontal = 10.dp)
+            .padding(top = 10.dp),
+        shape = Shape.large
     ) {
-        Card(modifier = Modifier.fillMaxWidth().padding(8.dp).height(40.dp)) {
-            Row(
-                modifier = Modifier.fillMaxSize().background(colorResource(R.color.RedButtons)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = webSites.name,
-                    modifier = Modifier.weight(1f).padding(8.dp),
-                    color = Color.Black
-                )
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.size(30.dp).padding(end = 8.dp),
+        Row(
+            modifier = Modifier.fillMaxSize().background(Color.White).padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = webSites.name,
+                modifier = Modifier.weight(1f).padding(8.dp),
+                color = Color.Black
+            )
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(30.dp).padding(end = 8.dp),
 
-                    ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.Black
-                    )
-                }
+                ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.Black
+                )
             }
         }
+
     }
-    Spacer(modifier = Modifier.padding(bottom = 10.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun textWithButtonBlackListWebView(onValidMacSubmit: (String) -> Unit, blockedWebsites: List<String>) {
+fun textWithButtonBlackListWebView(
+    onValidMacSubmit: (String) -> Unit,
+    blockedWebsites: List<String>
+) {
     val text2 = remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -210,7 +218,7 @@ fun webBlackListTitle(onBackPressed: () -> Unit) {
             )
         }
         Text(
-            text = "Blacklist Websites",
+            text = "Blacklisted Websites",
             color = Color.White,
 
             modifier = Modifier

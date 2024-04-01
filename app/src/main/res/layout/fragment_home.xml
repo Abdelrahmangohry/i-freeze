@@ -23,8 +23,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:text="@string/web"
+        android:textStyle="bold"
         android:textColor="@color/white"
-        android:fontFamily="@font/alger"
         android:textSize="30sp"
         app:layout_constraintTop_toBottomOf="@id/weblogo"
         />

@@ -88,7 +88,7 @@ fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavCont
                 )
             }
             Text(
-                text = "Whitelist Applications",
+                text = "Whitelisted Applications",
                 color = Color.White,
                 modifier = Modifier
                     .fillMaxWidth()
