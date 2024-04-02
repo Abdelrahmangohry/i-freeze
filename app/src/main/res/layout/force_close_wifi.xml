@@ -26,7 +26,7 @@
             android:focusable="true"
             android:gravity="center"
             android:padding="40dp"
-            android:text="You Have to Close WiFi or Enable Location"
+            android:text="@string/wifiBlockMessage"
             android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -20,4 +20,5 @@
     <string name="settings_btn">Setting Button</string>
     <string name="web">Web Access</string>
     <string name="back_arrow_description">back arrow\n</string>
+    <string name="wifiBlockMessage">Wi-Fi connection is not permitted by your organization.\n\nPlease disable Wi-Fi connection and ensure that mobile location is enabled.</string>
 </resources>
