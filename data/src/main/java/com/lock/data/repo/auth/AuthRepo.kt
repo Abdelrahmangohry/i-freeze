@@ -7,6 +7,7 @@ import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
 import com.lock.data.model.MobileResponse
+import com.lock.data.model.Untrusted
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
@@ -19,5 +20,6 @@ interface AuthRepo {
 
     suspend fun userLocation(location: LocationModel): Response<Location>
     suspend fun mobileApps(apps: MobileApps): Response<MobileResponse>
+    suspend fun unTrustedApps(): Response<Untrusted>
 
 }

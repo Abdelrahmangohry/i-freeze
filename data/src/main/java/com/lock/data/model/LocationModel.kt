@@ -59,11 +59,19 @@ data class MobileResponse(
 )
 
 
-
-
-
 data class LocationDataAddress(
     val address: String?,
     val latitude: Double?,
     val longitude: Double?
+)
+
+//Untrusted Applications
+data class Untrusted(
+    val data: List<UntrustedApps>,
+    val status: Int,
+    val message: String
+)
+data class UntrustedApps(
+    val id: String,
+    val appName : String
 )

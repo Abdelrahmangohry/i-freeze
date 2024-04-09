@@ -128,7 +128,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.Scan.route
         ) {
-            Scan(navController = navController)
+            Scan(navController = navController, lifecycle)
         }
     }
 }

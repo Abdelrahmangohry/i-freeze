@@ -7,10 +7,12 @@ import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
 import com.lock.data.model.MobileResponse
+import com.lock.data.model.Untrusted
 import com.lock.data.remote.UserApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.Response
+import retrofit2.http.GET
 import javax.inject.Inject
 
 class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
@@ -36,5 +38,7 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
         return api.mobileApps(apps)
     }
 
-
+    override suspend fun unTrustedApps(): Response<Untrusted> {
+        return api.unTrustedApps()
+    }
 }

@@ -6,6 +6,7 @@ import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
 import com.lock.data.model.MobileResponse
+import com.lock.data.model.Untrusted
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -38,6 +39,10 @@ interface UserApi {
     suspend fun mobileApps(
         @Body apps: MobileApps
     ) : Response<MobileResponse>
+
+    @GET("api/UntrustedApps")
+    suspend fun unTrustedApps(
+    ) : Response<Untrusted>
 
 }
 

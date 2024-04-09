@@ -272,7 +272,6 @@ fun Login(
                         color = Color.White,
                         textDecoration = TextDecoration.None // To remove underline
                     )
-
                 )
 
                 Box(

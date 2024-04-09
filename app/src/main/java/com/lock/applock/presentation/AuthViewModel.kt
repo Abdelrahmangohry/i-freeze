@@ -9,6 +9,7 @@ import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
 import com.lock.data.model.MobileResponse
+import com.lock.data.model.Untrusted
 import com.lock.domain.AuthUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -22,6 +23,7 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
     var _locationFlow: MutableLiveData<Response<Location>> = MutableLiveData()
 
     var _mobileAppsFlow: MutableLiveData<Response<MobileResponse>> = MutableLiveData()
+    var _untrustedAppsFlow: MutableLiveData<Response<Untrusted>> = MutableLiveData()
 
 
     fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
@@ -37,7 +39,6 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         viewModelScope.launch {
             val response3 = useCase.newUpdateUserData(deviceId)
             _newFlow.value = response3
-
         }
     }
 
@@ -53,6 +54,14 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         viewModelScope.launch {
             val response5 = useCase.mobileApps(apps)
             _mobileAppsFlow.value = response5
+
+        }
+    }
+
+    fun unTrustedApps() {
+        viewModelScope.launch {
+            val response6 = useCase.unTrustedApps()
+            _untrustedAppsFlow.value = response6
 
         }
     }

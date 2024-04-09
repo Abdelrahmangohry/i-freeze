@@ -49,8 +49,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import com.lock.applock.presentation.AppsViewModel
+import com.lock.applock.presentation.AuthViewModel
+import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
@@ -58,13 +62,15 @@ import java.io.InputStreamReader
 
 
 @Composable
-fun Scan(navController: NavController) {
+fun Scan(navController: NavController, lifecycle: LifecycleOwner) {
     val context = LocalContext.current
     val viewModel: AppsViewModel = hiltViewModel()
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val sharedPreferences = PreferencesGateway(context)
     val newList = viewModel.articlesItems.collectAsState().value
     val compareList = mutableListOf("YouTube", "Settings", "Play Storee", "Facebook")
     val appsNamesList = newList.map { it.appName }
-    val fakeAppsList = compareList.filter { appsNamesList.contains(it) }
+
     var currentProgress by remember { mutableStateOf(0f) }
     var loading by remember { mutableStateOf(false) }
     var clicked by remember { mutableStateOf(false) }
@@ -72,9 +78,21 @@ fun Scan(navController: NavController) {
     val lockedScreen = hasLockScreenPassword(context)
     val rooted = isDeviceRooted()
     val developerOptionsEnabled = areDeveloperOptionsEnabled(context)
-    Log.d("abdo", "Developer options are enabled: $developerOptionsEnabled")
-    Log.d("abdo", "Device is rooted: $rooted")
-    Log.d("abdo", "loading $loading")
+    var untrustedAppsList by remember { mutableStateOf(sharedPreferences.getList(("UntrustedApps"))) }
+    authViewModel.unTrustedApps()
+    authViewModel._untrustedAppsFlow.observe(lifecycle, Observer { response ->
+        if (response.isSuccessful) {
+            val appNames: List<String> = response.body()?.data?.map { it.appName } ?: emptyList()
+            sharedPreferences.saveList("UntrustedApps", appNames)
+            Log.d("abdo", "this is Untrusted app ${appNames}")
+        } else {
+            Log.d("abdo", "this is Untrusted app error ${response.errorBody()}")
+
+        }
+    })
+    val fakeAppsList = compareList.filter { untrustedAppsList.contains(it) }
+    Log.d("abdo", "fakeAppsList: $fakeAppsList")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -151,7 +169,12 @@ fun Scan(navController: NavController) {
                             } else {
                                 "Scan"
                             }
-                            Text(buttonText, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                            Text(
+                                buttonText,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 50.sp
+                            )
                         }
                     }
                 }
@@ -184,13 +207,21 @@ fun UntrustedApps(title: String, appsList: List<String>) {
         Text(
             text = title,
             color = Color.White,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            fontWeight = FontWeight.Bold
         )
-        Icon(
-            imageVector = Icons.Default.Cancel,
-            contentDescription = null,
-            tint = Color.Red
-        )
+        if (appsList.isEmpty()) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = Color.Green
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Cancel,
+                contentDescription = null,
+                tint = Color.Red
+            )
+        }
     }
 
     LazyColumn(

@@ -7,6 +7,7 @@ import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
 import com.lock.data.model.MobileResponse
+import com.lock.data.model.Untrusted
 import com.lock.data.repo.auth.AuthRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -37,5 +38,11 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
     ) : Response<MobileResponse> {
         return repo.mobileApps(apps)
     }
+
+    suspend fun unTrustedApps(
+    ) : Response<Untrusted> {
+        return repo.unTrustedApps()
+    }
+
 
 }
