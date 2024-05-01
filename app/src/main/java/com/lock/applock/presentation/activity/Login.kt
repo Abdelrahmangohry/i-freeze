@@ -237,22 +237,38 @@ fun Login(
                             }
 
                             if (username.value.text.isNotEmpty() && password.value.text.isNotEmpty()) {
-                                auth.signInWithEmailAndPassword(
-                                    username.value.text.toString().trim(),
-                                    password.value.text.toString().trim()
-                                ).addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        Log.d("islam", "Login :${task.isSuccessful} ")
-                                        navController.navigate(Screen.Home.route)
-                                    } else {
-                                        Toast.makeText(
+                                if(username.value.text.trim() == "Admin" &&
+                                    password.value.text.trim() == "HoNay@242"){
+
+                                    Toast.makeText(
                                             context,
-                                            task.exception?.localizedMessage,
+                                            "Login Successfully",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                    }
-
+                                    navController.navigate(Screen.Home.route)
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Incorrect Username or Password",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
+//                                auth.signInWithEmailAndPassword(
+//                                    username.value.text.toString().trim(),
+//                                    password.value.text.toString().trim()
+//                                ).addOnCompleteListener { task ->
+//                                    if (task.isSuccessful) {
+//                                        Log.d("islam", "Login :${task.isSuccessful} ")
+//                                        navController.navigate(Screen.Home.route)
+//                                    } else {
+//                                        Toast.makeText(
+//                                            context,
+//                                            task.exception?.localizedMessage,
+//                                            Toast.LENGTH_SHORT
+//                                        ).show()
+//                                    }
+//
+//                                }
                             }
                         },
                         modifier = Modifier.padding(horizontal = 50.dp),

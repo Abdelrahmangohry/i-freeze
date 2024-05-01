@@ -175,6 +175,9 @@ fun HeaderLogo() {
 
 @Composable
 fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
+    val context = LocalContext.current
+    val preference = PreferencesGateway(context)
+    val deviceId = preference.load("responseID", "")
 
     Column(
         modifier = Modifier
@@ -187,7 +190,16 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
             mainText = "System Scan",
             subText = "Keep Your Mobile Secure and Initiate a Scan",
             onClick = {
-                navController.navigate(Screen.Scan.route)
+
+                if (deviceId.isNullOrEmpty()) {
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                        .show()
+                    return@GeneralSettingItem
+                }
+                else{
+                    navController.navigate(Screen.Scan.route)
+                }
+
 
             }
         )
@@ -197,7 +209,16 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
             mainText = "Web Access",
             subText = "Roam within the Allowed Boundaries",
             onClick = {
-                webStart()
+
+                if (deviceId.isNullOrEmpty()) {
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                        .show()
+                    return@GeneralSettingItem
+                }
+                else{
+                    webStart()
+                }
+
             }
         )
 
@@ -206,8 +227,14 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
             mainText = "Admin Login",
             subText = "Administrative Privileges",
             onClick = {
-                navController.navigate(Screen.Home.route)
-
+                if (deviceId.isNullOrEmpty()) {
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                        .show()
+                    return@GeneralSettingItem
+                }
+                else{
+                    navController.navigate(Screen.Login.route)
+                }
             }
         )
 
@@ -217,8 +244,33 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
             mainText = "Settings",
             subText = "Configure App Permissions",
             onClick = {
-                navController.navigate(Screen.Setting.route)
+                if (deviceId.isNullOrEmpty()) {
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                        .show()
+                    return@GeneralSettingItem
+                }
+                else{
+                    navController.navigate(Screen.Setting.route)
+                }
 
+
+            }
+        )
+
+        GeneralSettingItem(
+            icon = R.drawable.contact_support,
+            mainText = "Support",
+            subText = "Contact Us",
+            onClick = {
+
+                if (deviceId.isNullOrEmpty()) {
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                        .show()
+                    return@GeneralSettingItem
+                }
+                else{
+                      navController.navigate(Screen.SupportTeam.route)
+                }
             }
         )
 

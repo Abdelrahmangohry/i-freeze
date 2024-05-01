@@ -65,7 +65,10 @@ fun WhiteListWifi(navController: NavController) {
                 mutableStateOf(
                     preference.getList("allowedWifiList") ?: mutableListOf()
                 )
+
             }
+
+            Log.d("abdo", "allowedWifiList $allowedWifi")
 
             SimpleInputTextWithButtonWifi(
                 onValidMacSubmit = { value ->
@@ -87,6 +90,7 @@ fun WhiteListWifi(navController: NavController) {
                             // Handle delete action here
                             allowedWifi = allowedWifi.filterNot { it == wifi }.toMutableList()
                             preference.saveList("allowedWifiList", allowedWifi)
+                            Log.d("abdo", "allowWifi $allowedWifi")
                         }
                     )
                 }

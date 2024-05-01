@@ -21,6 +21,7 @@ import com.lock.applock.presentation.activity.WebManager
 import com.lock.applock.presentation.activity.WhiteList
 import com.lock.applock.presentation.activity.WhiteListWeb
 import com.lock.applock.presentation.activity.WhiteListWifi
+import com.lock.applock.presentation.activity.ui.theme.SupportTeam
 import com.lock.applock.presentation.screen.HomeScreen
 import com.lock.applock.presentation.screen.NetworkControl
 import com.lock.applock.presentation.screen.SplashScreen
@@ -100,6 +101,12 @@ fun NavGraphBuilder.homeNavGraph(
             route = Screen.Setting.route
         ) {
             SettingScreen(navController = navController,activity)
+        }
+
+        composable(
+            route = Screen.SupportTeam.route
+        ) {
+            SupportTeam(navController = navController)
         }
 
         composable(

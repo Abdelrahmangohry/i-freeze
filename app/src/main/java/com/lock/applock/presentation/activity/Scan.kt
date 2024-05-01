@@ -4,6 +4,7 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -68,7 +69,7 @@ fun Scan(navController: NavController, lifecycle: LifecycleOwner) {
     val authViewModel: AuthViewModel = hiltViewModel()
     val sharedPreferences = PreferencesGateway(context)
     val newList = viewModel.articlesItems.collectAsState().value
-    val compareList = mutableListOf("YouTube", "Settings", "Play Storee", "Facebook")
+
     val appsNamesList = newList.map { it.appName }
 
     var currentProgress by remember { mutableStateOf(0f) }
@@ -78,19 +79,27 @@ fun Scan(navController: NavController, lifecycle: LifecycleOwner) {
     val lockedScreen = hasLockScreenPassword(context)
     val rooted = isDeviceRooted()
     val developerOptionsEnabled = areDeveloperOptionsEnabled(context)
-    var untrustedAppsList by remember { mutableStateOf(sharedPreferences.getList(("UntrustedApps"))) }
-    authViewModel.unTrustedApps()
-    authViewModel._untrustedAppsFlow.observe(lifecycle, Observer { response ->
-        if (response.isSuccessful) {
-            val appNames: List<String> = response.body()?.data?.map { it.appName } ?: emptyList()
-            sharedPreferences.saveList("UntrustedApps", appNames)
-            Log.d("abdo", "this is Untrusted app ${appNames}")
-        } else {
-            Log.d("abdo", "this is Untrusted app error ${response.errorBody()}")
+    val untrustedAppsList by remember { mutableStateOf(sharedPreferences.getList(("UntrustedApps"))) }
 
-        }
-    })
-    val fakeAppsList = compareList.filter { untrustedAppsList.contains(it) }
+    if(isNetworkAvailable(context)){
+        authViewModel.unTrustedApps()
+        authViewModel._untrustedAppsFlow.observe(lifecycle, Observer { response ->
+            if (response.isSuccessful) {
+                val appNames: List<String> = response.body()?.data?.map { it.appName } ?: emptyList()
+                sharedPreferences.saveList("UntrustedApps", appNames)
+                Log.d("abdo", "this is Untrusted app $appNames")
+            } else {
+                Log.d("abdo", "this is Untrusted app error ${response.errorBody()}")
+
+            }
+        })
+    }
+    else{
+        Toast.makeText(context, "Please Enable Internet Connection", Toast.LENGTH_SHORT).show()
+    }
+
+
+    val fakeAppsList = appsNamesList.filter { untrustedAppsList.contains(it) }
     Log.d("abdo", "fakeAppsList: $fakeAppsList")
 
     Column(
@@ -349,3 +358,4 @@ fun backArrow(onBackPressed: () -> Unit) {
         }
     }
 }
+

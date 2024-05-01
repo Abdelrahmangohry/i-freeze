@@ -10,6 +10,8 @@ sealed class Screen(val route:String){
     object Home : Screen(route = "home_screen")
     object GeneralWebView : Screen(route = "general_web_view")
     object Setting : Screen(route = "setting_screen")
+
+    object SupportTeam : Screen(route = "support_team")
     object LicenseActivation : Screen(route = "license_activation")
     object WhiteList : Screen(route = "withe_list_screen")
     object BlackList : Screen(route = "black_list_screen")
