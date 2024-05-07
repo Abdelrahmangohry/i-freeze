@@ -57,7 +57,7 @@ object NetWorkModule {
 
     @Provides
     fun providesBaseUrl(): String {
-        return "https://security.flothers.com:8443/"
+        return "https://central.flothers.com:8443/"
     }
     @Provides
     fun provideRetrofitClient(

@@ -44,16 +44,33 @@ class AutoSyncWorker @AssistedInject constructor(
 
     private val installedAppsList = getInstalledApps(context)
 
+    private var failureCount = preference.load("failureCount", 0)
+    private var isFailureLimitReached = preference.load("isFailureLimitReached", false)
+    private val licenseID = preference.load("licenseID", "")
+
     init {
+        failureCount = preference.load("failureCount", 0)!!
         LocationHelper.getLocation(context, this)
     }
 
+
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
-            if (!isLocationEnabled(applicationContext)){
-                applicationContext.startService(locationService)
+
+            if (failureCount!! >= 2) {
+                isFailureLimitReached = true
+                preference.save("isFailureLimitReached", isFailureLimitReached!!)
             }
             else{
+                isFailureLimitReached = false
+                preference.save("isFailureLimitReached", isFailureLimitReached!!)
+            }
+
+
+
+            if (!isLocationEnabled(applicationContext)) {
+                applicationContext.startService(locationService)
+            } else {
                 applicationContext.stopService(locationService)
             }
             val address = locationData.address ?: "Unknown Address"
@@ -68,6 +85,8 @@ class AutoSyncWorker @AssistedInject constructor(
             )
 
 
+
+
             val response = api.newUpdateUserData(deviceId)
             val userLocationResponse = api.userLocation(userLocation)
 
@@ -75,19 +94,34 @@ class AutoSyncWorker @AssistedInject constructor(
                 deviceId = deviceId,
                 appName = installedAppsList
             )
+
+            val checklicenseData = api.checkLicenseData(licenseID!!)
+            if (checklicenseData.isSuccessful){
+                val responseBody = checklicenseData.body()?.toString()
+                val isLicenseValid = responseBody?.toBoolean() ?: false // Convert string to boolean
+                preference.save("validLicense", isLicenseValid)
+                Log.d("abdo", "Is license valid: $isLicenseValid")
+            }
+
             val mobileApplications = api.mobileApps(mobileApplication)
             if (mobileApplications.isSuccessful) {
                 Log.d("abdo", "mobile application sent successfully")
+                failureCount = 0
+                Log.d("abdo", "failureCount from try $failureCount")
+                preference.save("failureCount", failureCount!!)
+                Log.d("abdo", "isFailureLimitReached from try $isFailureLimitReached")
             }
 
             if (userLocationResponse.isSuccessful) {
                 Log.d("abdo", "User location updated successfully")
+
             }
             if (response.isSuccessful) {
                 val cloudList = response.body()?.data?.exceptionWifi
                 val newList = ArrayList<String>().apply {
                     addAll(allowedList ?: emptyList())
-                    cloudList?.forEach{it
+                    cloudList?.forEach {
+                        it
                         if (it !in allowedList.orEmpty()) {
                             add(it.toLowerCase().trim())
                         }
@@ -99,7 +133,8 @@ class AutoSyncWorker @AssistedInject constructor(
                 val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
                 val newListCloudBlockedWebSites = ArrayList<String>().apply {
                     addAll(blockedWebsites ?: emptyList())
-                    cloudBlockedWebSites?.forEach{it
+                    cloudBlockedWebSites?.forEach {
+                        it
                         if (it !in blockedWebsites.orEmpty()) {
                             add(it.toLowerCase().trim())
                         }
@@ -135,20 +170,30 @@ class AutoSyncWorker @AssistedInject constructor(
                     }
                     preference.update("WifiWhite", it.whiteListWiFi)
                     preference.save("time", it.time)
+
                 }
             } else {
-                Log.d("abdo", "Retrying....")
+                Log.d("abdo", "Retrying.... before ")
                 applicationContext.startService(serviceIntent)
             }
         } catch (e: Exception) {
-            if (e is UnknownHostException) {
-                Log.d("abdo", "Retrying....")
-            } else {
-                Log.e("abdo", "Error", e)
-                applicationContext.startService(serviceIntent)
+
+            Log.e("abdo", "Error", e)
+            failureCount = failureCount!! + 1
+            preference.save("failureCount", failureCount!!)
+            if (failureCount!! >= 2) {
+                isFailureLimitReached = true
+                preference.save("isFailureLimitReached", isFailureLimitReached!!)
+            }else{
+                isFailureLimitReached = false
+                preference.save("isFailureLimitReached", isFailureLimitReached!!)
+            }
+            applicationContext.startService(serviceIntent)
 //                val errorData = Data.Builder().putString("error", e.toString()).build()
 //                Result.failure(errorData)
-            }
+            Log.d("abdo", "failureCount from error $failureCount")
+            Log.d("abdo", "isFailureLimitReached $isFailureLimitReached")
+
         }
     }
 
@@ -162,7 +207,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
 fun startAutoSyncWorker(context: Context) {
     // Create a periodic work request for AutoSyncWorker
-    val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(360, TimeUnit.MINUTES)
+    val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(15, TimeUnit.MINUTES)
         .setInitialDelay(1, TimeUnit.SECONDS)
         .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
         .build()
@@ -186,7 +231,7 @@ fun getInstalledApps(context: Context): List<String> {
         val activityInfo = resolveInfo.activityInfo
         val name = activityInfo.loadLabel(pk).toString()
         val packageName = activityInfo.packageName
-            apps.add(name)
+        apps.add(name)
     }
     return apps
 }

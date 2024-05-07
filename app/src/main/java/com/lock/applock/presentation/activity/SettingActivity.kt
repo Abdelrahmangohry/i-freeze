@@ -108,7 +108,8 @@ fun GeneralOptionsUISetting(
     val isLocationEnabled = preference.load("locationBlocked", false)
     val locationBlockedState = remember { mutableStateOf(isLocationEnabled) }
     Log.d("abdo", "locationBlockedState ${locationBlockedState.value}")
-    val serviceIntent   = Intent(context, LocationService::class.java)
+
+    val serviceIntent = Intent(context, LocationService::class.java)
 
     val launcher =  rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -209,6 +210,7 @@ fun GeneralOptionsUISetting(
                     locationBlockedState.value = isCheckedLocation
                     if (isCheckedLocation && !isLocationEnabled(context)) {
                         Log.d("abdo", "i am here")
+                        Log.d("abdo", "isCheckedLocation $isCheckedLocation")
                         context.startService(serviceIntent)
                     } else {
                         Log.d("abdo", "iam in else")

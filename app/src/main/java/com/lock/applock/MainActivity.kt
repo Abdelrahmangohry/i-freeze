@@ -3,7 +3,6 @@ package com.lock.applock
 import LightPrimaryColor
 import SecondaryColor
 import android.Manifest
-import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
@@ -29,7 +28,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -58,23 +56,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.work.BackoffPolicy
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.compse.ui.SetupNavGraph
 import com.lock.applock.presentation.activity.MainWebActivity
 import com.lock.applock.presentation.activity.isLocationEnabled
-import com.lock.applock.presentation.activity.isLocationPermissionGranted
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.AdminService
-import com.lock.applock.service.AutoSyncWorker
-import com.lock.applock.service.ForceCloseWifi
 import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.AppLockTheme
 import com.lock.applock.ui.theme.Shape
@@ -136,14 +129,14 @@ class MainActivity : ComponentActivity() {
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.ACCESS_NETWORK_STATE
+                Manifest.permission.ACCESS_NETWORK_STATE
             )
             -> {
 
             }
             else -> {
                 requestPermissionLauncher.launch(
-                    android.Manifest.permission.ACCESS_NETWORK_STATE
+                    Manifest.permission.ACCESS_NETWORK_STATE
                 )
             }
         }

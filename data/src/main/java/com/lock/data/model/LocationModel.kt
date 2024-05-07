@@ -20,6 +20,7 @@ data class DeviceConfigurations(
     val browsers : Boolean,
     val blockListApps : Boolean,
     val whiteListApps : Boolean,
+    val licenseId : String,
     val time: String,
 
 
@@ -74,4 +75,18 @@ data class Untrusted(
 data class UntrustedApps(
     val id: String,
     val appName : String
+)
+
+
+//Send Ticket
+data class TicketMessageBody(
+    val deviceId: String,
+    val name: String,
+    val email: String,
+    val phone: String,
+    val description: String
+)
+
+data class TicketResponse (
+    var data    : String,
 )

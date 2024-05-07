@@ -7,6 +7,8 @@ import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
 import com.lock.data.model.MobileResponse
+import com.lock.data.model.TicketMessageBody
+import com.lock.data.model.TicketResponse
 import com.lock.data.model.Untrusted
 import com.lock.data.repo.auth.AuthRepo
 import kotlinx.coroutines.flow.Flow
@@ -44,5 +46,15 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
         return repo.unTrustedApps()
     }
 
+    suspend fun  sendTicket(
+        message: TicketMessageBody
+    ) : Response<TicketResponse> {
+        return repo.sendTicket(message)
+    }
 
+    suspend fun  checkLicenseData(
+        licenseID: String
+    ) : Response<Boolean> {
+        return repo.checkLicenseData(licenseID)
+    }
 }

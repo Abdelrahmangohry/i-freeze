@@ -2,17 +2,12 @@ package com.lock.applock.presentation.activity
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.LocationManager
-import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,23 +20,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -49,31 +51,109 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.lock.applock.MainActivity
 import com.lock.applock.R
 import com.lock.applock.presentation.AppsViewModel
 import com.lock.applock.presentation.nav_graph.Screen
 import com.lock.applock.service.LocationService
-import com.lock.applock.service.NetworkMonitoringService
 import com.lock.applock.service.startAutoSyncWorker
 import com.lock.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
 
 @Composable
-fun AdminAccess(navController: NavController, webStart: () -> Unit, viewModel: AppsViewModel = hiltViewModel()) {
+fun AdminAccess(
+    navController: NavController,
+    webStart: () -> Unit,
+    viewModel: AppsViewModel = hiltViewModel()
+) {
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF175AA8))
     ) {
-        autoSyncButton()
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+
+        ) {
+            autoSyncButton()
+            dropDownOptions(navController)
+        }
         HeaderLogo()
         GeneralOptionsUI(navController, webStart)
     }
+}
+
+@Composable
+fun dropDownOptions(navController: NavController) {
+
+    var expanded by remember { mutableStateOf(false) }
+    val handler = LocalUriHandler.current
+    val context = LocalContext.current
+    val preference = PreferencesGateway(context)
+    val deviceId = preference.load("responseID", "")
+    var isFailureLimitReached = preference.load("isFailureLimitReached", false)
+    var isLicenseValid = preference.load("validLicense", true)
+
+        IconButton(
+            onClick = { expanded = !expanded },
+
+            ) {
+            Icon(
+                Icons.Default.MoreVert,
+                contentDescription = "Options",
+                tint = Color.White,
+                modifier = Modifier.size(30.dp)
+            )
+
+            DropdownMenu(
+
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Settings") },
+                    onClick = {
+                        if (deviceId.isNullOrEmpty()) {
+                            Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                                .show()
+                            return@DropdownMenuItem
+                        } else if (isFailureLimitReached!! || !isLicenseValid!!) {
+                            Toast.makeText(
+                                context,
+                                "License Failed Please Enable Internet Connection or Contact Support Team",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                            return@DropdownMenuItem
+                        } else {
+                            navController.navigate(Screen.Setting.route)
+                        }
+
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Help") },
+                    onClick = {
+                        handler.openUri("https://ifreeze.flothers.com/expert/")
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("License Activation") },
+                    onClick = {
+                        navController.navigate(Screen.LicenseActivation.route)
+                    }
+                )
+            }
+        }
+
+
 }
 
 @Composable
@@ -100,11 +180,14 @@ fun autoSyncButton() {
                 if (isLocationPermissionGranted(context)) {
                     if (isLocationEnabled(context)) {
                         Log.d("abdo", "autoSync started")
-                        Toast.makeText(context, "Data Synchronized Successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Data Synchronized Successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         context.stopService(locationService)
                         startAutoSyncWorker(context)
-                    }
-                    else {
+                    } else {
                         Log.d("abdo", "i must start service")
                         context.startService(locationService)
                         Toast.makeText(context, "Please Enable Location", Toast.LENGTH_SHORT).show()
@@ -112,7 +195,11 @@ fun autoSyncButton() {
                     }
 
                 } else {
-                    Toast.makeText(context, "Give I-Freeze The Location Permission", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Give I-Freeze The Location Permission",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     ActivityCompat.requestPermissions(
                         context as Activity,
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -174,11 +261,12 @@ fun HeaderLogo() {
 }
 
 @Composable
-fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
+fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
     val deviceId = preference.load("responseID", "")
-
+    var isFailureLimitReached = preference.load("isFailureLimitReached", false)
+    var isLicenseValid = preference.load("validLicense", true)
     Column(
         modifier = Modifier
             .padding(horizontal = 14.dp)
@@ -195,8 +283,15 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
                         .show()
                     return@GeneralSettingItem
-                }
-                else{
+                } else if (isFailureLimitReached!! || !isLicenseValid!!) {
+                    Toast.makeText(
+                        context,
+                        "License Failed Please Enable Internet Connection or Contact Support Team",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@GeneralSettingItem
+                } else {
                     navController.navigate(Screen.Scan.route)
                 }
 
@@ -214,8 +309,15 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
                         .show()
                     return@GeneralSettingItem
-                }
-                else{
+                } else if (isFailureLimitReached!! || !isLicenseValid!!) {
+                    Toast.makeText(
+                        context,
+                        "License Failed Please Enable Internet Connection or Contact Support Team",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@GeneralSettingItem
+                } else {
                     webStart()
                 }
 
@@ -227,62 +329,55 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit ) {
             mainText = "Admin Login",
             subText = "Administrative Privileges",
             onClick = {
+                Log.d("abdo", "isFailureLimitReached $isFailureLimitReached")
+                Log.d("abdo", "isLicenseValid $isLicenseValid")
                 if (deviceId.isNullOrEmpty()) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
                         .show()
                     return@GeneralSettingItem
-                }
-                else{
-                    navController.navigate(Screen.Login.route)
+                } else if (isFailureLimitReached!! || !isLicenseValid!!) {
+                    Toast.makeText(
+                        context,
+                        "License Failed Please Enable Internet Connection or Contact Support Team",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@GeneralSettingItem
+                } else {
+                    navController.navigate(Screen.Home.route)
                 }
             }
         )
 
 
-        GeneralSettingItem(
-            icon = R.drawable.icon_settings,
-            mainText = "Settings",
-            subText = "Configure App Permissions",
-            onClick = {
-                if (deviceId.isNullOrEmpty()) {
-                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
-                        .show()
-                    return@GeneralSettingItem
-                }
-                else{
-                    navController.navigate(Screen.Setting.route)
-                }
-
-
-            }
-        )
+//        GeneralSettingItem(
+//            icon = R.drawable.icon_settings,
+//            mainText = "Settings",
+//            subText = "Configure App Permissions",
+//            onClick = {
+//
+//
+//            }
+//        )
 
         GeneralSettingItem(
             icon = R.drawable.contact_support,
             mainText = "Support",
             subText = "Contact Us",
             onClick = {
-
-                if (deviceId.isNullOrEmpty()) {
-                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
-                        .show()
-                    return@GeneralSettingItem
-                }
-                else{
-                      navController.navigate(Screen.SupportTeam.route)
-                }
+                navController.navigate(Screen.SupportTeam.route)
             }
         )
 
-        GeneralSettingItem(
-            icon = R.drawable.baseline_key_24,
-            mainText = "License Activation",
-            subText = "Activate Your License",
-            onClick = {
-                navController.navigate(Screen.LicenseActivation.route)
-
-            }
-        )
+//        GeneralSettingItem(
+//            icon = R.drawable.baseline_key_24,
+//            mainText = "License Activation",
+//            subText = "Activate Your License",
+//            onClick = {
+//                navController.navigate(Screen.LicenseActivation.route)
+//
+//            }
+//        )
 
 
     }

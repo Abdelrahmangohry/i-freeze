@@ -222,7 +222,7 @@ fun licenseKey(
                             val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
                             myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             context.startActivity(myIntent)
-                        }else{
+                        } else {
                             context.startService(serviceIntent)
                         }
                     }
@@ -255,11 +255,12 @@ fun licenseKey(
                                 authViewModel.newUpdateUserData(deviceId!!)
                                 authViewModel._newFlow.observe(lifecycle, Observer { responseId ->
                                     if (responseId.isSuccessful) {
-
+                                        val licenseID = responseId.body()?.data?.device?.licenseId
                                         Log.d(
                                             "abdo",
-                                            "response body from license ${responseId.body()}"
+                                            "response body from license ${responseId.body()?.data?.device?.licenseId}"
                                         )
+                                        preference.save("licenseID", licenseID!!)
                                         preference.update(
                                             "Blacklist",
                                             responseId.body()?.data?.device?.blockListApps!!
@@ -298,6 +299,8 @@ fun licenseKey(
                                             "time",
                                             "${responseId.body()?.data?.device?.time}"
                                         )
+                                        val isLicenseValid = true
+                                        preference.save("validLicense", isLicenseValid)
                                         Toast.makeText(
                                             context,
                                             "Data Synchronized Successfully",
@@ -372,14 +375,14 @@ fun isNetworkAvailable(context: Context): Boolean {
     }
 }
 
- fun isLocationPermissionGranted(context: Context): Boolean {
+fun isLocationPermissionGranted(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
         context,
         Manifest.permission.ACCESS_FINE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED
 }
 
- fun isLocationEnabled(context: Context): Boolean {
+fun isLocationEnabled(context: Context): Boolean {
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
             locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)

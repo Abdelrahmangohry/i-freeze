@@ -7,6 +7,8 @@ import com.lock.data.model.Location
 import com.lock.data.model.LocationModel
 import com.lock.data.model.MobileApps
 import com.lock.data.model.MobileResponse
+import com.lock.data.model.TicketMessageBody
+import com.lock.data.model.TicketResponse
 import com.lock.data.model.Untrusted
 import com.lock.data.remote.UserApi
 import kotlinx.coroutines.flow.Flow
@@ -40,5 +42,13 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
 
     override suspend fun unTrustedApps(): Response<Untrusted> {
         return api.unTrustedApps()
+    }
+
+    override suspend fun sendTicket(message: TicketMessageBody): Response<TicketResponse> {
+        return api.sendTicket(message)
+    }
+
+    override suspend fun checkLicenseData(licenseID: String): Response<Boolean> {
+        return api.checkLicenseData(licenseID)
     }
 }

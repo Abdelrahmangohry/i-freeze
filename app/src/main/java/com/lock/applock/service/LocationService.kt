@@ -2,9 +2,15 @@ package com.lock.applock.service
 
 import android.app.Service
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.database.ContentObserver
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.provider.Settings
@@ -19,13 +25,16 @@ import com.patient.data.cashe.PreferencesGateway
 
 class LocationService : Service() {
     private lateinit var locationService: Intent
+
     private val helper by lazy { NotificationHelper(this) }
+    private var isOverlayShown = false
+
     var serviceApp: ForceCloseLocation? = null
-    private var overlayView: View? = null
+
     lateinit var preferenc: PreferencesGateway
 
     private var windowManager: WindowManager? = null
-    private var isServiceBound = false
+//    private var isServiceBound = false
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
@@ -57,33 +66,64 @@ class LocationService : Service() {
         return START_STICKY
     }
 
+
     private fun startLocationMonitoring() {
+//        preferenc = PreferencesGateway(applicationContext)
+//        var locationToggle = preferenc.update("locationBlocked", isCheckedLocation)
+        // Start the foreground service
         startForeground(NotificationHelper.NOTIFICATION_ID, helper.getNotification())
-        // Check if location is enabled
-        if (!isLocationEnabled()) {
-            // Location is disabled, inflate layout
-            Log.d("abdo", "Location Enabled from service should overlay")
-            showOverlayLayout()
-        } else {
-            // Location is enabled, remove layout if present
-            Log.d("abdo", "Location not Enabled from service should remove overlay")
 
-            removeOverlayLayout()
+        // Get the location manager
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        // Define a provider status listener
+        val providerListener = object : LocationListener {
+            override fun onProviderEnabled(provider: String) {
+                // Handle provider enabled
+                if (isOverlayShown) {
+                    removeOverlayLayout()
+                    isOverlayShown = false // Reset the flag
+                }
+                Log.d("LocationStatus", "Location provider $provider enabled")
+            }
+
+            override fun onProviderDisabled(provider: String) {
+                val locationStatus = preferenc.load("locationBlocked", false)
+                Log.d("newwww", "locationStatus $locationStatus")
+                // Handle provider disabled
+                if (!isOverlayShown && preferenc.load("locationBlocked", false) == true) {
+                    showOverlayLayout()
+                    isOverlayShown = true // Set the flag
+                }else{
+                    removeOverlayLayout()
+                    isOverlayShown = false
+                }
+
+                Log.d("LocationStatus", "Location provider $provider disabled")
+            }
+
+            override fun onLocationChanged(location: Location) {
+                // Unused for provider status monitoring
+            }
+
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+                // Unused for provider status monitoring
+            }
         }
-    }
 
-
-    private fun isLocationEnabled(): Boolean {
-        return try {
-            val locationMode = Settings.Secure.getInt(
-                contentResolver,
-                Settings.Secure.LOCATION_MODE
+        // Register for location provider status updates
+        try {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                0,  // Update interval set to 0 for provider status changes only
+                0f, // Minimum distance set to 0 for provider status changes only
+                providerListener
             )
-            locationMode != Settings.Secure.LOCATION_MODE_OFF
-        } catch (e: Settings.SettingNotFoundException) {
-            false
+        } catch (e: SecurityException) {
+            // Handle permission denied or other security-related exceptions
         }
     }
+
 
     private fun showOverlayLayout() {
         if (serviceApp != null) {
@@ -94,18 +134,16 @@ class LocationService : Service() {
     private fun removeOverlayLayout() {
         if (serviceApp != null) {
             serviceApp?.removeChatHeadView()
-        }
-        else{
+        } else {
             Log.d("abdo", "ServiceApp is null")
         }
     }
 
     override fun onDestroy() {
         removeOverlayLayout()
-        if (isServiceBound) {
-            unbindService(serviceConnection)
-            isServiceBound = false
-        }
+        applicationContext.stopService(locationService)
+
         super.onDestroy()
     }
+
 }

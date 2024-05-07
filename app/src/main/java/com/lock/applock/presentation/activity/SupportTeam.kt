@@ -1,10 +1,11 @@
-package com.lock.applock.presentation.activity.ui.theme
+package com.lock.applock.presentation.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -13,6 +14,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,10 +34,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lock.applock.R
+import com.lock.applock.presentation.AuthViewModel
+import com.lock.data.model.TicketMessageBody
+import com.patient.data.cashe.PreferencesGateway
 
 @RequiresApi(34)
 @Composable
@@ -53,11 +62,14 @@ fun SupportTeam(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ticketBody() {
+    val authViewModel: AuthViewModel = hiltViewModel()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val preference = PreferencesGateway(context)
+    val deviceId = preference.load("responseID", "")
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -72,6 +84,14 @@ fun ticketBody() {
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Name") },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Filled.Person, contentDescription = "Icon")
+                },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.DarkGray,
+                    focusedIndicatorColor = Color.White, // Change focused indicator color
+                    unfocusedIndicatorColor = Color.Black, // Change unfocused indicator color
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -79,12 +99,16 @@ fun ticketBody() {
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Filled.Email, contentDescription = "Email")
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = Color.White, // Change text color
                     cursorColor = Color.White, // Change cursor color
                     focusedIndicatorColor = Color.White, // Change focused indicator color
                     unfocusedIndicatorColor = Color.Black, // Change unfocused indicator color
+                    containerColor = Color.DarkGray,
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
             )
@@ -99,8 +123,12 @@ fun ticketBody() {
                     cursorColor = Color.White, // Change cursor color
                     focusedIndicatorColor = Color.White, // Change focused indicator color
                     unfocusedIndicatorColor = Color.Black, // Change unfocused indicator color
+                    containerColor = Color.DarkGray,
                 ),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Filled.Phone, contentDescription = "Phone")
+                },
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
@@ -113,6 +141,7 @@ fun ticketBody() {
                     cursorColor = Color.White, // Change cursor color
                     focusedIndicatorColor = Color.White, // Change focused indicator color
                     unfocusedIndicatorColor = Color.Black, // Change unfocused indicator color
+                    containerColor = Color.DarkGray,
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
             )
@@ -120,6 +149,18 @@ fun ticketBody() {
 
             Button(
                 onClick = {
+                    val message = TicketMessageBody(
+                        deviceId = deviceId!!,
+                        name = name.trim(),
+                        email = email.trim(),
+                        phone = phone.trim(),
+                        description = description.trim(),
+                    )
+                    Log.d("abdo", "deviceId ${deviceId}")
+                    Log.d("abdo", "name:  ${name.trim()}")
+                    Log.d("abdo", "email:  ${email.trim()}")
+                    Log.d("abdo", "phone:  ${phone.trim()}")
+                    Log.d("abdo", "description:  ${description.trim()}")
                     if (!isNetworkAvailable(context)) {
                         Toast.makeText(
                             context,
@@ -127,7 +168,12 @@ fun ticketBody() {
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-
+                        authViewModel.sendTicket(message)
+                        Toast.makeText(
+                            context,
+                            "We Received Your Ticket Successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -140,28 +186,9 @@ fun ticketBody() {
 }
 
 
-// Function to check if the device is connected to the internet
-@SuppressLint("ServiceCast")
-fun isNetworkAvailable(context: Context): Boolean {
-    val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null &&
-                (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
-    } else {
-        val networkInfo = connectivityManager.activeNetworkInfo
-        return networkInfo != null && networkInfo.isConnected
-    }
-}
-
-
 @Composable
 fun HeaderSupport(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -174,9 +201,10 @@ fun HeaderSupport(onBackPressed: () -> Unit) {
             color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 30.dp).padding(horizontal = 95.dp),
+                .padding(top = 8.dp, bottom = 30.dp),
             fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
+            fontSize = 22.sp,
+            textAlign = TextAlign.Center
         )
     }
 }
