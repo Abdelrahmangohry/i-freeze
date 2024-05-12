@@ -10,6 +10,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -85,6 +86,7 @@ object LocationHelper {
                 // Toast.makeText(context,"enable gps", Toast.LENGTH_LONG).show()
             }
         } else {
+//            Toast.makeText(context, "Please Give I-Freeze The Location Permission", Toast.LENGTH_SHORT).show()
             // Request location permissions
             createLocationRequest(context as AppCompatActivity)
         }

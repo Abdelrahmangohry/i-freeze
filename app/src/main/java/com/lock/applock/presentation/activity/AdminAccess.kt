@@ -3,6 +3,8 @@ package com.lock.applock.presentation.activity
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -161,7 +164,10 @@ fun autoSyncButton() {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
     val deviceId = preference.load("responseID", "")
-
+    val enabledServicesSetting = Settings.Secure.getString(
+        context.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )
 
     val locationService = Intent(context, LocationService::class.java)
     Row(modifier = Modifier.padding(15.dp)) {
@@ -174,9 +180,29 @@ fun autoSyncButton() {
                         .show()
                     return@Button
                 }
-                if (!isOnline(context)) {
+                if (!isNetworkAvailable(context)) {
+                    Toast.makeText(context, "You Should Enable Internet Connection", Toast.LENGTH_SHORT)
+                        .show()
                     return@Button
                 }
+
+                if (
+                    !Settings.canDrawOverlays(context) ||
+                    enabledServicesSetting?.contains("com.lock.applock.service.AccessibilityServices") != true ||
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Toast.makeText(
+                        context,
+                        "Please enable i-Freeze permissions in app settings",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@Button
+                }
+
                 if (isLocationPermissionGranted(context)) {
                     if (isLocationEnabled(context)) {
                         Log.d("abdo", "autoSync started")
@@ -185,11 +211,9 @@ fun autoSyncButton() {
                             "Data Synchronized Successfully",
                             Toast.LENGTH_SHORT
                         ).show()
-                        context.stopService(locationService)
                         startAutoSyncWorker(context)
                     } else {
                         Log.d("abdo", "i must start service")
-                        context.startService(locationService)
                         Toast.makeText(context, "Please Enable Location", Toast.LENGTH_SHORT).show()
 //                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     }
@@ -344,7 +368,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                         .show()
                     return@GeneralSettingItem
                 } else {
-                    navController.navigate(Screen.Home.route)
+                    navController.navigate(Screen.Login.route)
                 }
             }
         )

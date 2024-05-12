@@ -216,7 +216,9 @@ fun Login(
                 ) {
                     Button(
                         onClick = {
-                            if (!isOnline(context)) {
+                            if (!isNetworkAvailable(context)) {
+                                Toast.makeText(context, "Please Enable Internet Connection", Toast.LENGTH_SHORT)
+                                    .show()
                                 return@Button
                             }
                             if (TextUtils.isEmpty(username.value.text)) {
@@ -253,22 +255,6 @@ fun Login(
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
-//                                auth.signInWithEmailAndPassword(
-//                                    username.value.text.toString().trim(),
-//                                    password.value.text.toString().trim()
-//                                ).addOnCompleteListener { task ->
-//                                    if (task.isSuccessful) {
-//                                        Log.d("islam", "Login :${task.isSuccessful} ")
-//                                        navController.navigate(Screen.Home.route)
-//                                    } else {
-//                                        Toast.makeText(
-//                                            context,
-//                                            task.exception?.localizedMessage,
-//                                            Toast.LENGTH_SHORT
-//                                        ).show()
-//                                    }
-//
-//                                }
                             }
                         },
                         modifier = Modifier.padding(horizontal = 50.dp),
@@ -279,77 +265,11 @@ fun Login(
 
                     }
                 }
-
-                Spacer(modifier = Modifier.height(20.dp))
-                ClickableText(
-                    text = AnnotatedString("Forgot password?"),
-                    onClick = { },
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White,
-                        textDecoration = TextDecoration.None // To remove underline
-                    )
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFF175AA8)),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    ClickableText(
-                        text = AnnotatedString("Sign up here"),
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(20.dp),
-                        onClick = { },
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = Color.White,
-                            textDecoration = TextDecoration.None // To remove underline
-                        )
-
-                    )
-                }
             }
         }
     }
 }
 
-fun isOnline(context: Context): Boolean {
-    val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val capabilities =
-        connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-    if (capabilities != null) {
-
-
-        when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                return true
-            }
-
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-
-
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                return true
-            }
-
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-
-                Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-                return true
-            }
-        }
-    } else {
-
-        Toast.makeText(context, "Check connection to the internet", Toast.LENGTH_LONG)
-            .show()
-    }
-    return false
-
-}
 
 @Composable
 fun loginHeaderLogo() {

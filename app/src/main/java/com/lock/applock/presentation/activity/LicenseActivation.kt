@@ -69,8 +69,6 @@ import java.net.NetworkInterface
 fun LicenseActivation(
     navController: NavController, lifecycle: LifecycleOwner, context: Context,
     authViewModel: AuthViewModel = hiltViewModel()
-
-
 ) {
 
     Column(
@@ -95,12 +93,7 @@ fun licenseKey(
     val preference = PreferencesGateway(LocalContext.current)
     var deviceId = preference.load("responseID", "")
     val syncTime = preference.load("time", "")
-    val serviceIntent = Intent(context, LocationService::class.java)
-//    var isVisible by remember { mutableStateOf(preference.load("IsVisible", true)) }
-//    var showActivationBox = remember { mutableStateOf(preference.load("BoxShowed", true)) }
-
     var text by remember { mutableStateOf("") }
-
 
     //getting the device Name
     val deviceName: String = Build.BRAND + Build.MODEL
@@ -109,6 +102,10 @@ fun licenseKey(
     //getting the AndroidID
     val androidId: String =
         Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+    val enabledServicesSetting = Settings.Secure.getString(
+        context.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )
 
     //getting the IP Adress
     fun getIpAddress(): String {
@@ -134,12 +131,20 @@ fun licenseKey(
 
     val ipAddress = getIpAddress()
 
-    val deviceDto = DeviceDTO(
-        deviceName = deviceName,
-        operatingSystemVersion = operatingSystemVersion,
-        deviceIp = ipAddress,
-        macAddress = androidId,
-        serialNumber = androidId
+//    val deviceDto = DeviceDTO(
+//        deviceName = deviceName,
+//        operatingSystemVersion = operatingSystemVersion,
+//        deviceIp = ipAddress,
+//        macAddress = androidId,
+//        serialNumber = androidId
+//    )
+
+        val deviceDto = DeviceDTO(
+        deviceName = "NewTestAsd",
+        operatingSystemVersion = "Android NewTestAsd",
+        deviceIp = "NewTestAsd",
+        macAddress = "NewTestAsd",
+        serialNumber = "NewTestAsd"
     )
 
 
@@ -179,7 +184,7 @@ fun licenseKey(
                 )
             } else {
                 Text(
-                    text = "License Activated Successfully",
+                    text = "License Is Activated",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
@@ -188,172 +193,122 @@ fun licenseKey(
 
         }
         Column(modifier = Modifier.wrapContentSize(align = Alignment.Center)) {
+            if (deviceId.isNullOrEmpty()) {
 
-            ElevatedButton(
-                onClick = {
-                    var locationPermissionRequestCode = 123
-                    if (!deviceId.isNullOrEmpty()) {
-                        Toast.makeText(
-                            context,
-                            "Licence Already Activated",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@ElevatedButton
-                    }
-                    if (!isNetworkAvailable(context)) {
-                        Toast.makeText(
-                            context,
-                            "Please connect to the internet",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@ElevatedButton
-                    }
-
-                    if (!isLocationPermissionGranted(context)) {
-                        ActivityCompat.requestPermissions(
-                            context as Activity,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            locationPermissionRequestCode
-                        )
-
-                    }
-                    if (!isLocationEnabled(context)) {
-                        if (!Settings.canDrawOverlays(context)) {
-                            val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                            myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            context.startActivity(myIntent)
-                        } else {
-                            context.startService(serviceIntent)
+                ElevatedButton(
+                    onClick = {
+                        if (!isNetworkAvailable(context)) {
+                            Toast.makeText(
+                                context,
+                                "Please connect to the internet",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@ElevatedButton
                         }
-                    }
 
-                    if (text.isEmpty()) {
-                        Toast.makeText(
-                            context,
-                            "Add License Key",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@ElevatedButton
-                    } else {
-                        authViewModel.getUserLogin(text, deviceDto)
-                        authViewModel._loginFlow.observe(lifecycle, Observer { response ->
-                            if (response.isSuccessful) {
-                                Log.d("abdo", response.body().toString())
-                                deviceId = response.body().toString().trim()
+                        if (text.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "Add License Key",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@ElevatedButton
+                        } else {
+                            authViewModel.getUserLogin(text, deviceDto)
+                            authViewModel._loginFlow.observe(lifecycle, Observer { response ->
+                                if (response.isSuccessful) {
+                                    Log.d("abdo", response.body().toString())
+                                    deviceId = response.body().toString().trim()
 
-                                preference.save("responseID", deviceId!!)
-                                Toast.makeText(
-                                    context,
-                                    "License Activate Successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                    preference.save("responseID", deviceId!!)
+                                    Toast.makeText(
+                                        context,
+                                        "License Activated",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
 
-                                preference.save("IsVisible", false)
-                                preference.save("BoxShowed", false)
-
-                                navController.navigate(Screen.AdminAccess.route)
-                                authViewModel.newUpdateUserData(deviceId!!)
-                                authViewModel._newFlow.observe(lifecycle, Observer { responseId ->
-                                    if (responseId.isSuccessful) {
-                                        val licenseID = responseId.body()?.data?.device?.licenseId
-                                        Log.d(
-                                            "abdo",
-                                            "response body from license ${responseId.body()?.data?.device?.licenseId}"
-                                        )
-                                        preference.save("licenseID", licenseID!!)
-                                        preference.update(
-                                            "Blacklist",
-                                            responseId.body()?.data?.device?.blockListApps!!
-                                        )
-                                        preference.update(
-                                            "Whitelist",
-                                            responseId.body()?.data?.device?.whiteListApps!!
-                                        )
-                                        preference.update(
-                                            "Browsers",
-                                            responseId.body()?.data?.device?.browsers!!
-                                        )
-                                        preference.update(
-                                            "WebBlacklist",
-                                            responseId.body()?.data?.device?.blockListURLs!!
-                                        )
-                                        preference.update(
-                                            "WebWhitelist",
-                                            responseId.body()?.data?.device?.whiteListURLs!!
-                                        )
-                                        preference.update(
-                                            "WifiBlocked",
-                                            responseId.body()?.data?.device?.blockWiFi!!
-                                        )
-
-                                        if (responseId.body()?.data?.device?.blockWiFi!!) {
-                                            context.startService(serviceIntent)
-                                        } else {
-                                            context.stopService(serviceIntent)
-                                        }
-                                        preference.update(
-                                            "WifiWhite",
-                                            responseId.body()?.data?.device?.whiteListWiFi!!
-                                        )
-                                        preference.save(
-                                            "time",
-                                            "${responseId.body()?.data?.device?.time}"
-                                        )
-                                        val isLicenseValid = true
-                                        preference.save("validLicense", isLicenseValid)
+                                    if (
+                                        !Settings.canDrawOverlays(context) ||
+                                        enabledServicesSetting?.contains("com.lock.applock.service.AccessibilityServices") != true ||
+                                        ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.ACCESS_FINE_LOCATION
+                                        ) != PackageManager.PERMISSION_GRANTED
+                                    ) {
                                         Toast.makeText(
                                             context,
-                                            "Data Synchronized Successfully",
+                                            "Please enable i-Freeze permissions in app settings",
                                             Toast.LENGTH_SHORT
-                                        ).show()
+                                        )
+                                            .show()
                                     }
-                                })
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    context.resources.getString(R.string.invalid_license_activate_key),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                return@Observer
-                            }
 
-                        })
-                    }
-                },
-                modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-            ) {
-                Text("Activate", fontSize = 16.sp, color = Color.White)
+                                    preference.save("IsVisible", false)
+                                    preference.save("BoxShowed", false)
+
+                                    navController.navigate(Screen.AdminAccess.route)
+
+                                    authViewModel.newUpdateUserData(deviceId!!)
+                                    authViewModel._newFlow.observe(
+                                        lifecycle,
+                                        Observer { responseId ->
+                                            if (responseId.isSuccessful) {
+
+                                                val licenseID =
+                                                    responseId.body()?.data?.device?.licenseId
+                                                Log.d(
+                                                    "abdo",
+                                                    "response body from license ${responseId.body()?.data?.device?.licenseId}"
+                                                )
+                                                preference.save("licenseID", licenseID!!)
+                                                preference.save(
+                                                    "time",
+                                                    "${responseId.body()?.data?.device?.time}"
+                                                )
+                                                val isLicenseValid = true
+                                                preference.save("validLicense", isLicenseValid)
+
+                                            }
+                                        })
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        context.resources.getString(R.string.invalid_license_activate_key),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@Observer
+                                }
+
+                            })
+                        }
+                    },
+                    modifier = Modifier.padding(vertical = 16.dp)
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
+                ) {
+                    Text("Activate", fontSize = 16.sp, color = Color.White)
+                }
             }
 
+            if (syncTime.isNullOrEmpty()) {
+                Text(
+                    "",
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 15.dp)
+                )
 
-//            ElevatedButton(
-//                onClick = {
-//                    if (showActivationBox.value == false) {
-//                        preference.save("IsVisible", false)
-//                        showActivationBox.value = true
-//                    } else {
-//                        Toast.makeText(
-//                            context,
-//                            "Box Already Showed",
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                    }
-//                },
-//                modifier = Modifier.padding(vertical = 16.dp).align(Alignment.CenterHorizontally),
-//                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-//            ) {
-//                Text("Show Activation Box", fontSize = 16.sp, color = Color.White)
-//
-//            }
-            Text(
-                "Last Update : $syncTime",
-                fontSize = 16.sp,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            } else {
+                Text(
+                    "Last Update : $syncTime",
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 15.dp)
+                )
+            }
 
         }
+
     }
 }
 

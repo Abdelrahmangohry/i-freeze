@@ -132,11 +132,11 @@ fun GeneralOptionsUISetting(
             mainText = "Admin Permission",
             subText = "For get access and control over apps",
             onClick = {
-                if (!deviceManager.isAdminActive(compName)){
-                    val adminIntent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                    adminIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                    adminIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin")
-                    activity.startActivityForResult(adminIntent, 1)
+                if (!deviceManager.isDeviceOwnerApp(activity.packageName)){
+                    val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+                    intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
+                    activity.startActivityForResult(intent, 1)
                 }else{
                     Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_LONG).show()
                 }
@@ -157,7 +157,7 @@ fun GeneralOptionsUISetting(
                     context.startActivity(myIntent)
                 }else{
                     Toast.makeText(
-                        context,"its already here ", Toast.LENGTH_LONG).show()
+                        context,"Over Draw Already Enabled", Toast.LENGTH_LONG).show()
                 }
             }
         )
@@ -166,7 +166,6 @@ fun GeneralOptionsUISetting(
             mainText = "Accessibility Service",
             subText = "This is essential part of Android's",
             onClick = {
-                Log.d("islam", "GeneralOptionsUISetting :accessibility ")
                 val enabledServicesSetting = Settings.Secure.getString(context.contentResolver,
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
                 )
@@ -174,7 +173,7 @@ fun GeneralOptionsUISetting(
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                     context.startActivity(intent)
                 }else{
-                    Toast.makeText(context,"its already isAccessibilityServiceEnabled ", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context,"Accessibility Service Already Enabled", Toast.LENGTH_LONG).show()
                 }
             }
         )

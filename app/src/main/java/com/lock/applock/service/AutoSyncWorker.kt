@@ -1,12 +1,16 @@
 package com.lock.applock.service
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.ui.text.toLowerCase
+import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.CoroutineWorker
@@ -47,7 +51,10 @@ class AutoSyncWorker @AssistedInject constructor(
     private var failureCount = preference.load("failureCount", 0)
     private var isFailureLimitReached = preference.load("isFailureLimitReached", false)
     private val licenseID = preference.load("licenseID", "")
-
+    val enabledServicesSetting = Settings.Secure.getString(
+        context.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )
     init {
         failureCount = preference.load("failureCount", 0)!!
         LocationHelper.getLocation(context, this)
@@ -66,13 +73,28 @@ class AutoSyncWorker @AssistedInject constructor(
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
             }
 
+            if (
+                !Settings.canDrawOverlays(applicationContext) ||
+                enabledServicesSetting?.contains("com.lock.applock.service.AccessibilityServices") != true ||
+                ContextCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(
+                    applicationContext,
+                    "Please enable i-Freeze permissions in app settings",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
 
-
-            if (!isLocationEnabled(applicationContext)) {
-                applicationContext.startService(locationService)
-            } else {
-                applicationContext.stopService(locationService)
             }
+
+//            if (!isLocationEnabled(applicationContext)) {
+//                applicationContext.startService(locationService)
+//            } else {
+//                applicationContext.stopService(locationService)
+//            }
             val address = locationData.address ?: "Unknown Address"
             val latitude = locationData.latitude ?: 0.0
             val longitude = locationData.longitude ?: 0.0
@@ -83,9 +105,6 @@ class AutoSyncWorker @AssistedInject constructor(
                 address = address,
                 deviceId = deviceId!!
             )
-
-
-
 
             val response = api.newUpdateUserData(deviceId)
             val userLocationResponse = api.userLocation(userLocation)
