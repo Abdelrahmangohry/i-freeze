@@ -19,7 +19,8 @@ fun SetupNavGraph(
     context: Context,
     wifi: () -> Unit,
     lifecycle: LifecycleOwner,
-    webStart: () -> Unit
+    webStart: () -> Unit,
+    filesScan: () -> Unit
 
 ){
     NavHost(
@@ -27,6 +28,6 @@ fun SetupNavGraph(
         startDestination = HOME_GRAPH_ROUTE,
         route = ROOT_GRAPH_ROUTE
     ) {
-        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle,webStart)
+        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle,webStart,filesScan)
     }
 }

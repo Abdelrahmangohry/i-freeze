@@ -64,7 +64,7 @@ class AutoSyncWorker @AssistedInject constructor(
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
 
-            if (failureCount!! >= 2) {
+            if (failureCount!! >= 20) {
                 isFailureLimitReached = true
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
             }

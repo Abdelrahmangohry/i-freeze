@@ -303,21 +303,8 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
             subText = "Keep Your Mobile Secure and Initiate a Scan",
             onClick = {
 
-                if (deviceId.isNullOrEmpty()) {
-                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
-                        .show()
-                    return@GeneralSettingItem
-                } else if (isFailureLimitReached!! || !isLicenseValid!!) {
-                    Toast.makeText(
-                        context,
-                        "License Failed Please Enable Internet Connection or Contact Support Team",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                    return@GeneralSettingItem
-                } else {
                     navController.navigate(Screen.Scan.route)
-                }
+
 
 
             }

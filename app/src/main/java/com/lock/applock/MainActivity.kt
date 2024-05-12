@@ -64,6 +64,7 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.compse.ui.SetupNavGraph
+import com.lock.applock.presentation.activity.FullSystemScan
 import com.lock.applock.presentation.activity.MainWebActivity
 import com.lock.applock.presentation.activity.isLocationEnabled
 import com.lock.applock.presentation.nav_graph.Screen
@@ -148,8 +149,8 @@ class MainActivity : ComponentActivity() {
                 navController = rememberNavController()
                 SetupNavGraph(
                     navController = navController,
-                    this, this, { wifiCheck() }, this
-                ) { webActivity() }
+                    this, this, { wifiCheck() }, this, { webActivity() },{systemScan()}
+                )
             }
         }
     }
@@ -194,6 +195,15 @@ class MainActivity : ComponentActivity() {
 
     fun permissions() {
 
+    }
+
+    fun systemScan(){
+        this.startActivity(
+            Intent(
+                this,
+                FullSystemScan::class.java
+            )
+        )
     }
 
     fun webActivity() {

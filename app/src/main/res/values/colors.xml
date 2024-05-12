@@ -17,6 +17,7 @@
     <color name="RedButtons">#ff5050</color>
     <color name="GreenButtons">#99ff66</color>
     <color name="appBar">#013572</color>
+    <color name="green">#4AD300</color>
 
     <!--    custom colors-->
     <color name="cool_blue">#0091EA</color>

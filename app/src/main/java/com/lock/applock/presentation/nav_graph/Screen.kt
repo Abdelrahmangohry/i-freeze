@@ -23,6 +23,8 @@ sealed class Screen(val route:String){
     object WebManager : Screen(route = "web_manager")
     object NetworkControl : Screen(route = "network_control")
     object Scan : Screen(route = "scan")
+    object ScanProperties : Screen(route = "scan_properties")
+
     object Detail : Screen(route = "detail_screen?id={id}&name={name}") {
         fun passNameAndId(
             id: Int = 0,

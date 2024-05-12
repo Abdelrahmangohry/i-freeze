@@ -16,6 +16,7 @@ import com.lock.applock.presentation.activity.GeneralWebView
 import com.lock.applock.presentation.activity.LicenseActivation
 import com.lock.applock.presentation.activity.Login
 import com.lock.applock.presentation.activity.Scan
+import com.lock.applock.presentation.activity.ScanProperties
 import com.lock.applock.presentation.activity.SettingScreen
 import com.lock.applock.presentation.activity.WebManager
 import com.lock.applock.presentation.activity.WhiteList
@@ -30,7 +31,7 @@ import com.lock.applock.presentation.screen.SplashScreen
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
     activity : Activity, context:Context, wifi: () -> Unit,
-    lifecycle: LifecycleOwner, webStart : () -> Unit
+    lifecycle: LifecycleOwner, webStart : () -> Unit,filesScan: () -> Unit
 ) {
     navigation(
         startDestination = Screen.AdminAccess.route,
@@ -135,7 +136,15 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.Scan.route
         ) {
-            Scan(navController = navController, lifecycle)
+            Scan(navController = navController, filesScan)
         }
+
+        composable(
+            route = Screen.ScanProperties.route
+        ) {
+            ScanProperties(navController = navController, lifecycle)
+        }
+
+
     }
 }
