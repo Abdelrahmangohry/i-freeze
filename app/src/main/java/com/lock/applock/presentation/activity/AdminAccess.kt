@@ -1,6 +1,7 @@
 package com.lock.applock.presentation.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -93,6 +94,7 @@ fun AdminAccess(
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun dropDownOptions(navController: NavController) {
 
@@ -123,22 +125,7 @@ fun dropDownOptions(navController: NavController) {
                 DropdownMenuItem(
                     text = { Text("Settings") },
                     onClick = {
-                        if (deviceId.isNullOrEmpty()) {
-                            Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
-                                .show()
-                            return@DropdownMenuItem
-                        } else if (isFailureLimitReached!! || !isLicenseValid!!) {
-                            Toast.makeText(
-                                context,
-                                "License Failed Please Enable Internet Connection or Contact Support Team",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                            return@DropdownMenuItem
-                        } else {
                             navController.navigate(Screen.Setting.route)
-                        }
-
                     }
                 )
                 DropdownMenuItem(
@@ -300,11 +287,23 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
         GeneralSettingItem(
             icon = R.drawable.scan,
             mainText = "System Scan",
-            subText = "Keep Your Mobile Secure and Initiate a Scan",
+            subText = "Initiate a scan to detect threats",
             onClick = {
-
+                if (deviceId.isNullOrEmpty()) {
+                    Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
+                        .show()
+                    return@GeneralSettingItem
+                } else if (isFailureLimitReached!! || !isLicenseValid!!) {
+                    Toast.makeText(
+                        context,
+                        "License Failed Please Enable Internet Connection or Contact Support Team",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@GeneralSettingItem
+                } else {
                     navController.navigate(Screen.Scan.route)
-
+                }
 
 
             }

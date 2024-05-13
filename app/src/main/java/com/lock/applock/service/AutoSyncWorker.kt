@@ -90,11 +90,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
             }
 
-//            if (!isLocationEnabled(applicationContext)) {
-//                applicationContext.startService(locationService)
-//            } else {
-//                applicationContext.stopService(locationService)
-//            }
+
             val address = locationData.address ?: "Unknown Address"
             val latitude = locationData.latitude ?: 0.0
             val longitude = locationData.longitude ?: 0.0

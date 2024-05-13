@@ -94,9 +94,9 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
             }
         })
     }
-    else{
-        Toast.makeText(context, "Please Enable Internet Connection", Toast.LENGTH_SHORT).show()
-    }
+//    else{
+//        Toast.makeText(context, "Please Enable Internet Connection", Toast.LENGTH_SHORT).show()
+//    }
 
 
     val fakeAppsList = appsNamesList.filter { untrustedAppsList.contains(it) }

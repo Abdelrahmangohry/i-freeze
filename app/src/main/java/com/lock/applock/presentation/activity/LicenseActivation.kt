@@ -107,7 +107,7 @@ fun licenseKey(
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )
 
-    //getting the IP Adress
+    //getting the IP Address
     fun getIpAddress(): String {
         var ipAddress = ""
         try {
@@ -130,21 +130,14 @@ fun licenseKey(
     }
 
     val ipAddress = getIpAddress()
+    Log.d("abdo", "ipAddress $ipAddress")
 
-//    val deviceDto = DeviceDTO(
-//        deviceName = deviceName,
-//        operatingSystemVersion = operatingSystemVersion,
-//        deviceIp = ipAddress,
-//        macAddress = androidId,
-//        serialNumber = androidId
-//    )
-
-        val deviceDto = DeviceDTO(
-        deviceName = "NewTestAsd",
-        operatingSystemVersion = "Android NewTestAsd",
-        deviceIp = "NewTestAsd",
-        macAddress = "NewTestAsd",
-        serialNumber = "NewTestAsd"
+    val deviceDto = DeviceDTO(
+        deviceName = deviceName,
+        operatingSystemVersion = operatingSystemVersion,
+        deviceIp = ipAddress,
+        macAddress = androidId,
+        serialNumber = androidId
     )
 
 
@@ -184,7 +177,7 @@ fun licenseKey(
                 )
             } else {
                 Text(
-                    text = "License Is Activated",
+                    text = "License is Activated",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
