@@ -15,9 +15,13 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.lock.applock.R
+import com.lock.applock.presentation.adapter.AffectedFiles
 import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -39,17 +43,21 @@ class FullSystemScan : AppCompatActivity() {
 
     // Views
     private lateinit var callLogTextView: TextView
+    private lateinit var numberOfAffectedFiles: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var estimatedTimeTextView: TextView
+    private lateinit var recyclerView: RecyclerView
     private lateinit var btn: Button
 
     //    private lateinit var btn2: Button
     private var hashesList = mutableListOf<Pair<String, String>>()
     private var hashesListDatabase = mutableListOf<String>()
+    private var affectedList = mutableListOf<String>()
     private lateinit var numberOfScannedFiles: TextView
     private lateinit var loadingProgressBar: ProgressBar
     private lateinit var preference: PreferencesGateway
     private lateinit var database: SQLiteDatabase
+
 
     // Variables
     private var totalSize: Long = 0
@@ -57,35 +65,52 @@ class FullSystemScan : AppCompatActivity() {
     private var startTime: Long = 0
     private var counter = 0
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("SetTextI18n", "MissingInflatedId", "Range")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_full_system_scan)
         preference = PreferencesGateway(this)
+        val savedHashList = preference.getList("hashesListDatabase")
+        Log.d("abdo", "savedHashList $savedHashList")
+        GlobalScope.launch(Dispatchers.IO) {
+            //Copy the database file from assets to internal storage
+            copyDatabaseFile()
+            // Open the database
+            database = openOrCreateDatabase("scan.db", Context.MODE_PRIVATE, null)
 
+            // Query the database and retrieve data from the specific table
+            val cursor = database.rawQuery("SELECT * FROM Malware_hashs", null)
 
-        //         Copy the database file from assets to internal storage
-        copyDatabaseFile()
-        // Open the database
-        database = openOrCreateDatabase("scan.db", Context.MODE_PRIVATE, null)
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    val columnName = cursor.getString(cursor.getColumnIndex("sha256"))
+                    if (columnName.isNullOrEmpty()) {
+                        continue
+                    } else {
+                        hashesListDatabase.add(columnName)
+                        // Process the retrieved data as needed
+                    }
+                }
+                preference.saveList("hashesListDatabase", hashesListDatabase)
+                cursor.close()
+                Log.d("abdo", "hashlist $hashesList")
+                // Compare the lists here and update UI accordingly
+                for (pair in hashesList) {
+                    if (pair.second in hashesListDatabase) {
+                        affectedList.add(pair.first)
+                        Log.d("abdo", "affectedList $affectedList")
+                    }
+                }
 
-
-        // Query the database and retrieve data from the specific table
-        val cursor = database.rawQuery("SELECT * FROM Malware_hashs", null)
-//
-//        if (cursor != null) {
-//            while (cursor.moveToNext()) {
-//                val columnName = cursor.getString(cursor.getColumnIndex("sha256"))
-////                    hashesListDatabase.add(columnName)
-//                // Process the retrieved data as needed
-//                Log.d("abdo", "hashesListDatabase $hashesListDatabase")
-//            }
-//            cursor.close()
-//        }
-
+            }
+        }
 
         // Initialize loading spinner
         loadingProgressBar = findViewById(R.id.loadingProgressBar)
+        numberOfAffectedFiles = findViewById(R.id.numberOfEffectedFiles)
+        recyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
         // Initialize views
         callLogTextView = findViewById(R.id.callLogTextView)
         progressBar = findViewById(R.id.progressBar)
@@ -99,72 +124,49 @@ class FullSystemScan : AppCompatActivity() {
             numberOfScannedFiles.text = ""
             progressBar.progress = 0 // Reset progress bar
             startTime = System.currentTimeMillis() // Start time for estimating time
-
+            counter = 0
             GlobalScope.launch(Dispatchers.IO) {
+
                 processedSize = 0 // Reset processed size
                 progressBar.progress = 0 // Reset progress bar
                 startTime = System.currentTimeMillis()
                 val downloadDirectory =
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                Log.d("HashLog", "rootDirectory $downloadDirectory")
+                Log.d("abdo", "rootDirectory $downloadDirectory")
                 runOnUiThread {
                     loadingProgressBar.visibility = View.VISIBLE
                     estimatedTimeTextView.visibility = View.GONE
+                    numberOfAffectedFiles.visibility = View.GONE
                     progressBar.visibility = View.GONE
                     callLogTextView.visibility = View.GONE
                 }
                 totalSize = getTotalSize(downloadDirectory)
-                Log.d("HashLog", "total size $totalSize")
+                Log.d("abdo", "total size $totalSize")
                 runOnUiThread {
                     loadingProgressBar.visibility = View.GONE
                     estimatedTimeTextView.visibility = View.VISIBLE
+                    numberOfAffectedFiles.visibility = View.VISIBLE
                     progressBar.visibility = View.VISIBLE
                     callLogTextView.visibility = View.VISIBLE
                 }
                 getHashCodeFromFiles(downloadDirectory)
-                Log.d("HashLog", "hashesList $hashesList")
+                Log.d("abdo", "hashesList $hashesList")
                 withContext(Dispatchers.Main) {
+                    for (pair in hashesList) {
+                        if (pair.second in hashesListDatabase) {
+                            affectedList.add(pair.first)
+                        }
+                    }
+
+                    recyclerView.adapter = AffectedFiles(affectedList)
+                    numberOfAffectedFiles.text = "number of Affected Files: ${affectedList.size}"
+                    Log.d("abdo", "affectedlistsize = $affectedList")
                     numberOfScannedFiles.text = "Number of files Scanned: $counter"
                 }
             } // Start scanning
 
         }
 
-
-//        btn2.setOnClickListener {
-//            numberOfScannedFiles.text = ""
-//            progressBar.progress = 0 // Reset progress bar
-//            startTime = System.currentTimeMillis() // Start time for estimating time
-//                GlobalScope.launch(Dispatchers.IO) {
-//                    processedSize = 0 // Reset processed size
-//                    progressBar.progress = 0 // Reset progress bar
-//                    startTime = System.currentTimeMillis()
-//                    val rootDirectory = Environment.getExternalStorageDirectory()
-//                    Log.d("HashLog", "rootDirectory $rootDirectory")
-//                    runOnUiThread {
-//                        loadingProgressBar.visibility = View.VISIBLE
-//                        progressBar.visibility = View.GONE
-//                        callLogTextView.visibility = View.GONE
-//                        estimatedTimeTextView.visibility = View.GONE
-//                    }
-//                    totalSize = getTotalSize(rootDirectory)
-//                    Log.d("HashLog", "total size $totalSize")
-//
-//                    runOnUiThread {
-//                        loadingProgressBar.visibility = View.GONE
-//                        progressBar.visibility = View.VISIBLE
-//                        callLogTextView.visibility = View.VISIBLE
-//                        estimatedTimeTextView.visibility = View.VISIBLE
-//                    }
-//
-//                    getHashCodeFromFiles(rootDirectory)
-//                    Log.d("HashLog", "hashesList $hashesList")
-//                    withContext(Dispatchers.Main) {
-//                        numberOfScannedFiles.text = "Number of files Scanned: $counter"
-//                    }
-//                } // Start scanning
-//
-//        }
 
         // Request permission if not granted
         if (ContextCompat.checkSelfPermission(
@@ -266,7 +268,7 @@ class FullSystemScan : AppCompatActivity() {
     }
 
     private fun getFileHash(file: File): String {
-        val digest = MessageDigest.getInstance("MD5")
+        val digest = MessageDigest.getInstance("SHA-256")
         val fis = FileInputStream(file)
         val byteArray = ByteArray(1024)
         var bytesCount: Int

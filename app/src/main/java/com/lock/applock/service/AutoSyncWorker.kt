@@ -196,7 +196,7 @@ class AutoSyncWorker @AssistedInject constructor(
             Log.e("abdo", "Error", e)
             failureCount = failureCount!! + 1
             preference.save("failureCount", failureCount!!)
-            if (failureCount!! >= 2) {
+            if (failureCount!! >= 20) {
                 isFailureLimitReached = true
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
             }else{
