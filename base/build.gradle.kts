@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lock.base"
+    namespace = "com.ifreeze.base"
     compileSdk = 34
 
     defaultConfig {

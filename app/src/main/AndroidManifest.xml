@@ -51,7 +51,7 @@
 
         <provider
             android:name=".SharedPreferencesProvider"
-            android:authorities="com.lock.applock.provider"
+            android:authorities="com.ifreeze.applock.provider"
             android:enabled="true"
             android:exported="true" />
 

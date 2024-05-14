@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lock.data"
+    namespace = "com.ifreeze.data"
     compileSdk = 34
 
     defaultConfig {

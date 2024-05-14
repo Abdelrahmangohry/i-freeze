@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lock.di"
+    namespace = "com.ifreeze.di"
     compileSdk = 34
 
     defaultConfig {

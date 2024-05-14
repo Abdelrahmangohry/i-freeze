@@ -9,8 +9,8 @@
         android:shortcutShortLabel="@string/home">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.lock.applock.MainActivity"
-            android:targetPackage="com.lock.applock" />
+            android:targetClass="com.ifreeze.applock.MainActivity"
+            android:targetPackage="com.ifreeze.applock" />
     </shortcut>
 
     <!-- Shortcut 2:
@@ -22,8 +22,8 @@
         android:shortcutShortLabel="@string/Setting">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.lock.applock.presentation.activity.SettingActivity"
-            android:targetPackage="com.lock.applock" />
+            android:targetClass="com.ifreeze.applock.presentation.activity.SettingActivity"
+            android:targetPackage="com.ifreeze.applock" />
     </shortcut>
 
     <shortcut
@@ -33,8 +33,8 @@
         android:shortcutShortLabel="@string/WhiteList">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.lock.applock.presentation.activity.PhoneAppsActivity"
-            android:targetPackage="com.lock.applock.presentation.activity" />
+            android:targetClass="com.ifreeze.applock.presentation.activity.PhoneAppsActivity"
+            android:targetPackage="com.ifreeze.applock.presentation.activity" />
     </shortcut>
 
 </shortcuts>

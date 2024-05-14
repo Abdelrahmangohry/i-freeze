@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lock.domain"
+    namespace = "com.ifreeze.domain"
     compileSdk = 34
 
     defaultConfig {

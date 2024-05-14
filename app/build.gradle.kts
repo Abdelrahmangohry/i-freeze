@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.lock.applock"
+    namespace = "com.ifreeze.applock"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.lock.applock"
+        applicationId = "com.ifreeze.applock"
         minSdk = 28
         targetSdk = 33
         versionCode = 1
@@ -29,12 +29,12 @@ android {
     productFlavors {
         create("beta") {
             dimension = "I-freeze"
-            applicationId = "com.lock.applock"
+            applicationId = "com.ifreeze.applock"
 //            buildConfigField("String", "appName", "My QA App")
         }
         create("prod") {
             dimension = "I-freeze"
-            applicationId = "com.lock.applock"
+            applicationId = "com.ifreeze.applock"
 //            buildConfigField("String", "appName", "My Prod App")
         }
     }
