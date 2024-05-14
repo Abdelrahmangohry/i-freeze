@@ -159,9 +159,9 @@ class FullSystemScan : AppCompatActivity() {
                     }
 
                     recyclerView.adapter = AffectedFiles(affectedList)
-                    numberOfAffectedFiles.text = "number of Affected Files: ${affectedList.size}"
+                    numberOfAffectedFiles.text = "Number of infected files: ${affectedList.size}"
                     Log.d("abdo", "affectedlistsize = $affectedList")
-                    numberOfScannedFiles.text = "Number of files Scanned: $counter"
+                    numberOfScannedFiles.text = "Number of scanned files: $counter"
                 }
             } // Start scanning
 
