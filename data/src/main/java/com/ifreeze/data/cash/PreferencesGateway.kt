@@ -9,7 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 const val PREFERENCES_NAME = "PREFERENCES_NAME"
-
+const val BASE_URL_KEY = "BaseUrl"
 class PreferencesGateway @Inject constructor(@ApplicationContext val context: Context) {
 
     inline fun <reified T : Any> save(key: String, value: T) {
@@ -191,6 +191,14 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
             editor.putString(key, value)
             editor.apply()
         }
+    }
+
+    fun saveBaseUrl(baseUrl: String) {
+        save(BASE_URL_KEY, baseUrl)
+    }
+
+    fun loadBaseUrl(): String? {
+        return load(BASE_URL_KEY, "")
     }
 
 }

@@ -70,6 +70,7 @@ import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.startAutoSyncWorker
 import com.ifreeze.applock.ui.theme.AppLockTheme
 import com.ifreeze.applock.ui.theme.Shape
+import com.ifreeze.di.NetWorkModule
 import com.ifreeze.di.NetworkConfig
 import com.patient.data.cashe.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
@@ -104,8 +105,10 @@ class MainActivity : ComponentActivity() {
         preferenc = PreferencesGateway(applicationContext)
         val locationService = Intent(this, LOCATION_SERVICE::class.java)
 
-// Dynamically set the base URL
-        networkConfig.baseUrl = "https://centhrthrtral.flothers.com:8443/"
+        val newBaseUrl = "https://centhrthrtral.flothers.com:8443/"
+
+        preferenc.saveBaseUrl(newBaseUrl)
+        Log.d("abdo", "newBaseUrl $newBaseUrl")
 
 
         when (PackageManager.PERMISSION_GRANTED) {

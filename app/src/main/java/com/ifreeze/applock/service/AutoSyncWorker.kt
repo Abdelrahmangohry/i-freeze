@@ -22,6 +22,8 @@ import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
 import com.ifreeze.data.remote.UserApi
 import com.ifreeze.data.repo.auth.LocationHelper
+import com.ifreeze.di.NetWorkModule
+
 import com.ifreeze.di.NetworkConfig
 import com.patient.data.cashe.PreferencesGateway
 import dagger.assisted.Assisted
@@ -61,7 +63,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
-
+//            updateBaseUrl("https://security.flothers.com:8443/")
             if (failureCount!! >= 20) {
                 isFailureLimitReached = true
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)

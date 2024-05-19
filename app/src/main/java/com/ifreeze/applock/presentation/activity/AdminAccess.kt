@@ -171,22 +171,22 @@ fun autoSyncButton() {
                     return@Button
                 }
 
-                if (
-                    !Settings.canDrawOverlays(context) ||
-                    enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    Toast.makeText(
-                        context,
-                        "Please enable i-Freeze permissions in app settings",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                    return@Button
-                }
+//                if (
+//                    !Settings.canDrawOverlays(context) ||
+//                    enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
+//                    ContextCompat.checkSelfPermission(
+//                        context,
+//                        Manifest.permission.ACCESS_FINE_LOCATION
+//                    ) != PackageManager.PERMISSION_GRANTED
+//                ) {
+//                    Toast.makeText(
+//                        context,
+//                        "Please enable i-Freeze permissions in app settings",
+//                        Toast.LENGTH_SHORT
+//                    )
+//                        .show()
+//                    return@Button
+//                }
 
                 if (isLocationPermissionGranted(context)) {
                     if (isLocationEnabled(context)) {

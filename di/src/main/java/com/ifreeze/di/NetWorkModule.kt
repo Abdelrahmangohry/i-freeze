@@ -1,11 +1,13 @@
 package com.ifreeze.di
 
+import android.content.Context
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.ifreeze.data.remote.UserApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -20,35 +22,37 @@ const val TAG = "NetWorkModule"
 @Module
 @InstallIn(SingletonComponent::class)
 object NetWorkModule {
+//    private var baseUrl: String = "http://192.168.1.1:8080/"
+//    private var retrofit: Retrofit? = null
     @Provides
     fun providesLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     }
 
+    @Provides
+    fun provideBaseUrlInterceptor(): BaseUrlInterceptor {
+        return BaseUrlInterceptor()
+    }
 
     @Provides
     fun provideOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
     ): OkHttpClient {
-        val okHttpClient = OkHttpClient().newBuilder()
-        okHttpClient.callTimeout(60, TimeUnit.SECONDS)
-        okHttpClient.connectTimeout(60, TimeUnit.SECONDS)
-        okHttpClient.readTimeout(60, TimeUnit.SECONDS)
-        okHttpClient.writeTimeout(60, TimeUnit.SECONDS)
-        okHttpClient.retryOnConnectionFailure(true)
-        okHttpClient.addNetworkInterceptor { chain ->
-            val original = chain.request()
-            val requestBuilder = original.newBuilder()
-                .method(original.method, original.body)
-//            requestBuilder.addHeader("Content-Type", "application/json")
-            val request = requestBuilder
-                .build()
-            Log.d(TAG, "provideOkHttpClient: ${request}")
-            return@addNetworkInterceptor chain.proceed(request)
-        }
-
-        okHttpClient.addInterceptor(loggingInterceptor)
-        return okHttpClient.build()
+        return OkHttpClient.Builder()
+            .callTimeout(60, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .addNetworkInterceptor { chain ->
+                val original = chain.request()
+                val request = original.newBuilder()
+                    .method(original.method, original.body)
+                    .build()
+                Log.d(TAG, "provideOkHttpClient: $request")
+                chain.proceed(request)
+            }
+            .addInterceptor(loggingInterceptor)
+            .build()
     }
 
     @Provides
@@ -59,8 +63,8 @@ object NetWorkModule {
     @Provides
     fun provideRetrofitClient(
         okHttpClient: OkHttpClient,
-        networkConfig: NetworkConfig,
-        converterFactory: Converter.Factory
+        converterFactory: Converter.Factory,
+        networkConfig : NetworkConfig
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(networkConfig.baseUrl)
@@ -74,4 +78,12 @@ object NetWorkModule {
     fun provideWeatherApi(retrofit: Retrofit): UserApi {
         return retrofit.create(UserApi::class.java)
     }
+
+//    fun updateBaseUrl(newBaseUrl: String) {
+//        baseUrl = newBaseUrl
+//        retrofit = Retrofit.Builder()
+//            .baseUrl(baseUrl)
+//            .addConverterFactory(GsonConverterFactory.create())
+//            .build()
+//    }
 }
