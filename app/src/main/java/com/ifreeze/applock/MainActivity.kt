@@ -70,8 +70,11 @@ import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.startAutoSyncWorker
 import com.ifreeze.applock.ui.theme.AppLockTheme
 import com.ifreeze.applock.ui.theme.Shape
+import com.ifreeze.di.NetworkConfig
 import com.patient.data.cashe.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
+import java.net.URI
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -79,6 +82,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var compName: ComponentName
     private lateinit var preferenc: PreferencesGateway
     lateinit var navController: NavHostController
+
+    @Inject
+    lateinit var networkConfig: NetworkConfig
     val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -98,7 +104,8 @@ class MainActivity : ComponentActivity() {
         preferenc = PreferencesGateway(applicationContext)
         val locationService = Intent(this, LOCATION_SERVICE::class.java)
 
-
+// Dynamically set the base URL
+        networkConfig.baseUrl = "https://centhrthrtral.flothers.com:8443/"
 
 
         when (PackageManager.PERMISSION_GRANTED) {
@@ -107,12 +114,11 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
                 Log.d("abdo", "autoSync started")
-                if(!isLocationEnabled(this)){
+                if (!isLocationEnabled(this)) {
                     startService(locationService)
-                }
-                else{
+                } else {
                     stopService(locationService)
-                startAutoSyncWorker(this)
+                    startAutoSyncWorker(this)
                 }
             }
 
@@ -132,6 +138,7 @@ class MainActivity : ComponentActivity() {
             -> {
 
             }
+
             else -> {
                 requestPermissionLauncher.launch(
                     Manifest.permission.ACCESS_NETWORK_STATE
@@ -146,7 +153,7 @@ class MainActivity : ComponentActivity() {
                 navController = rememberNavController()
                 SetupNavGraph(
                     navController = navController,
-                    this, this, { wifiCheck() }, this, { webActivity() }, {systemScan()}
+                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }
                 )
             }
         }
@@ -173,6 +180,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun isValidUrl(url: String): Boolean {
+        return try {
+            val uri = URI(url)
+            uri.isAbsolute && (uri.scheme == "http" || uri.scheme == "https")
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         when (requestCode) {
@@ -194,7 +210,7 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    fun systemScan(){
+    fun systemScan() {
         this.startActivity(
             Intent(
                 this,

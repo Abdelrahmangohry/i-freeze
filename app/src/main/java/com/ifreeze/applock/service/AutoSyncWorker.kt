@@ -22,10 +22,12 @@ import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
 import com.ifreeze.data.remote.UserApi
 import com.ifreeze.data.repo.auth.LocationHelper
+import com.ifreeze.di.NetworkConfig
 import com.patient.data.cashe.PreferencesGateway
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @HiltWorker
 class AutoSyncWorker @AssistedInject constructor(

@@ -25,6 +25,7 @@ object NetWorkModule {
         return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     }
 
+
     @Provides
     fun provideOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
@@ -34,6 +35,7 @@ object NetWorkModule {
         okHttpClient.connectTimeout(60, TimeUnit.SECONDS)
         okHttpClient.readTimeout(60, TimeUnit.SECONDS)
         okHttpClient.writeTimeout(60, TimeUnit.SECONDS)
+        okHttpClient.retryOnConnectionFailure(true)
         okHttpClient.addNetworkInterceptor { chain ->
             val original = chain.request()
             val requestBuilder = original.newBuilder()
@@ -46,7 +48,6 @@ object NetWorkModule {
         }
 
         okHttpClient.addInterceptor(loggingInterceptor)
-        okHttpClient.build()
         return okHttpClient.build()
     }
 
@@ -56,17 +57,13 @@ object NetWorkModule {
     }
 
     @Provides
-    fun providesBaseUrl(): String {
-        return "https://security.flothers.com:8443/"
-    }
-    @Provides
     fun provideRetrofitClient(
         okHttpClient: OkHttpClient,
-        baseUrl: String,
+        networkConfig: NetworkConfig,
         converterFactory: Converter.Factory
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl(networkConfig.baseUrl)
             .client(okHttpClient)
             .addConverterFactory(converterFactory)
             .build()
