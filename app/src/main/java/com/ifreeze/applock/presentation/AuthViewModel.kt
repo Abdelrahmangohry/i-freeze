@@ -28,6 +28,7 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
     var _untrustedAppsFlow: MutableLiveData<Response<Untrusted>> = MutableLiveData()
     var _sendTicketFlow: MutableLiveData<Response<TicketResponse>> = MutableLiveData()
     var _checkLicenseDataFlow: MutableLiveData<Response<Boolean>> = MutableLiveData()
+    var _getcloudURL: MutableLiveData<Response<String>> = MutableLiveData()
 
 
     fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
@@ -86,8 +87,14 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         }
     }
 
+    fun getCloudURL(licenseID: String) {
+        viewModelScope.launch {
+            val response9 = useCase.getCloudURL(licenseID)
+            _getcloudURL.value = response9
+
+        }
+    }
 
 }
-
 
 

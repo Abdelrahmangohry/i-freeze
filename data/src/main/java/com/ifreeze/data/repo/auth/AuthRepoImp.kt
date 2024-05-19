@@ -11,6 +11,8 @@ import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
 import com.ifreeze.data.remote.UserApi
 import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Path
 import javax.inject.Inject
 
 class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
@@ -46,5 +48,9 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
 
     override suspend fun checkLicenseData(licenseID: String): Response<Boolean> {
         return api.checkLicenseData(licenseID)
+    }
+
+    override suspend fun getCloudURL(licenseID: String): Response<String> {
+        return api.getCloudURL(licenseID)
     }
 }

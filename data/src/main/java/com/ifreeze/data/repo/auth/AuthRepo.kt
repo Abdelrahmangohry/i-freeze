@@ -10,6 +10,8 @@ import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
 import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Path
 
 interface AuthRepo {
     suspend fun getUserLogin( activationKey : String
@@ -23,5 +25,6 @@ interface AuthRepo {
     suspend fun unTrustedApps(): Response<Untrusted>
     suspend fun sendTicket(message: TicketMessageBody): Response<TicketResponse>
     suspend fun checkLicenseData(licenseID: String): Response<Boolean>
+    suspend fun getCloudURL(licenseID: String): Response<String>
 
 }

@@ -22,17 +22,12 @@ const val TAG = "NetWorkModule"
 @Module
 @InstallIn(SingletonComponent::class)
 object NetWorkModule {
-//    private var baseUrl: String = "http://192.168.1.1:8080/"
-//    private var retrofit: Retrofit? = null
+
     @Provides
     fun providesLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     }
 
-    @Provides
-    fun provideBaseUrlInterceptor(): BaseUrlInterceptor {
-        return BaseUrlInterceptor()
-    }
 
     @Provides
     fun provideOkHttpClient(

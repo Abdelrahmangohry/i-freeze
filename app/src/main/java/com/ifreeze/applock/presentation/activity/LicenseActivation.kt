@@ -185,6 +185,10 @@ fun licenseKey(
 
                 ElevatedButton(
                     onClick = {
+                        val newBaseUrl = "https://192.168.1.250/"
+
+                        preference.saveBaseUrl(newBaseUrl)
+                        Log.d("abdo", "newBaseUrl $newBaseUrl")
                         if (!isNetworkAvailable(context)) {
                             Toast.makeText(
                                 context,
@@ -230,6 +234,15 @@ fun licenseKey(
                                         )
                                             .show()
                                     }
+                                    authViewModel.getCloudURL(deviceId!!)
+                                    authViewModel._getcloudURL.observe(lifecycle, Observer{
+                                        response ->
+                                        if (response.isSuccessful){
+
+                                        }
+                                    })
+                                    val updatedUrl = "https://192.168.1.90/"
+                                    preference.saveBaseUrl(updatedUrl)
 
                                     preference.save("IsVisible", false)
                                     preference.save("BoxShowed", false)

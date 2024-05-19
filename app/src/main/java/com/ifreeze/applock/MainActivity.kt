@@ -105,10 +105,7 @@ class MainActivity : ComponentActivity() {
         preferenc = PreferencesGateway(applicationContext)
         val locationService = Intent(this, LOCATION_SERVICE::class.java)
 
-        val newBaseUrl = "https://centhrthrtral.flothers.com:8443/"
 
-        preferenc.saveBaseUrl(newBaseUrl)
-        Log.d("abdo", "newBaseUrl $newBaseUrl")
 
 
         when (PackageManager.PERMISSION_GRANTED) {

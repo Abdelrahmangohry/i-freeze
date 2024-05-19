@@ -54,4 +54,10 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
     ) : Response<Boolean> {
         return repo.checkLicenseData(licenseID)
     }
+
+    suspend fun  getCloudURL(
+        licenseID: String
+    ) : Response<String> {
+        return repo.getCloudURL(licenseID)
+    }
 }

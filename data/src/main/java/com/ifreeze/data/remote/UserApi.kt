@@ -56,5 +56,10 @@ interface UserApi {
         @Path("licenseID") licenseID: String,
     ): Response<Boolean>
 
+    @GET("api/CloudURL/{licenseID}")
+    suspend fun getCloudURL(
+        @Path("licenseID") licenseID: String,
+    ): Response<String>
+
 }
 
