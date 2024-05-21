@@ -17,6 +17,7 @@ import com.ifreeze.applock.presentation.activity.LicenseActivation
 import com.ifreeze.applock.presentation.activity.Login
 import com.ifreeze.applock.presentation.activity.Scan
 import com.ifreeze.applock.presentation.activity.ScanProperties
+import com.ifreeze.applock.presentation.activity.SettingAdmin
 import com.ifreeze.applock.presentation.activity.SettingScreen
 import com.ifreeze.applock.presentation.activity.WebManager
 import com.ifreeze.applock.presentation.activity.WhiteList
@@ -102,6 +103,12 @@ fun NavGraphBuilder.homeNavGraph(
             route = Screen.Setting.route
         ) {
             SettingScreen(navController = navController,activity)
+        }
+
+        composable(
+            route = Screen.SettingAdmin.route
+        ) {
+            SettingAdmin(navController = navController,activity)
         }
 
         composable(

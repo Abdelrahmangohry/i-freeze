@@ -162,7 +162,7 @@ fun ticketBody() {
                     if (!isNetworkAvailable(context)) {
                         Toast.makeText(
                             context,
-                            "Please enable internet connection",
+                            "Please connect to the management server",
                             Toast.LENGTH_SHORT
                         ).show()
                         return@Button

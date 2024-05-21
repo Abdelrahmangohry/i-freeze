@@ -3,6 +3,7 @@ package com.ifreeze.applock.presentation
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
@@ -28,12 +29,12 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
     var _untrustedAppsFlow: MutableLiveData<Response<Untrusted>> = MutableLiveData()
     var _sendTicketFlow: MutableLiveData<Response<TicketResponse>> = MutableLiveData()
     var _checkLicenseDataFlow: MutableLiveData<Response<Boolean>> = MutableLiveData()
-    var _getcloudURL: MutableLiveData<Response<String>> = MutableLiveData()
+    var _getcloudURL: MutableLiveData<Response<BaseUlrResponse>> = MutableLiveData()
 
 
-    fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
+    fun getUserLogin(deviceDto: DeviceDTO) {
         viewModelScope.launch {
-            val response = useCase.getUserLogin(activationKey, deviceDto)
+            val response = useCase.getUserLogin(deviceDto)
             _loginFlow.value = response
 
         }

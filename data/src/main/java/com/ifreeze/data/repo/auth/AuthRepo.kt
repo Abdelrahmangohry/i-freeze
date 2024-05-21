@@ -1,5 +1,6 @@
 package com.ifreeze.data.repo.auth
 
+import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
@@ -14,9 +15,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface AuthRepo {
-    suspend fun getUserLogin( activationKey : String
-                              ,deviceDto: DeviceDTO ):
-            Response<String>
+    suspend fun getUserLogin(deviceDto: DeviceDTO ): Response<String>
 
     suspend fun newUpdateUserData(deviceId: String): Response<Data>
 
@@ -25,6 +24,6 @@ interface AuthRepo {
     suspend fun unTrustedApps(): Response<Untrusted>
     suspend fun sendTicket(message: TicketMessageBody): Response<TicketResponse>
     suspend fun checkLicenseData(licenseID: String): Response<Boolean>
-    suspend fun getCloudURL(licenseID: String): Response<String>
+    suspend fun getCloudURL(licenseID: String): Response<BaseUlrResponse>
 
 }

@@ -171,22 +171,22 @@ fun autoSyncButton() {
                     return@Button
                 }
 
-//                if (
-//                    !Settings.canDrawOverlays(context) ||
-//                    enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
-//                    ContextCompat.checkSelfPermission(
-//                        context,
-//                        Manifest.permission.ACCESS_FINE_LOCATION
-//                    ) != PackageManager.PERMISSION_GRANTED
-//                ) {
-//                    Toast.makeText(
-//                        context,
-//                        "Please enable i-Freeze permissions in app settings",
-//                        Toast.LENGTH_SHORT
-//                    )
-//                        .show()
-//                    return@Button
-//                }
+                if (
+                    !Settings.canDrawOverlays(context) ||
+                    enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Toast.makeText(
+                        context,
+                        "Please enable i-Freeze permissions in app settings",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@Button
+                }
 
                 if (isLocationPermissionGranted(context)) {
                     if (isLocationEnabled(context)) {
@@ -294,7 +294,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                 } else if (isFailureLimitReached!! || !isLicenseValid!!) {
                     Toast.makeText(
                         context,
-                        "License Failed Please Enable Internet Connection or Contact Support Team",
+                        "License Failed Please connect to the management server",
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -320,7 +320,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                 } else if (isFailureLimitReached!! || !isLicenseValid!!) {
                     Toast.makeText(
                         context,
-                        "License Failed Please Enable Internet Connection or Contact Support Team",
+                        "License Failed Please connect to the management server",
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -346,7 +346,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                 } else if (isFailureLimitReached!! || !isLicenseValid!!) {
                     Toast.makeText(
                         context,
-                        "License Failed Please Enable Internet Connection or Contact Support Team",
+                        "License Failed Please connect to the management server",
                         Toast.LENGTH_SHORT
                     )
                         .show()

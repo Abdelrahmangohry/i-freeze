@@ -90,3 +90,12 @@ data class TicketMessageBody(
 data class TicketResponse (
     var data    : String,
 )
+
+//////Get Base Url
+data class BaseUlrResponse(
+    val data : ApiResponse
+)
+
+data class ApiResponse(
+    val url : String
+)

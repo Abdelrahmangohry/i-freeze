@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ifreeze.applock.R
 
-class AffectedFiles(private val stringList: List<String>) :
+class AffectedFiles (private val stringList: List<String>) :
     RecyclerView.Adapter<AffectedFiles.StringViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StringViewHolder {

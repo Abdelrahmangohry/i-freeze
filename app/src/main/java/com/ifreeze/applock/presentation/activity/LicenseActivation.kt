@@ -157,22 +157,15 @@ fun licenseKey(
 
         Box(modifier = Modifier.background(color = Color.White)) {
             if (deviceId.isNullOrEmpty()) {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = { Text("xxxx-xxxx-xxxx-xxxx", color = Color.Black) },
-                    maxLines = 1,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = Color.Black, // Text color // Color of the leading icon
-                        unfocusedBorderColor = Color.LightGray, // Border color when unfocused
-                        focusedBorderColor = Color.Black,
-                        cursorColor = Color.Black
-                    ),
-                    modifier = Modifier.padding(20.dp),
+                Text(
+                    text = "Please activate license key",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
                 )
             } else {
                 Text(
-                    text = "License is Activated",
+                    text = "License is activated",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
@@ -192,21 +185,13 @@ fun licenseKey(
                         if (!isNetworkAvailable(context)) {
                             Toast.makeText(
                                 context,
-                                "Please connect to the internet",
+                                "Please connect to the management server",
                                 Toast.LENGTH_SHORT
                             ).show()
                             return@ElevatedButton
                         }
 
-                        if (text.isEmpty()) {
-                            Toast.makeText(
-                                context,
-                                "Add License Key",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            return@ElevatedButton
-                        } else {
-                            authViewModel.getUserLogin(text, deviceDto)
+                            authViewModel.getUserLogin(deviceDto)
                             authViewModel._loginFlow.observe(lifecycle, Observer { response ->
                                 if (response.isSuccessful) {
                                     Log.d("abdo", response.body().toString())
@@ -274,14 +259,14 @@ fun licenseKey(
                                 } else {
                                     Toast.makeText(
                                         context,
-                                        context.resources.getString(R.string.invalid_license_activate_key),
+                                        "Invalid License Activation Key",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     return@Observer
                                 }
 
                             })
-                        }
+
                     },
                     modifier = Modifier.padding(vertical = 16.dp)
                         .align(Alignment.CenterHorizontally),

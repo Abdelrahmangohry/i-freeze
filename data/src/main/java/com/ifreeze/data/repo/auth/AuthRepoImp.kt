@@ -1,5 +1,6 @@
 package com.ifreeze.data.repo.auth
 
+import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
@@ -18,11 +19,10 @@ import javax.inject.Inject
 class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
 
     override suspend fun getUserLogin(
-        activationKey: String,
         deviceDto: DeviceDTO
     ) : Response<String> {
         return api.
-        getUserLogin(activationKey,deviceDto)
+        getUserLogin(deviceDto)
     }
 
     override suspend fun newUpdateUserData(deviceId: String): Response<Data> {
@@ -50,7 +50,7 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
         return api.checkLicenseData(licenseID)
     }
 
-    override suspend fun getCloudURL(licenseID: String): Response<String> {
+    override suspend fun getCloudURL(licenseID: String): Response<BaseUlrResponse> {
         return api.getCloudURL(licenseID)
     }
 }

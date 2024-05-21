@@ -68,17 +68,17 @@ import com.patient.data.cashe.PreferencesGateway
 
 @RequiresApi(34)
 @Composable
-fun SettingScreen(navController: NavController, activity:Activity) {
+fun SettingAdmin(navController: NavController, activity:Activity) {
     Column (
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ){
-        HeaderSetting(onBackPressed = { navController.popBackStack() })
-        GeneralOptionsUISetting(activity)
+        HeaderAdmin(onBackPressed = { navController.popBackStack() })
+        GeneralOptionsUIAdmin(activity)
     }
 }
 
 @Composable
-fun HeaderSetting(onBackPressed: () -> Unit) {
+fun HeaderAdmin(onBackPressed: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
@@ -104,7 +104,7 @@ fun HeaderSetting(onBackPressed: () -> Unit) {
 @SuppressLint("SuspiciousIndentation")
 @RequiresApi(34)
 @Composable
-fun GeneralOptionsUISetting(
+fun GeneralOptionsUIAdmin(
     activity:Activity,
 ) {
     val context = LocalContext.current
@@ -206,7 +206,7 @@ fun GeneralOptionsUISetting(
             }
         )
 
-            toggleLocationSettingItem(
+            toggleLocationAdminItem(
                 icon = R.drawable.map,
                 mainText = "Track Location",
                 subText = "Click Here to Track The Location",
@@ -283,7 +283,7 @@ fun GeneralOptionsUISetting(
 
 
 @Composable
-fun toggleLocationSettingItem(
+fun toggleLocationAdminItem(
     icon: Int,
     mainText: String,
     subText: String,

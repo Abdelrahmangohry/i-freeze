@@ -1,5 +1,6 @@
 package com.ifreeze.data.remote
 
+import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
@@ -18,48 +19,47 @@ import retrofit2.http.Query
 
 //Api data base GET / POST
 interface UserApi {
-    @POST("api/Licenses/ActivateMobile/{activationKey}")
+    @POST("Licenses/ActivateMobile/94156ef6-b6f3-4b3f-bed6-f4e077e99abd")
     suspend fun getUserLogin(
-        @Path("activationKey") activationKey: String,
         @Body deviceDto: DeviceDTO
     ): Response<String>
 
 
-    @GET("api/Devices/GetMobileConfigurations")
+    @GET("Devices/GetMobileConfigurations")
     suspend fun newUpdateUserData(
         @Query("mobileId")
         mobileId: String,
     ): Response<Data>
 
-    @POST("api/MobileLocation")
+    @POST("MobileLocation")
     suspend fun userLocation(
         @Body location: LocationModel
     ): Response<Location>
 
 
-    @POST("api/MobileApps")
+    @POST("MobileApps")
     suspend fun mobileApps(
         @Body apps: MobileApps
     ): Response<MobileResponse>
 
-    @GET("api/UntrustedApps")
+    @GET("UntrustedApps")
     suspend fun unTrustedApps(
     ): Response<Untrusted>
 
-    @POST("api/Ticket")
+    @POST("Ticket")
     suspend fun sendTicket(
         @Body message: TicketMessageBody
     ): Response<TicketResponse>
 
-    @GET("api/Licenses/CheckLicenseDate/{licenseID}")
+    @GET("Licenses/CheckLicenseDate/{licenseID}")
     suspend fun checkLicenseData(
         @Path("licenseID") licenseID: String,
     ): Response<Boolean>
 
-    @GET("api/CloudURL/{licenseID}")
+    @GET("CloudURL/{licenseID}")
     suspend fun getCloudURL(
         @Path("licenseID") licenseID: String,
-    ): Response<String>
+    ): Response<BaseUlrResponse>
 
 }
 

@@ -63,7 +63,14 @@ class AutoSyncWorker @AssistedInject constructor(
 
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
-//            updateBaseUrl("https://security.flothers.com:8443/")
+            val getNewBaseUrl = api.getCloudURL(deviceId!!)
+            if (getNewBaseUrl.isSuccessful){
+                val updatedUrl = getNewBaseUrl.body()?.data?.url
+                Log.d("server", "updatedUrl from auto sync $updatedUrl")
+                preference.saveBaseUrl(updatedUrl!!)
+            }
+
+
             if (failureCount!! >= 20) {
                 isFailureLimitReached = true
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
@@ -89,6 +96,10 @@ class AutoSyncWorker @AssistedInject constructor(
                     .show()
 
             }
+
+
+
+
 
 
             val address = locationData.address ?: "Unknown Address"

@@ -211,7 +211,7 @@ fun Login(
                     Button(
                         onClick = {
                             if (!isNetworkAvailable(context)) {
-                                Toast.makeText(context, "Please Enable Internet Connection", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "Please connect to the management server", Toast.LENGTH_SHORT)
                                     .show()
                                 return@Button
                             }

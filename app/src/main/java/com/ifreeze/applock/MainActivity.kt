@@ -3,11 +3,13 @@ package com.ifreeze.applock
 import LightPrimaryColor
 import SecondaryColor
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -15,6 +17,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -61,10 +64,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.compse.ui.SetupNavGraph
+import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.activity.FullSystemScan
 //import com.ifreeze.applock.presentation.activity.FullSystemScan
 import com.ifreeze.applock.presentation.activity.MainWebActivity
 import com.ifreeze.applock.presentation.activity.isLocationEnabled
+import com.ifreeze.applock.presentation.activity.isNetworkAvailable
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.startAutoSyncWorker
@@ -76,16 +81,21 @@ import com.patient.data.cashe.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URI
 import javax.inject.Inject
+import androidx.lifecycle.Observer
+import com.ifreeze.data.model.DeviceDTO
+import java.net.Inet4Address
+import java.net.NetworkInterface
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var deviceManager: DevicePolicyManager
     private lateinit var compName: ComponentName
-    private lateinit var preferenc: PreferencesGateway
+    private lateinit var preference: PreferencesGateway
     lateinit var navController: NavHostController
 
-    @Inject
-    lateinit var networkConfig: NetworkConfig
+    // Inject AuthViewModel using Hilt
+    private val authViewModel: AuthViewModel by viewModels()
+
     val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -97,15 +107,27 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    @SuppressLint("HardwareIds")
     @RequiresApi(34)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, AdminService::class.java)
-        preferenc = PreferencesGateway(applicationContext)
+        preference = PreferencesGateway(applicationContext)
         val locationService = Intent(this, LOCATION_SERVICE::class.java)
-
-
+        var deviceId = preference.load("responseID", "")
+        val enabledServicesSetting = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        )
+        //getting the device Name
+        val deviceName: String = Build.BRAND + Build.MODEL
+        //getting the operating system version
+        val operatingSystemVersion: String = "Android " + Build.VERSION.RELEASE
+        val ipAddress = getIpAddress()
+        //getting the AndroidID
+        val androidId: String =
+            Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 
 
         when (PackageManager.PERMISSION_GRANTED) {
@@ -129,21 +151,55 @@ class MainActivity : ComponentActivity() {
 
             }
         }
-
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
+        if (!isNetworkAvailable(this)) {
+            Toast.makeText(
                 this,
-                Manifest.permission.ACCESS_NETWORK_STATE
+                "Please connect to the management server",
+                Toast.LENGTH_SHORT
+            ).show()
+
+        } else if (deviceId.isNullOrEmpty()) {
+
+            val deviceDto = DeviceDTO(
+                deviceName = deviceName,
+                operatingSystemVersion = operatingSystemVersion,
+                deviceIp = ipAddress,
+                macAddress = androidId,
+                serialNumber = androidId
             )
-            -> {
+            val baseUrl = "http://192.168.1.250:8443/api/"
+            preference.saveBaseUrl(baseUrl)
 
-            }
+            authViewModel.getUserLogin(deviceDto)
+            authViewModel._loginFlow.observe(this, Observer { response ->
+                if (response.isSuccessful) {
+                    Log.d("abdo", response.body().toString())
+                    deviceId = response.body().toString().trim()
+                    Log.d("deviceID", "this is device id $deviceId")
+                    preference.save("responseID", deviceId!!)
+                    Toast.makeText(
+                        this,
+                        "License is Activated",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    if (
+                        !Settings.canDrawOverlays(this) ||
+                        enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
+                        ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        Toast.makeText(
+                            this,
+                            "Please enable i-Freeze permissions in app settings",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+                }
 
-            else -> {
-                requestPermissionLauncher.launch(
-                    Manifest.permission.ACCESS_NETWORK_STATE
-                )
-            }
+            })
         }
 
 
@@ -159,14 +215,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    //getting the IP Address
+    fun getIpAddress(): String {
+        var ipAddress = ""
+        try {
+            val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+            while (networkInterfaces.hasMoreElements()) {
+                val networkInterface = networkInterfaces.nextElement()
+                val inetAddresses = networkInterface.inetAddresses
+                while (inetAddresses.hasMoreElements()) {
+                    val inetAddress = inetAddresses.nextElement()
+                    if (inetAddress is Inet4Address && !inetAddress.isLoopbackAddress) {
+                        ipAddress = inetAddress.hostAddress
+                        break
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ipAddress
+    }
+
     fun CreateKiskoMode() {
         if (deviceManager.isDeviceOwnerApp(applicationContext.getPackageName())) {
-            Log.d("islam", "CcreateKiskoMode : ${preferenc.load("kisko", false)}")
-            if (preferenc.load("kisko", false) == false) {
-                preferenc.update("kisko", true)
+            Log.d("islam", "CcreateKiskoMode : ${preference.load("kisko", false)}")
+            if (preference.load("kisko", false) == false) {
+                preference.update("kisko", true)
                 startLockTask()
             } else {
-                preferenc.update("kisko", true)
+                preference.update("kisko", true)
                 stopLockTask()
             }
         }
@@ -232,7 +310,7 @@ class MainActivity : ComponentActivity() {
 //        val broadcastNetworkReceiver = NetworkReceiver()
 //        val intentFilterNetwork = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
 //        registerReceiver(broadcastNetworkReceiver, intentFilterNetwork)
-        Log.d("islam  ", "wifiCheck start: ${preferenc.load("WifiBlocked", false)} ")
+        Log.d("islam  ", "wifiCheck start: ${preference.load("WifiBlocked", false)} ")
 //        val serviceIntent = Intent(this, NetworkMonitoringService::class.java)
 //        if (preferenc.load("WifiBlocked", false) == true) {
 //            startService(serviceIntent)
@@ -395,7 +473,7 @@ fun GeneralOptionsUI(
             mainText = "Settings",
             subText = "Configure App Permissions",
             onClick = {
-                navController.navigate(Screen.Setting.route)
+                navController.navigate(Screen.SettingAdmin.route)
             }
         )
 
@@ -426,7 +504,6 @@ fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: ()
                     .padding(vertical = 18.dp, horizontal = 14.dp)
                     .fillMaxWidth(),
 
-                verticalAlignment = Alignment.CenterVertically
             ) {
 
                 Box(

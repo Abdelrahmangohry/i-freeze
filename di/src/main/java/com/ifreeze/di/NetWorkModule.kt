@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.ifreeze.data.remote.UserApi
+import com.patient.data.cashe.PreferencesGateway
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,10 +29,15 @@ object NetWorkModule {
         return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     }
 
+    @Provides
+    fun provideDynamicBaseUrlInterceptor(preferencesGateway: PreferencesGateway): DynamicBaseUrlInterceptor {
+        return DynamicBaseUrlInterceptor(preferencesGateway)
+    }
 
     @Provides
     fun provideOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
+        dynamicBaseUrlInterceptor: DynamicBaseUrlInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .callTimeout(60, TimeUnit.SECONDS)
@@ -46,6 +52,7 @@ object NetWorkModule {
                 Log.d(TAG, "provideOkHttpClient: $request")
                 chain.proceed(request)
             }
+            .addInterceptor(dynamicBaseUrlInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
     }
@@ -59,10 +66,9 @@ object NetWorkModule {
     fun provideRetrofitClient(
         okHttpClient: OkHttpClient,
         converterFactory: Converter.Factory,
-        networkConfig : NetworkConfig
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(networkConfig.baseUrl)
+            .baseUrl("http://192.168.1.250:8443/api/")
             .client(okHttpClient)
             .addConverterFactory(converterFactory)
             .build()

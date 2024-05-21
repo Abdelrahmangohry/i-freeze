@@ -1,5 +1,6 @@
 package com.ifreeze.domain
 
+import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
@@ -15,9 +16,9 @@ import javax.inject.Inject
 
 class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
     suspend fun getUserLogin(
-        activationKey: String, deviceDto: DeviceDTO
+        deviceDto: DeviceDTO
     ) : Response<String> {
-        return repo.getUserLogin(activationKey, deviceDto)
+        return repo.getUserLogin(deviceDto)
     }
 
     suspend fun newUpdateUserData(
@@ -57,7 +58,7 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
 
     suspend fun  getCloudURL(
         licenseID: String
-    ) : Response<String> {
+    ) : Response<BaseUlrResponse> {
         return repo.getCloudURL(licenseID)
     }
 }
