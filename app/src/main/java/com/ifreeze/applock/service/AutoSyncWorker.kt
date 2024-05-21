@@ -71,7 +71,7 @@ class AutoSyncWorker @AssistedInject constructor(
             }
 
 
-            if (failureCount!! >= 20) {
+            if (failureCount!! >= 120) {
                 isFailureLimitReached = true
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
             }
@@ -233,7 +233,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
 fun startAutoSyncWorker(context: Context) {
     // Create a periodic work request for AutoSyncWorker
-    val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(15, TimeUnit.MINUTES)
+    val workRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(360, TimeUnit.MINUTES)
         .setInitialDelay(1, TimeUnit.SECONDS)
         .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
         .build()
