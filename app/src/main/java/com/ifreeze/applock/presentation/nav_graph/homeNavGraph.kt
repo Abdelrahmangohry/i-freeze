@@ -13,6 +13,7 @@ import com.ifreeze.applock.presentation.activity.AppManager
 import com.ifreeze.applock.presentation.activity.BlackList
 import com.ifreeze.applock.presentation.activity.BlackListWeb
 import com.ifreeze.applock.presentation.activity.GeneralWebView
+import com.ifreeze.applock.presentation.activity.KioskMode
 import com.ifreeze.applock.presentation.activity.LicenseActivation
 import com.ifreeze.applock.presentation.activity.Login
 import com.ifreeze.applock.presentation.activity.Scan
@@ -59,6 +60,13 @@ fun NavGraphBuilder.homeNavGraph(
         ) {
             HomeScreen(navController = navController, wifi)
         }
+
+        composable(
+            route = Screen.KioskMode.route
+        ) {
+            KioskMode(navController = navController,)
+        }
+
         composable(
             route = Screen.Splash.route
         ) {

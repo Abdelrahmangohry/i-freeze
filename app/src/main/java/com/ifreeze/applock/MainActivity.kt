@@ -76,12 +76,13 @@ import com.ifreeze.applock.service.startAutoSyncWorker
 import com.ifreeze.applock.ui.theme.AppLockTheme
 import com.ifreeze.applock.ui.theme.Shape
 import com.ifreeze.di.NetWorkModule
-import com.ifreeze.di.NetworkConfig
+
 import com.patient.data.cashe.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URI
 import javax.inject.Inject
 import androidx.lifecycle.Observer
+import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.data.model.DeviceDTO
 import java.net.Inet4Address
 import java.net.NetworkInterface
@@ -112,7 +113,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        compName = ComponentName(this, AdminService::class.java)
+        compName = ComponentName(this, MyDeviceAdminReceiver::class.java)
         preference = PreferencesGateway(applicationContext)
         val locationService = Intent(this, LOCATION_SERVICE::class.java)
         var deviceId = preference.load("responseID", "")

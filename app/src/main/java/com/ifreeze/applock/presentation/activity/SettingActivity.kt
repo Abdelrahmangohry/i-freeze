@@ -60,6 +60,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.ifreeze.applock.GeneralSettingItem
 import com.ifreeze.applock.R
+import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.ui.theme.Shape
@@ -110,7 +111,7 @@ fun GeneralOptionsUISetting(
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
     val deviceManager = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-    val compName = ComponentName(activity, AdminService::class.java)
+    val compName = ComponentName(activity, MyDeviceAdminReceiver::class.java)
     val isAdminPermissionGranted = remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(preference.loadBaseUrl() ?: "") }
     val isLocationEnabled = preference.load("locationBlocked", false)
@@ -144,12 +145,10 @@ fun GeneralOptionsUISetting(
                     val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
                     intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
                     intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-                    activity.startActivityForResult(intent, 1)
+                    context.startActivity(intent)
                 }else{
-                    Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_SHORT).show()
                 }
-                Log.d("islam", "GeneralOptionsUISetting :admin ")
-//                AdminAction()
             }
         )
         GeneralSettingItem(
@@ -165,7 +164,7 @@ fun GeneralOptionsUISetting(
                     context.startActivity(myIntent)
                 }else{
                     Toast.makeText(
-                        context,"Over Draw Already Enabled", Toast.LENGTH_LONG).show()
+                        context,"Over Draw Already Enabled", Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -181,7 +180,7 @@ fun GeneralOptionsUISetting(
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                     context.startActivity(intent)
                 }else{
-                    Toast.makeText(context,"Accessibility Service Already Enabled", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context,"Accessibility Service Already Enabled", Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -201,7 +200,7 @@ fun GeneralOptionsUISetting(
                     )
                 } else {
                     // Location permission is already granted
-                    Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_SHORT).show()
                 }
             }
         )

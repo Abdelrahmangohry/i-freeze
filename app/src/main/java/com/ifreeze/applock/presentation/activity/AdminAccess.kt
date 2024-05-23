@@ -358,16 +358,6 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
         )
 
 
-//        GeneralSettingItem(
-//            icon = R.drawable.icon_settings,
-//            mainText = "Settings",
-//            subText = "Configure App Permissions",
-//            onClick = {
-//
-//
-//            }
-//        )
-
         GeneralSettingItem(
             icon = R.drawable.contact_support,
             mainText = "Support",
@@ -377,15 +367,15 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
             }
         )
 
-//        GeneralSettingItem(
-//            icon = R.drawable.baseline_key_24,
-//            mainText = "License Activation",
-//            subText = "Activate Your License",
-//            onClick = {
-//                navController.navigate(Screen.LicenseActivation.route)
-//
-//            }
-//        )
+        GeneralSettingItem(
+            icon = R.drawable.contact_support,
+            mainText = "kiosk Mode",
+            subText = "Contact Us",
+            onClick = {
+                navController.navigate(Screen.KioskMode.route)
+            }
+        )
+
 
 
     }

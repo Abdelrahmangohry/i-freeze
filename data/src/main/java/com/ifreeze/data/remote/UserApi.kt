@@ -19,7 +19,7 @@ import retrofit2.http.Query
 
 //Api data base GET / POST
 interface UserApi {
-    @POST("Licenses/ActivateMobile/94156ef6-b6f3-4b3f-bed6-f4e077e99abd")
+    @POST("Licenses/ActivateMobile/c8ff0875-5dd4-4735-8694-56f69b01059a")
     suspend fun getUserLogin(
         @Body deviceDto: DeviceDTO
     ): Response<String>

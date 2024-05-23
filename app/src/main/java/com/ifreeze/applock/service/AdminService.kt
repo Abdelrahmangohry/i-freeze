@@ -19,6 +19,7 @@ class AdminService: DeviceAdminReceiver() {
     override fun onEnabled(context: Context, intent: Intent) {
         super.onEnabled(context, intent)
         showToast(context,"onEnabled")
+
     }
 
     override fun onDisabled(context: Context, intent: Intent) {

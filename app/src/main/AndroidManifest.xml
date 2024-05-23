@@ -96,22 +96,32 @@
         </service>
         <service android:name=".service.NetworkMonitoringService" />
         <service android:name=".service.ForceCloseWifi" />
-
         <receiver
-            android:name=".service.AdminService"
-            android:exported="true"
-            android:permission="android.permission.BIND_DEVICE_ADMIN | android.permission.MANAGE_DEVICE_ADMINS">
+            android:name=".Receiver.MyDeviceAdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
             <meta-data
                 android:name="android.app.device_admin"
-                android:resource="@xml/admin_controllers" />
-
+                android:resource="@xml/device_admin_receiver" />
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.PROFILE_PROVISIONING_COMPLETE" />
             </intent-filter>
         </receiver>
+<!--        <receiver-->
+<!--            android:name=".service.AdminService"-->
+<!--            android:exported="true"-->
+<!--            android:permission="android.permission.BIND_DEVICE_ADMIN | android.permission.MANAGE_DEVICE_ADMINS">-->
+<!--            <meta-data-->
+<!--                android:name="android.app.device_admin"-->
+<!--                android:resource="@xml/admin_controllers" />-->
+
+<!--            <intent-filter>-->
+<!--                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />-->
+<!--                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />-->
+<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--                <action android:name="android.intent.action.PROFILE_PROVISIONING_COMPLETE" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
         <receiver android:name=".brodcast.NetworkReceiver" />
         <receiver
             android:name=".brodcast.BootReceiver"

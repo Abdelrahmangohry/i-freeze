@@ -10,11 +10,11 @@ import javax.inject.Singleton
 class NetworkConfig @Inject constructor(preference: PreferencesGateway) {
 
 
-        var baseUrl: String = "http://192.168.1.250:8443/api/"
+        var baseUrl: String = "https://central.flothers.com:8443/api/"
 
 
     init {
-        val savedBaseUrl = preference.loadBaseUrl()
+        val savedBaseUrl = "https://central.flothers.com:8443/api/"
         if (!savedBaseUrl.isNullOrEmpty()) {
             baseUrl = savedBaseUrl
             Log.d("server", "updatedUrl from server $baseUrl")

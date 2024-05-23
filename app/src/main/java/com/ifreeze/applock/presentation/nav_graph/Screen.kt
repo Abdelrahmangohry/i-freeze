@@ -12,6 +12,7 @@ sealed class Screen(val route:String){
     object Setting : Screen(route = "setting_screen")
 
     object SupportTeam : Screen(route = "support_team")
+    object KioskMode : Screen(route = "kiosk_mode")
     object LicenseActivation : Screen(route = "license_activation")
     object SettingAdmin : Screen(route = "setting_admin")
     object WhiteList : Screen(route = "withe_list_screen")

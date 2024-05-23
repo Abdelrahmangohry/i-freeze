@@ -60,6 +60,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.ifreeze.applock.GeneralSettingItem
 import com.ifreeze.applock.R
+import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.ui.theme.Shape
@@ -110,7 +111,7 @@ fun GeneralOptionsUIAdmin(
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
     val deviceManager = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-    val compName = ComponentName(activity, AdminService::class.java)
+    val compName = ComponentName(activity, MyDeviceAdminReceiver::class.java)
     val isAdminPermissionGranted = remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(preference.loadBaseUrl() ?: "") }
     val isLocationEnabled = preference.load("locationBlocked", false)
