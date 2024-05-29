@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.widget.Toast
 import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -87,6 +88,20 @@ class AccessibilityServices : AccessibilityService() {
 
             }
         }
+
+        // new test by islam
+        if (p0?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            // Detect Overview button press
+            if ("com.android.systemui.recents.RecentsActivity" == p0.className) {
+                // Custom action when Overview button is pressed
+                handleOverviewButtonPress()
+            }
+        }
+    }
+
+    private fun handleOverviewButtonPress() {
+        // Custom action logic
+        Toast.makeText(this, "Overview button pressed", Toast.LENGTH_SHORT).show()
     }
 
     fun killThisPackageIfRunning(context: Context, packageName: String?) {

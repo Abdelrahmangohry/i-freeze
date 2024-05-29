@@ -27,18 +27,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,19 +43,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.ifreeze.applock.GeneralSettingItem
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
-import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
@@ -205,28 +195,28 @@ fun GeneralOptionsUISetting(
             }
         )
 
-            toggleLocationSettingItem(
-                icon = R.drawable.map,
-                mainText = "Track Location",
-                subText = "Click Here to Track The Location",
-                isChecked = locationBlockedState.value!!,
-                onCheckedChange = { isCheckedLocation ->
-
-                    preference.update("locationBlocked", isCheckedLocation)
-                    locationBlockedState.value = isCheckedLocation
-                    if (isCheckedLocation && !isLocationEnabled(context)) {
-                        Log.d("abdo", "i am here")
-                        Log.d("abdo", "isCheckedLocation $isCheckedLocation")
-                        context.startService(serviceIntent)
-                    } else {
-                        Log.d("abdo", "iam in else")
-                        context.stopService(serviceIntent)
-                    }
-                },
-                onClick = {
-
-                }
-            )
+//            toggleLocationSettingItem(
+//                icon = R.drawable.map,
+//                mainText = "Track Location",
+//                subText = "Click Here to Track The Location",
+//                isChecked = locationBlockedState.value!!,
+//                onCheckedChange = { isCheckedLocation ->
+//
+//                    preference.update("locationBlocked", isCheckedLocation)
+//                    locationBlockedState.value = isCheckedLocation
+//                    if (isCheckedLocation && !isLocationEnabled(context)) {
+//                        Log.d("abdo", "i am here")
+//                        Log.d("abdo", "isCheckedLocation $isCheckedLocation")
+//                        context.startService(serviceIntent)
+//                    } else {
+//                        Log.d("abdo", "iam in else")
+//                        context.stopService(serviceIntent)
+//                    }
+//                },
+//                onClick = {
+//
+//                }
+//            )
     }
 }
 

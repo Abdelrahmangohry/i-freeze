@@ -352,7 +352,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                         .show()
                     return@GeneralSettingItem
                 } else {
-                    navController.navigate(Screen.Login.route)
+                    navController.navigate(Screen.Home.route)
                 }
             }
         )
@@ -368,15 +368,13 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
         )
 
         GeneralSettingItem(
-            icon = R.drawable.contact_support,
-            mainText = "kiosk Mode",
-            subText = "Contact Us",
+            icon = R.drawable.apps,
+            mainText = "Applications",
+            subText = "Access applications",
             onClick = {
                 navController.navigate(Screen.KioskMode.route)
             }
         )
-
-
 
     }
 }

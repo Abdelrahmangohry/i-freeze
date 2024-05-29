@@ -97,10 +97,6 @@ class AutoSyncWorker @AssistedInject constructor(
             }
 
 
-
-
-
-
             val address = locationData.address ?: "Unknown Address"
             val latitude = locationData.latitude ?: 0.0
             val longitude = locationData.longitude ?: 0.0

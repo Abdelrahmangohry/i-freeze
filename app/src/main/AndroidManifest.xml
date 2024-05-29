@@ -37,6 +37,20 @@
         android:theme="@style/Theme.AppLock"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
+        <activity
+            android:name=".presentation.activity.CustomLauncherActivity"
+            android:launchMode="singleTask"
+            android:stateNotNeeded="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".presentation.activity.FullSystemScan"
             android:exported="false" />
@@ -60,6 +74,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:lockTaskMode="if_whitelisted"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppLock">
             <intent-filter>
@@ -96,32 +111,33 @@
         </service>
         <service android:name=".service.NetworkMonitoringService" />
         <service android:name=".service.ForceCloseWifi" />
+
         <receiver
             android:name=".Receiver.MyDeviceAdminReceiver"
-            android:permission="android.permission.BIND_DEVICE_ADMIN"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
                 android:name="android.app.device_admin"
                 android:resource="@xml/device_admin_receiver" />
+
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
-        </receiver>
-<!--        <receiver-->
-<!--            android:name=".service.AdminService"-->
-<!--            android:exported="true"-->
-<!--            android:permission="android.permission.BIND_DEVICE_ADMIN | android.permission.MANAGE_DEVICE_ADMINS">-->
-<!--            <meta-data-->
-<!--                android:name="android.app.device_admin"-->
-<!--                android:resource="@xml/admin_controllers" />-->
-
-<!--            <intent-filter>-->
-<!--                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />-->
-<!--                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />-->
-<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
-<!--                <action android:name="android.intent.action.PROFILE_PROVISIONING_COMPLETE" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
+        </receiver> <!-- <receiver -->
+        <!-- android:name=".service.AdminService" -->
+        <!-- android:exported="true" -->
+        <!-- android:permission="android.permission.BIND_DEVICE_ADMIN | android.permission.MANAGE_DEVICE_ADMINS"> -->
+        <!-- <meta-data -->
+        <!-- android:name="android.app.device_admin" -->
+        <!-- android:resource="@xml/admin_controllers" /> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" /> -->
+        <!-- <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" /> -->
+        <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
+        <!-- <action android:name="android.intent.action.PROFILE_PROVISIONING_COMPLETE" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
         <receiver android:name=".brodcast.NetworkReceiver" />
         <receiver
             android:name=".brodcast.BootReceiver"

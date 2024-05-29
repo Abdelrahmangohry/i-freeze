@@ -178,7 +178,7 @@ fun licenseKey(
 
                 ElevatedButton(
                     onClick = {
-                        val newBaseUrl = "https://192.168.1.250/"
+                        val newBaseUrl = "https://security.flothers.com:8443/api/"
 
                         preference.saveBaseUrl(newBaseUrl)
                         Log.d("abdo", "newBaseUrl $newBaseUrl")
@@ -226,12 +226,9 @@ fun licenseKey(
 
                                         }
                                     })
-                                    val updatedUrl = "https://192.168.1.90/"
-                                    preference.saveBaseUrl(updatedUrl)
 
                                     preference.save("IsVisible", false)
                                     preference.save("BoxShowed", false)
-
                                     navController.navigate(Screen.AdminAccess.route)
 
                                     authViewModel.newUpdateUserData(deviceId!!)

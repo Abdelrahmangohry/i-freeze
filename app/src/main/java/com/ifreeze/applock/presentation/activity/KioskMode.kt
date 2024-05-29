@@ -6,10 +6,13 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
+import android.os.Build
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,18 +25,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,18 +48,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.helper.getAppIconByPackageName
 import com.ifreeze.applock.helper.toImageBitmap
-import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.window.DialogProperties
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,190 +77,229 @@ import com.patient.data.cashe.PreferencesGateway
 fun KioskMode(navController: NavController) {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
-    var whiteListKiosk by remember { mutableStateOf(preference.getList("whiteListKiosk")) }
-    var inputText by remember { mutableStateOf("") }
+    var applicationNames by remember { mutableStateOf(preference.getList("applicationsList")) }
+    val deviceManager =
+        context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+    val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
+    var isDeviceAdminActive by remember { mutableStateOf(deviceManager.isAdminActive(compName)) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    val view = LocalView.current
+    val window = (view.context as Activity).window
+    var insetsController = WindowCompat.getInsetsController(window, view)
+    var showSwipeAlert by remember { mutableStateOf(false) }
 
-    val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-    val adminName = getComponentName(context)
 
-    val deviceAdminLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = { result ->
-            if (dpm.isAdminActive(adminName)) {
-                try {
-                    // Create a Bundle with the desired restrictions
-                    val restrictions = Bundle().apply {
-                        // Example restrictions
-                        putBoolean("no_screen_capture", true)
-                        putBoolean("no_add_user", true)
-                        // Add more restrictions as needed
-                    }
+    val predefinedApplicationNames = arrayOf("com.facebook.katana", "com.instagram.android")
+    applicationNames = ArrayList(predefinedApplicationNames.toList())
 
-                    dpm.setApplicationRestrictions(adminName, "com.ifreeze.applock", restrictions)
-                    dpm.setLockTaskPackages(adminName, whiteListKiosk.toTypedArray())
-                } catch (e: SecurityException) {
-                    Log.d("abdo", "Failed to set lock task packages", e)
-                }
-            } else {
-                Log.d("abdo", "Device admin not activated")
-            }
-        }
-    )
-
-    // Check and prompt for device admin activation
     LaunchedEffect(Unit) {
-        if (!dpm.isAdminActive(adminName)) {
-            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-                putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminName)
-                putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Your app needs to be a device admin to enable Kiosk Mode.")
-            }
-            deviceAdminLauncher.launch(intent)
+        if (!isDeviceAdminActive) {
+            activateDeviceAdmin(context, deviceManager, compName)
         } else {
-
-            try {
-                dpm.setLockTaskPackages(adminName, whiteListKiosk.toTypedArray())
-            } catch (e: SecurityException) {
-                Log.d("abdo", "Failed to set lock task packages", e)
-            }
+            startLockTask(context)
+//            enterImmersiveMode()
         }
     }
 
-    Column(
+
+    if (showPasswordDialog) {
+        PasswordDialog(
+            onDismiss = { showPasswordDialog = false },
+            onPasswordCorrect = {
+                showPasswordDialog = false
+                stopLockTask(context)
+                navController.popBackStack()
+            }
+        )
+    }
+
+    if (showSwipeAlert) {
+        AlertDialog(
+            onDismissRequest = { showSwipeAlert = false },
+            title = { Text("Swipe Detected") },
+            text = { Text("You swiped from down to up!") },
+            confirmButton = {
+                Button(onClick = { showSwipeAlert = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
+    var initialY by remember { mutableStateOf(0f) }
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF175AA8))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
-            Text(
-                text = "Kiosk",
-                color = Color.White,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 6.dp, bottom = 15.dp)
-                    .padding(horizontal = 30.dp),
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 22.sp
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-        ) {
-            OutlinedTextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.White)
-                    .padding(15.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = Color.Black, // Text color // Color of the leading icon
-                    unfocusedBorderColor = Color.LightGray, // Border color when unfocused
-                    focusedBorderColor = Color.Black,
-                    cursorColor = Color.Black,
-                ),
-                maxLines = 1,
-                label = { Text(text = "Package Name", color = Color.Black) },
-                placeholder = { Text(text = "Enter Package Name") },
-            )
-
-            Button(
-                onClick = {
-                    if (inputText.isNotEmpty()) {
-                        whiteListKiosk =
-                            whiteListKiosk.toMutableList()
-                                .apply { add(inputText.lowercase().trim()) } as ArrayList<String>
-                        preference.saveList("whiteListKiosk", whiteListKiosk)
-                        Log.d("abdo", "WhiteListKiosk from on click $whiteListKiosk ")
-                        inputText = ""
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp),
-                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-            ) {
-                Text("Submit", color = Color.White)
-            }
-
-            Button(
-                onClick = {
-                    if (whiteListKiosk.isNotEmpty()) {
-                        val packageManager = context.packageManager
-                        val launchIntent =
-                            packageManager.getLaunchIntentForPackage(whiteListKiosk[0])
-                        if (launchIntent != null) {
-                            try {
-                                dpm.setLockTaskPackages(adminName, whiteListKiosk.toTypedArray())
-                                context.startActivity(
-                                    launchIntent,
-                                    ActivityOptions.makeBasic().toBundle()
-                                )
-                                (context as? Activity)?.startLockTask()
-                            } catch (e: SecurityException) {
-                                Log.d("abdo", "Failed to start activity in lock task mode", e)
-                            }
+            .pointerInput(Unit) {
+                detectVerticalDragGestures(
+                    onDragStart = { offset ->
+                        initialY = offset.y
+                    },
+                    onVerticalDrag = { change, dragAmount ->
+                        change.consume()
+                        showPasswordDialog = true// Optional: consume the change
+                    },
+                    onDragEnd = {
+                        val finalY = initialY
+                        if (initialY - finalY > 100) { // Adjust the threshold as needed
+                            showPasswordDialog = true
                         }
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp),
-                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-            ) {
-                Text("Start Kiosk", color = Color.White)
-            }
-
-            Button(
-                onClick = {
-                    // Stop Kiosk Mode by clearing lock task packages
-                    dpm.setLockTaskPackages(adminName, emptyArray())
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp),
-                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-            ) {
-                Text("Stop Kiosk", color = Color.White)
-            }
-        }
-
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(whiteListKiosk.size) { index ->
-                KioskListItems(
-                    app = whiteListKiosk[index],
-                    onDeleteClick = {
-                        whiteListKiosk = whiteListKiosk.toMutableList().apply {
-                            remove(whiteListKiosk[index])
-                        } as ArrayList<String>
-                        preference.saveList("whiteListKiosk", whiteListKiosk)
-                        Log.d("abdo", "WhiteListKiosk from delete $whiteListKiosk ")
-                    }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+
             }
-        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF175AA8))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { showPasswordDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Applications",
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 22.sp
+                    )
+                }
+
+            }
+
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(applicationNames.size) { index ->
+                    KioskListItems(
+                        app = applicationNames[index],
+
+                        onPressAction = { packageName ->
+                            openApplication(context, packageName)
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+            }
+        }}
+
+    }
+
+
+
+private fun startLockTask(context: Context) {
+    if (context is ComponentActivity) {
+        context.startLockTask()
+    }
+}
+
+fun stopLockTask(context: Context) {
+    if (context is ComponentActivity) {
+        context.stopLockTask()
     }
 }
 
 
+private fun activateDeviceAdmin(context: Context, deviceManager: DevicePolicyManager, compName: ComponentName) {
+    if (!deviceManager.isAdminActive(compName)) {
+        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+            putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+            putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    }
+}
+private fun openApplication(context: Context, packageName: String) {
+    val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+    if (intent != null) {
+        context.startActivity(intent)
+    } else {
+        Toast.makeText(context, "Package not found", Toast.LENGTH_SHORT).show()
+    }
+}
+
+
+
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KioskListItems(app: String, onDeleteClick: () -> Unit) {
+fun PasswordDialog(onDismiss: () -> Unit, onPasswordCorrect: () -> Unit) {
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Enter Password") },
+        text = {
+            Column (
+                modifier = Modifier.fillMaxSize()
+            ){
+                TextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (password == "123") {
+                        onPasswordCorrect()
+                    } else {
+                        errorMessage = "Incorrect password. Please try again."
+                    }
+                }
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun KioskListItems(app: String, onPressAction: (String) -> Unit) {
     val imageBitmap = LocalContext.current.getAppIconByPackageName(app)?.toImageBitmap()
     Card(
+        onClick= { onPressAction(app) },
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFF175AA8))
@@ -288,26 +340,36 @@ fun KioskListItems(app: String, onDeleteClick: () -> Unit) {
                         .weight(1f)
                         .padding(8.dp),
                 )
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .padding(end = 8.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.Black
-                    )
-                }
+
             }
         }
     }
 }
 
-fun getComponentName(context: Context): ComponentName {
-    return ComponentName(context, MyDeviceAdminReceiver::class.java)
+
+@Composable
+fun LockedSwipePage(
+    swipeEnabled: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    val modifier = if (!swipeEnabled) {
+        Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { change, _ ->
+                    change.consumeAllChanges() // Consume all vertical drag gestures
+                }
+            }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { change, _ ->
+                    change.consumeAllChanges() // Consume all horizontal drag gestures
+                }
+            }
+    } else {
+        Modifier.fillMaxSize()
+    }
+
+    Box(modifier = modifier.background(Color.Transparent)) {
+        content()
+    }
 }
-
-
-

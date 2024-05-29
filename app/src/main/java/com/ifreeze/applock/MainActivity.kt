@@ -13,9 +13,13 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
@@ -60,6 +64,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -111,6 +118,14 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("HardwareIds")
     @RequiresApi(34)
     override fun onCreate(savedInstanceState: Bundle?) {
+//enableEdgeToEdge(
+//    statusBarStyle = SystemBarStyimprele.light(
+//        0xFFFFFFFF.toInt(), 0xFFFFFFFF.toInt()
+//    ),
+//    navigationBarStyle = SystemBarStyle.light(
+//        0xFFFFFFFF.toInt(), 0xFFFFFFFF.toInt()
+//    ),
+//)
         super.onCreate(savedInstanceState)
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, MyDeviceAdminReceiver::class.java)
@@ -121,6 +136,25 @@ class MainActivity : ComponentActivity() {
             contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         )
+
+        window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.FOCUSABLES_TOUCH_MODE
+                        or View.GONE
+                )
+
+        enterImmersiveMode()
+//        //Hide the status bar.
+//        window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+//
+//
+//        //You must hide action bar when you hide status bar.
+//        actionBar?.hide()
+
+
+
         //getting the device Name
         val deviceName: String = Build.BRAND + Build.MODEL
         //getting the operating system version
@@ -168,7 +202,7 @@ class MainActivity : ComponentActivity() {
                 macAddress = androidId,
                 serialNumber = androidId
             )
-            val baseUrl = "http://192.168.1.250:8443/api/"
+            val baseUrl = "https://security.flothers.com:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
             authViewModel.getUserLogin(deviceDto)
@@ -209,9 +243,11 @@ class MainActivity : ComponentActivity() {
             AppLockTheme {
                 navController = rememberNavController()
                 SetupNavGraph(
+
                     navController = navController,
                     this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }
                 )
+
             }
         }
     }
@@ -296,6 +332,16 @@ class MainActivity : ComponentActivity() {
                 FullSystemScan::class.java
             )
         )
+    }
+
+    private fun enterImmersiveMode() {
+        val window = window
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController?.let {
+            it.hide(WindowInsetsCompat.Type.systemBars())
+            it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
     }
 
     fun webActivity() {

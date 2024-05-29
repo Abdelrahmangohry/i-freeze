@@ -3,6 +3,7 @@ package com.ifreeze.applock.presentation.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
@@ -10,6 +11,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.Settings
 import android.util.Log
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -115,11 +117,13 @@ fun GeneralOptionsUIAdmin(
     val isAdminPermissionGranted = remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(preference.loadBaseUrl() ?: "") }
     val isLocationEnabled = preference.load("locationBlocked", false)
+    val isApplicationBlocked = preference.load("BlockState", false)
     val locationBlockedState = remember { mutableStateOf(isLocationEnabled) }
+    val lockedApplicationState = remember { mutableStateOf(isApplicationBlocked) }
     Log.d("abdo", "locationBlockedState ${locationBlockedState.value}")
 
     val serviceIntent = Intent(context, LocationService::class.java)
-
+//    val lockedApplicationState = mutableStateOf(false)
     val launcher =  rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult ={
@@ -229,6 +233,35 @@ fun GeneralOptionsUIAdmin(
 
                 }
             )
+
+        toggleLocationAdminItem(
+            icon = R.drawable.lock,
+            mainText = "Kiosk Mode",
+            subText = "Click here to enable kiosk mode",
+            isChecked = lockedApplicationState.value!!,
+            onCheckedChange = { isApplicationBlocked ->
+                if (isApplicationBlocked) {
+                    // Enable kiosk mode
+                    preference.update("BlockState", true)
+                    lockedApplicationState.value = true
+                    (context as? Activity)?.startLockTask()
+                    Log.d("abdo", "start lock")
+                } else {
+                    // Request password to disable kiosk mode
+                    showPasswordDialog(context) {
+                        // Disable kiosk mode only if password is correct
+                        preference.update("BlockState", false)
+                        lockedApplicationState.value = false
+                        (context as? Activity)?.stopLockTask()
+                        Log.d("abdo", "stop lock")
+                    }
+                }
+            },
+            onClick = {
+                // Handle item click if needed
+            }
+        )
+
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 8.dp
@@ -282,6 +315,29 @@ fun GeneralOptionsUIAdmin(
     }
 }
 
+fun showPasswordDialog(context: Context, onPasswordCorrect: () -> Unit) {
+    val editText = EditText(context)
+    val correctPassword = "123" // Set your password here
+    val dialog = AlertDialog.Builder(context)
+        .setTitle("Enter Password")
+        .setView(editText)
+        .setPositiveButton("OK") { dialog, _ ->
+            val inputPassword = editText.text.toString()
+            if (inputPassword == correctPassword) {
+                onPasswordCorrect()
+            } else {
+                Log.d("abdo", "Incorrect password")
+            }
+            dialog.dismiss()
+        }
+        .setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+        .create()
+
+    dialog.show()
+}
+
 
 @Composable
 fun toggleLocationAdminItem(
@@ -296,7 +352,7 @@ fun toggleLocationAdminItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .background(Color(0xFF175AA8))
+            .background(Color(0xFF175AA8)).padding(bottom = 12.dp)
     ) {
         Box(
             modifier = Modifier

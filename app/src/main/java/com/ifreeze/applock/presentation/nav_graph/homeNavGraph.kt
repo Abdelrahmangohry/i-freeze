@@ -2,6 +2,8 @@ package com.ifreeze.applock.presentation.nav_graph
 
 import android.app.Activity
 import android.content.Context
+import android.gesture.GestureOverlayView
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.*
@@ -25,6 +27,7 @@ import com.ifreeze.applock.presentation.activity.WhiteList
 import com.ifreeze.applock.presentation.activity.WhiteListWeb
 import com.ifreeze.applock.presentation.activity.WhiteListWifi
 import com.ifreeze.applock.presentation.activity.SupportTeam
+import com.ifreeze.applock.presentation.activity.showPasswordDialog
 import com.ifreeze.applock.presentation.screen.HomeScreen
 import com.ifreeze.applock.presentation.screen.NetworkControl
 import com.ifreeze.applock.presentation.screen.SplashScreen
@@ -64,8 +67,18 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.KioskMode.route
         ) {
-            KioskMode(navController = navController,)
+            BackHandler(true) {
+
+
+            }
+
+//            GestureOverlayView
+//            (showPasswordDialog(context, ))
+                KioskMode(navController = navController,)
+
         }
+
+
 
         composable(
             route = Screen.Splash.route
