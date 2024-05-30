@@ -16,10 +16,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
-
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
@@ -73,21 +70,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.compse.ui.SetupNavGraph
 import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.activity.FullSystemScan
-//import com.ifreeze.applock.presentation.activity.FullSystemScan
 import com.ifreeze.applock.presentation.activity.MainWebActivity
 import com.ifreeze.applock.presentation.activity.isLocationEnabled
 import com.ifreeze.applock.presentation.activity.isNetworkAvailable
 import com.ifreeze.applock.presentation.nav_graph.Screen
-import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.startAutoSyncWorker
 import com.ifreeze.applock.ui.theme.AppLockTheme
 import com.ifreeze.applock.ui.theme.Shape
-import com.ifreeze.di.NetWorkModule
-
 import com.patient.data.cashe.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URI
-import javax.inject.Inject
 import androidx.lifecycle.Observer
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.data.model.DeviceDTO

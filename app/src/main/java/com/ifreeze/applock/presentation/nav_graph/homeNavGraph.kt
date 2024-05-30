@@ -27,7 +27,6 @@ import com.ifreeze.applock.presentation.activity.WhiteList
 import com.ifreeze.applock.presentation.activity.WhiteListWeb
 import com.ifreeze.applock.presentation.activity.WhiteListWifi
 import com.ifreeze.applock.presentation.activity.SupportTeam
-import com.ifreeze.applock.presentation.activity.showPasswordDialog
 import com.ifreeze.applock.presentation.screen.HomeScreen
 import com.ifreeze.applock.presentation.screen.NetworkControl
 import com.ifreeze.applock.presentation.screen.SplashScreen

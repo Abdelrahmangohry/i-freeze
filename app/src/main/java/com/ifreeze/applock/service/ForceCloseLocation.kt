@@ -52,12 +52,12 @@
             val btn = chatHeadView?.findViewById<Button>(R.id.tryHereAgain)
             btn?.setOnClickListener {
                 if (isLocationEnabled(this)) {
-                    Log.d("button", "this is from the button")
+                    Log.d("abdo", "this is from the button")
                     stopService(locationService)
                     startAutoSyncWorker(this)
                 }
                 else {
-                    Log.d("button", "this is from the button stop service")
+                    Log.d("abdo", "this is from the button stop service")
                     startService(locationService)
                     Toast.makeText(applicationContext, "Please Enable Location", Toast.LENGTH_SHORT).show()
 //                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))

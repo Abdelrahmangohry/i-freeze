@@ -64,6 +64,7 @@ import com.ifreeze.applock.GeneralSettingItem
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.service.AdminService
+import com.ifreeze.applock.service.KioskModeService
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
@@ -71,10 +72,10 @@ import com.patient.data.cashe.PreferencesGateway
 
 @RequiresApi(34)
 @Composable
-fun SettingAdmin(navController: NavController, activity:Activity) {
-    Column (
+fun SettingAdmin(navController: NavController, activity: Activity) {
+    Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
-    ){
+    ) {
         HeaderAdmin(onBackPressed = { navController.popBackStack() })
         GeneralOptionsUIAdmin(activity)
     }
@@ -108,26 +109,30 @@ fun HeaderAdmin(onBackPressed: () -> Unit) {
 @RequiresApi(34)
 @Composable
 fun GeneralOptionsUIAdmin(
-    activity:Activity,
+    activity: Activity,
 ) {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
-    val deviceManager = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+    val deviceManager =
+        activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(activity, MyDeviceAdminReceiver::class.java)
     val isAdminPermissionGranted = remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(preference.loadBaseUrl() ?: "") }
+
     val isLocationEnabled = preference.load("locationBlocked", false)
-    val isApplicationBlocked = preference.load("BlockState", false)
     val locationBlockedState = remember { mutableStateOf(isLocationEnabled) }
+
+    val isApplicationBlocked = preference.load("BlockState", false)
     val lockedApplicationState = remember { mutableStateOf(isApplicationBlocked) }
-    Log.d("abdo", "locationBlockedState ${locationBlockedState.value}")
+    Log.d("kiosk", "lockedApplicationState $lockedApplicationState")
 
     val serviceIntent = Intent(context, LocationService::class.java)
+    val kioskIntent = Intent(context, KioskModeService::class.java)
 //    val lockedApplicationState = mutableStateOf(false)
-    val launcher =  rememberLauncherForActivityResult(
+    val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult ={
-            if (it){
+        onResult = {
+            if (it) {
                 Log.d("islam", "isAdminPermissionGranted : $it ")
                 isAdminPermissionGranted.value = true
             }
@@ -145,13 +150,17 @@ fun GeneralOptionsUIAdmin(
             mainText = "Admin Permission",
             subText = "For get access and control over apps",
             onClick = {
-                if (!deviceManager.isDeviceOwnerApp(activity.packageName)){
+                if (!deviceManager.isDeviceOwnerApp(activity.packageName)) {
                     val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
                     intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                    intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
+                    intent.putExtra(
+                        DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                        "You should enable the app!"
+                    )
                     activity.startActivityForResult(intent, 1)
-                }else{
-                    Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, "the admin permission is add ", Toast.LENGTH_SHORT)
+                        .show()
                 }
                 Log.d("islam", "GeneralOptionsUISetting :admin ")
 //                AdminAction()
@@ -168,9 +177,10 @@ fun GeneralOptionsUIAdmin(
                     val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
                     myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(myIntent)
-                }else{
+                } else {
                     Toast.makeText(
-                        context,"Over Draw Already Enabled", Toast.LENGTH_LONG).show()
+                        context, "Over Draw Already Enabled", Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         )
@@ -179,14 +189,19 @@ fun GeneralOptionsUIAdmin(
             mainText = "Accessibility Service",
             subText = "This is essential part of Android's",
             onClick = {
-                val enabledServicesSetting = Settings.Secure.getString(context.contentResolver,
+                val enabledServicesSetting = Settings.Secure.getString(
+                    context.contentResolver,
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
                 )
-                if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true){
+                if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true) {
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                     context.startActivity(intent)
-                }else{
-                    Toast.makeText(context,"Accessibility Service Already Enabled", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Accessibility Service Already Enabled",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         )
@@ -198,41 +213,50 @@ fun GeneralOptionsUIAdmin(
             onClick = {
                 val locationPermissionRequestCode = 123
                 // Check if location permission is already granted
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
                     // Location permission is not granted, request it
-                    ActivityCompat.requestPermissions(context as Activity,
+                    ActivityCompat.requestPermissions(
+                        context as Activity,
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                         locationPermissionRequestCode
                     )
                 } else {
                     // Location permission is already granted
-                    Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "Location permission is already granted",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         )
 
-            toggleLocationAdminItem(
-                icon = R.drawable.map,
-                mainText = "Track Location",
-                subText = "Click Here to Track The Location",
-                isChecked = locationBlockedState.value!!,
-                onCheckedChange = { isCheckedLocation ->
+        toggleLocationAdminItem(
+            icon = R.drawable.map,
+            mainText = "Track Location",
+            subText = "Click Here to Track The Location",
+            isChecked = locationBlockedState.value!!,
+            onCheckedChange = { isCheckedLocation ->
 
-                    preference.update("locationBlocked", isCheckedLocation)
-                    locationBlockedState.value = isCheckedLocation
-                    if (isCheckedLocation && !isLocationEnabled(context)) {
-                        Log.d("abdo", "i am here")
-                        Log.d("abdo", "isCheckedLocation $isCheckedLocation")
-                        context.startService(serviceIntent)
-                    } else {
-                        Log.d("abdo", "iam in else")
-                        context.stopService(serviceIntent)
-                    }
-                },
-                onClick = {
-
+                preference.update("locationBlocked", isCheckedLocation)
+                locationBlockedState.value = isCheckedLocation
+                if (isCheckedLocation && !isLocationEnabled(context)) {
+                    Log.d("abdo", "i am here")
+                    Log.d("abdo", "isCheckedLocation $isCheckedLocation")
+                    context.startService(serviceIntent)
+                } else {
+                    Log.d("abdo", "iam in else")
+                    context.stopService(serviceIntent)
                 }
-            )
+            },
+            onClick = {
+
+            }
+        )
 
         toggleLocationAdminItem(
             icon = R.drawable.lock,
@@ -240,21 +264,19 @@ fun GeneralOptionsUIAdmin(
             subText = "Click here to enable kiosk mode",
             isChecked = lockedApplicationState.value!!,
             onCheckedChange = { isApplicationBlocked ->
+                Log.d("kiosk", "isApplicationBlocked $isApplicationBlocked")
                 if (isApplicationBlocked) {
                     // Enable kiosk mode
                     preference.update("BlockState", true)
                     lockedApplicationState.value = true
-                    (context as? Activity)?.startLockTask()
+                    context.startService(kioskIntent)
                     Log.d("abdo", "start lock")
                 } else {
-                    // Request password to disable kiosk mode
-                    showPasswordDialog(context) {
-                        // Disable kiosk mode only if password is correct
-                        preference.update("BlockState", false)
-                        lockedApplicationState.value = false
-                        (context as? Activity)?.stopLockTask()
-                        Log.d("abdo", "stop lock")
-                    }
+                    preference.update("BlockState", false)
+                    lockedApplicationState.value = false
+                    context.stopService(kioskIntent)
+                    Log.d("abdo", "stop lock")
+
                 }
             },
             onClick = {
@@ -266,7 +288,7 @@ fun GeneralOptionsUIAdmin(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 8.dp
             ),
-            onClick = {  },
+            onClick = { },
             modifier = Modifier
                 .padding(top = 15.dp)
                 .fillMaxWidth()
@@ -286,7 +308,7 @@ fun GeneralOptionsUIAdmin(
                         onValueChange = { text = it },
                         label = { Text("Management Server", color = Color.Black) },
                         maxLines = 1,
-                        textStyle =  TextStyle(fontSize = 16.sp),
+                        textStyle = TextStyle(fontSize = 16.sp),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             textColor = Color.Black, // Text color // Color of the leading icon
                             unfocusedBorderColor = Color.LightGray, // Border color when unfocused
@@ -294,7 +316,7 @@ fun GeneralOptionsUIAdmin(
                             cursorColor = Color.Black
                         ),
                         modifier = Modifier.weight(1f)
-                        )
+                    )
 
                     // Save Button
                     Button(
@@ -313,29 +335,6 @@ fun GeneralOptionsUIAdmin(
 
         }
     }
-}
-
-fun showPasswordDialog(context: Context, onPasswordCorrect: () -> Unit) {
-    val editText = EditText(context)
-    val correctPassword = "123" // Set your password here
-    val dialog = AlertDialog.Builder(context)
-        .setTitle("Enter Password")
-        .setView(editText)
-        .setPositiveButton("OK") { dialog, _ ->
-            val inputPassword = editText.text.toString()
-            if (inputPassword == correctPassword) {
-                onPasswordCorrect()
-            } else {
-                Log.d("abdo", "Incorrect password")
-            }
-            dialog.dismiss()
-        }
-        .setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss()
-        }
-        .create()
-
-    dialog.show()
 }
 
 

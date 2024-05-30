@@ -92,14 +92,14 @@ fun KioskMode(navController: NavController) {
     val predefinedApplicationNames = arrayOf("com.facebook.katana", "com.instagram.android")
     applicationNames = ArrayList(predefinedApplicationNames.toList())
 
-    LaunchedEffect(Unit) {
-        if (!isDeviceAdminActive) {
-            activateDeviceAdmin(context, deviceManager, compName)
-        } else {
-            startLockTask(context)
-//            enterImmersiveMode()
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        if (!isDeviceAdminActive) {
+//            activateDeviceAdmin(context, deviceManager, compName)
+//        } else {
+//            startLockTask(context)
+////            enterImmersiveMode()
+//        }
+//    }
 
 
     if (showPasswordDialog) {

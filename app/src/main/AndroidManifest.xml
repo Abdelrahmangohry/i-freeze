@@ -51,6 +51,15 @@
             android:enabled="true"
             android:exported="true" />
 
+        <service
+            android:name=".service.ForceCloseKiosk"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".service.KioskModeService"
+            android:enabled="true"
+            android:exported="true" />
+
         <provider
             android:name=".SharedPreferencesProvider"
             android:authorities="com.ifreeze.applock.provider"
