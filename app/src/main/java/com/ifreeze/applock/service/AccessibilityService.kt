@@ -27,6 +27,7 @@ class AccessibilityServices : AccessibilityService() {
 
     private val handler = Handler()
     lateinit var serviceIntent: Intent
+    lateinit var kioskIntent: Intent
     var serviceApp: ForceCloseService? = null
     private lateinit var preferenc: PreferencesGateway
     private fun isLauncherPackage(packageName: String): Boolean {
@@ -64,13 +65,21 @@ class AccessibilityServices : AccessibilityService() {
 //    }
     ////////////////
 
+    private fun isKioskPackage(packageName: String): Boolean {
+        val kioskPackageList = listOf(
+            "com.facebook.katana",
+                   )
+        return kioskPackageList.any { packageName.startsWith(it) }
+    }
+
 
     override fun onAccessibilityEvent(p0: AccessibilityEvent?) {
         preferenc = PreferencesGateway(applicationContext)
 
         // Create an intent for ForceCloseService class
         serviceIntent = Intent(applicationContext, ForceCloseService::class.java)
-
+        kioskIntent = Intent(applicationContext, ForceCloseKiosk::class.java)
+        val blockState = preferenc.load("BlockState", false)
         blockedAppList = preferenc.getList("blockedAppsList")
         Log.d("abdo", "this issssss blockedAppList $blockedAppList")
 
@@ -79,7 +88,14 @@ class AccessibilityServices : AccessibilityService() {
         // Get the package name from the AccessibilityEvent
         val packageName = p0?.packageName.toString()
         Log.d("abdo", "this issssss packageName $packageName")
-
+        if (!isKioskPackage(packageName) && blockState == true){
+            startService(kioskIntent)
+            Log.d("test", "i started the service")
+        }
+        else{
+            stopService(kioskIntent)
+            Log.d("test", "i stopped the service")
+        }
         // Check if the event type is a window state change
         if (p0?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             Log.d("abdo", "packageName $packageName")
@@ -88,6 +104,8 @@ class AccessibilityServices : AccessibilityService() {
                 handleAppBasedOnLists(packageName, serviceIntent)
 
             }
+
+
         }
 
     }
