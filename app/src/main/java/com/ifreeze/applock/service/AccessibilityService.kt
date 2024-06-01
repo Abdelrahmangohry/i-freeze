@@ -68,6 +68,7 @@ class AccessibilityServices : AccessibilityService() {
     private fun isKioskPackage(packageName: String): Boolean {
         val kioskPackageList = listOf(
             "com.facebook.katana",
+            "com.instagram.android"
                    )
         return kioskPackageList.any { packageName.startsWith(it) }
     }

@@ -45,12 +45,19 @@ class ForceCloseKiosk : Service() {
         // Ensure proper handling of overlay permissions and user experience
         chatHeadView = LayoutInflater.from(this).inflate(R.layout.create_kiosk_mode, null)
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val kioskService = Intent(this, KioskModeService::class.java)
+
 
         val btn = chatHeadView?.findViewById<Button>(R.id.tryHereAgain)
+        val instagram = chatHeadView?.findViewById<Button>(R.id.instagram)
 
         btn?.setOnClickListener {
             val packageName = "com.facebook.katana"
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            startActivity(intent)
+        }
+
+        instagram?.setOnClickListener {
+            val packageName = "com.instagram.android"
             val intent = packageManager.getLaunchIntentForPackage(packageName)
             startActivity(intent)
         }
