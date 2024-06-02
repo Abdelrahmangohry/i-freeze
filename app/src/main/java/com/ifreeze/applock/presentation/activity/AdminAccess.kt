@@ -138,6 +138,13 @@ fun dropDownOptions(navController: NavController) {
                         navController.navigate(Screen.LicenseActivation.route)
                     }
                 )
+
+                DropdownMenuItem(
+                    text = { Text("Start Kiosk") },
+                    onClick = {
+                        preference.update("BlockState", true)
+                    }
+                )
             }
         }
 
@@ -352,7 +359,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                         .show()
                     return@GeneralSettingItem
                 } else {
-                    navController.navigate(Screen.Home.route)
+                    navController.navigate(Screen.Login.route)
                 }
             }
         )

@@ -4,22 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    >
+    android:background="@color/blue">
 
-        <TextView
-            android:id="@+id/chat_head_icon"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:text="List Of Applications"
-            android:textSize="30sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/chat_head_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:paddingBottom="15dp"
+        android:text="List Of Applications"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/tryHereAgain"
@@ -47,5 +46,15 @@
         app:layout_constraintStart_toEndOf="@+id/tryHereAgain"
         app:layout_constraintTop_toBottomOf="@+id/chat_head_icon" />
 
+    <ImageView
+        android:id="@+id/i_freeze"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="40dp"
+        android:src="@drawable/sheild"
+        android:background="@drawable/white_bg"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

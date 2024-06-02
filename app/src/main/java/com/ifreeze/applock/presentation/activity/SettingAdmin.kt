@@ -64,7 +64,8 @@ import com.ifreeze.applock.GeneralSettingItem
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.service.AdminService
-import com.ifreeze.applock.service.KioskModeService
+import com.ifreeze.applock.service.ForceCloseKiosk
+
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
@@ -127,7 +128,7 @@ fun GeneralOptionsUIAdmin(
     Log.d("kiosk", "lockedApplicationState $lockedApplicationState")
 
     val serviceIntent = Intent(context, LocationService::class.java)
-    val kioskIntent = Intent(context, KioskModeService::class.java)
+    val kioskIntent = Intent(context, ForceCloseKiosk::class.java)
 //    val lockedApplicationState = mutableStateOf(false)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -276,7 +277,6 @@ fun GeneralOptionsUIAdmin(
                     lockedApplicationState.value = false
                     context.stopService(kioskIntent)
                     Log.d("abdo", "stop lock")
-
                 }
             },
             onClick = {
