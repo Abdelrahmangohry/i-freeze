@@ -70,160 +70,66 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import com.ifreeze.applock.presentation.AuthViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KioskMode(navController: NavController) {
+fun KioskMode(
+    navController: NavController,
+    lifecycle: LifecycleOwner,
+    authViewModel: AuthViewModel = hiltViewModel(),
+) {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
-    var applicationNames by remember { mutableStateOf(preference.getList("applicationsList")) }
-    val deviceManager =
-        context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-    val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
-    var isDeviceAdminActive by remember { mutableStateOf(deviceManager.isAdminActive(compName)) }
-    var showPasswordDialog by remember { mutableStateOf(false) }
-    val view = LocalView.current
-    val window = (view.context as Activity).window
-    var insetsController = WindowCompat.getInsetsController(window, view)
-    var showSwipeAlert by remember { mutableStateOf(false) }
+
+    var applicationNames by remember { mutableStateOf(preference.getList("kioskApplications")) }
 
 
-    val predefinedApplicationNames = arrayOf("com.facebook.katana", "com.instagram.android")
-    applicationNames = ArrayList(predefinedApplicationNames.toList())
+    authViewModel.getKioskApps()
+    authViewModel._getkioskApps.observe(lifecycle, Observer { response ->
+        if (response.isSuccessful) {
+            val applicationNamesList = response.body()?.data?.map { it.packageName } ?: emptyList()
+            Log.d("kioskapp", "applicationNames $applicationNamesList")
+            preference.saveList("kioskApplications", applicationNamesList)
+            applicationNames = applicationNamesList as ArrayList<String>
+        }
+    })
 
-//    LaunchedEffect(Unit) {
-//        if (!isDeviceAdminActive) {
-//            activateDeviceAdmin(context, deviceManager, compName)
-//        } else {
-//            startLockTask(context)
-////            enterImmersiveMode()
-//        }
-//    }
-
-
-    if (showPasswordDialog) {
-        PasswordDialog(
-            onDismiss = { showPasswordDialog = false },
-            onPasswordCorrect = {
-                showPasswordDialog = false
-                stopLockTask(context)
-                navController.popBackStack()
-            }
-        )
-    }
-
-    if (showSwipeAlert) {
-        AlertDialog(
-            onDismissRequest = { showSwipeAlert = false },
-            title = { Text("Swipe Detected") },
-            text = { Text("You swiped from down to up!") },
-            confirmButton = {
-                Button(onClick = { showSwipeAlert = false }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
-
-    var initialY by remember { mutableStateOf(0f) }
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
-                detectVerticalDragGestures(
-                    onDragStart = { offset ->
-                        initialY = offset.y
-                    },
-                    onVerticalDrag = { change, dragAmount ->
-                        change.consume()
-                        showPasswordDialog = true// Optional: consume the change
-                    },
-                    onDragEnd = {
-                        val finalY = initialY
-                        if (initialY - finalY > 100) { // Adjust the threshold as needed
-                            showPasswordDialog = true
-                        }
+            .background(Color(0xFF175AA8)).padding(vertical = 35.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(
+            text = "Applications",
+            color = Color.White,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 22.sp
+        )
+
+
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(applicationNames.size) { index ->
+                KioskListItems(
+                    app = applicationNames[index],
+
+                    onPressAction = { packageName ->
+                        openApplication(context, packageName)
                     }
                 )
-
+                Spacer(modifier = Modifier.width(8.dp))
             }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF175AA8))
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { showPasswordDialog = true }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Applications",
-                        color = Color.White,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 22.sp
-                    )
-                }
-
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(applicationNames.size) { index ->
-                    KioskListItems(
-                        app = applicationNames[index],
-
-                        onPressAction = { packageName ->
-                            openApplication(context, packageName)
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
-        }}
-
-    }
-
-
-
-private fun startLockTask(context: Context) {
-    if (context is ComponentActivity) {
-        context.startLockTask()
-    }
-}
-
-fun stopLockTask(context: Context) {
-    if (context is ComponentActivity) {
-        context.stopLockTask()
-    }
-}
-
-
-private fun activateDeviceAdmin(context: Context, deviceManager: DevicePolicyManager, compName: ComponentName) {
-    if (!deviceManager.isAdminActive(compName)) {
-        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-            putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-            putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin")
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        context.startActivity(intent)
     }
 }
+
+
 private fun openApplication(context: Context, packageName: String) {
     val intent = context.packageManager.getLaunchIntentForPackage(packageName)
     if (intent != null) {
@@ -233,73 +139,12 @@ private fun openApplication(context: Context, packageName: String) {
     }
 }
 
-
-
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordDialog(onDismiss: () -> Unit, onPasswordCorrect: () -> Unit) {
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Enter Password") },
-        text = {
-            Column (
-                modifier = Modifier.fillMaxSize()
-            ){
-                TextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (errorMessage.isNotEmpty()) {
-                    Text(
-                        text = errorMessage,
-                        color = Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (password == "123") {
-                        onPasswordCorrect()
-                    } else {
-                        errorMessage = "Incorrect password. Please try again."
-                    }
-                }
-            ) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        },
-        properties = DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false
-        )
-    )
-}
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KioskListItems(app: String, onPressAction: (String) -> Unit) {
     val imageBitmap = LocalContext.current.getAppIconByPackageName(app)?.toImageBitmap()
     Card(
-        onClick= { onPressAction(app) },
+        onClick = { onPressAction(app) },
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFF175AA8))
@@ -343,33 +188,5 @@ fun KioskListItems(app: String, onPressAction: (String) -> Unit) {
 
             }
         }
-    }
-}
-
-
-@Composable
-fun LockedSwipePage(
-    swipeEnabled: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val modifier = if (!swipeEnabled) {
-        Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectVerticalDragGestures { change, _ ->
-                    change.consumeAllChanges() // Consume all vertical drag gestures
-                }
-            }
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { change, _ ->
-                    change.consumeAllChanges() // Consume all horizontal drag gestures
-                }
-            }
-    } else {
-        Modifier.fillMaxSize()
-    }
-
-    Box(modifier = modifier.background(Color.Transparent)) {
-        content()
     }
 }

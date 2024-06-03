@@ -43,6 +43,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
     private val deviceId = preference.load("responseID", "")
     private val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
+    private val kioskIntent = Intent(context, ForceCloseKiosk::class.java)
     private val locationService = Intent(context, LocationService::class.java)
 
     private val installedAppsList = getInstalledApps(context)
@@ -95,6 +96,11 @@ class AutoSyncWorker @AssistedInject constructor(
                     .show()
 
             }
+            val kioskApplications = api.getKioskApps()
+            if(kioskApplications.isSuccessful){
+                val applicationNamesList = kioskApplications.body()?.data?.map { it.packageName } ?: emptyList()
+                preference.saveList("kioskApplications", applicationNamesList)
+            }
 
 
             val address = locationData.address ?: "Unknown Address"
@@ -115,6 +121,8 @@ class AutoSyncWorker @AssistedInject constructor(
                 deviceId = deviceId,
                 appName = installedAppsList
             )
+
+
 
             val checklicenseData = api.checkLicenseData(licenseID!!)
             if (checklicenseData.isSuccessful){
@@ -184,6 +192,12 @@ class AutoSyncWorker @AssistedInject constructor(
                     preference.update("WebBlacklist", it.blockListURLs)
                     preference.update("WebWhitelist", it.whiteListURLs)
                     preference.update("WifiBlocked", it.blockWiFi)
+                    preference.update("BlockState", it.kiosk)
+                    if (it.kiosk) {
+                        applicationContext.startService(kioskIntent)
+                    } else {
+                        applicationContext.stopService(kioskIntent)
+                    }
                     if (it.blockWiFi) {
                         applicationContext.startService(serviceIntent)
                     } else {

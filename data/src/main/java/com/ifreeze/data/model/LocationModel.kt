@@ -22,6 +22,7 @@ data class DeviceConfigurations(
     val whiteListApps : Boolean,
     val licenseId : String,
     val time: String,
+    val kiosk: Boolean,
 
 
 )
@@ -98,4 +99,16 @@ data class BaseUlrResponse(
 
 data class ApiResponse(
     val url : String
+)
+
+//Get Kiosk Apps
+data class MobileConfigurationResponse(
+    val data: List<AppInfo>?,
+    val status: Int,
+    val message: String
+)
+
+data class AppInfo(
+    val packageName: String,
+    val isActive: Boolean,
 )

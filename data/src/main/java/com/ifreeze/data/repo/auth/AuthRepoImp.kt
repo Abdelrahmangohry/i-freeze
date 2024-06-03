@@ -6,6 +6,7 @@ import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
 import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
+import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
@@ -52,5 +53,9 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
 
     override suspend fun getCloudURL(licenseID: String): Response<BaseUlrResponse> {
         return api.getCloudURL(licenseID)
+    }
+
+    override suspend fun getKioskApps(): Response<MobileConfigurationResponse> {
+        return api.getKioskApps()
     }
 }

@@ -359,7 +359,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                         .show()
                     return@GeneralSettingItem
                 } else {
-                    navController.navigate(Screen.Login.route)
+                    navController.navigate(Screen.Home.route)
                 }
             }
         )

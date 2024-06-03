@@ -6,6 +6,7 @@ import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
 import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
+import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
@@ -60,6 +61,11 @@ interface UserApi {
     suspend fun getCloudURL(
         @Path("licenseID") licenseID: String,
     ): Response<BaseUlrResponse>
+
+
+    @GET("KioskApp")
+    suspend fun getKioskApps(
+    ): Response<MobileConfigurationResponse>
 
 }
 

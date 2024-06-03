@@ -9,6 +9,7 @@ import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
 import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
+import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
@@ -30,6 +31,7 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
     var _sendTicketFlow: MutableLiveData<Response<TicketResponse>> = MutableLiveData()
     var _checkLicenseDataFlow: MutableLiveData<Response<Boolean>> = MutableLiveData()
     var _getcloudURL: MutableLiveData<Response<BaseUlrResponse>> = MutableLiveData()
+    var _getkioskApps: MutableLiveData<Response<MobileConfigurationResponse>> = MutableLiveData()
 
 
     fun getUserLogin(deviceDto: DeviceDTO) {
@@ -96,6 +98,15 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         }
     }
 
+    fun getKioskApps() {
+        viewModelScope.launch {
+            val response10 = useCase.getKioskApps()
+            _getkioskApps.value = response10
+
+        }
+    }
+
 }
+
 
 

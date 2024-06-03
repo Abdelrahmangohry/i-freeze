@@ -11,6 +11,10 @@ import android.os.Handler
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat.startActivityForResult
 import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.CoroutineScope
@@ -67,11 +71,8 @@ class AccessibilityServices : AccessibilityService() {
     ////////////////
 
     private fun isKioskPackage(packageName: String): Boolean {
-        val kioskPackageList = listOf(
-            "com.facebook.katana",
-            "com.instagram.android",
+        val kioskPackageList = preferenc.getList("kioskApplications")
 
-                   )
         return kioskPackageList.any { packageName.startsWith(it) }
     }
 

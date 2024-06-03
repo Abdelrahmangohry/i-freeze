@@ -66,14 +66,14 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.KioskMode.route
         ) {
-            BackHandler(true) {
-
-
-            }
+//            BackHandler(true) {
+//
+//
+//            }
 
 //            GestureOverlayView
 //            (showPasswordDialog(context, ))
-                KioskMode(navController = navController,)
+                KioskMode(navController = navController, lifecycle)
 
         }
 

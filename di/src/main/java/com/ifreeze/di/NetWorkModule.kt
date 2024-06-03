@@ -68,7 +68,7 @@ object NetWorkModule {
         converterFactory: Converter.Factory,
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://security.flothers.com:8443/api/")
+            .baseUrl("https://central.flothers.com:8443/api/")
             .client(okHttpClient)
             .addConverterFactory(converterFactory)
             .build()

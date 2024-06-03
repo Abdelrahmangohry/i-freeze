@@ -6,6 +6,7 @@ import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
 import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
+import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
@@ -26,4 +27,5 @@ interface AuthRepo {
     suspend fun checkLicenseData(licenseID: String): Response<Boolean>
     suspend fun getCloudURL(licenseID: String): Response<BaseUlrResponse>
 
+    suspend fun getKioskApps(): Response<MobileConfigurationResponse>
 }

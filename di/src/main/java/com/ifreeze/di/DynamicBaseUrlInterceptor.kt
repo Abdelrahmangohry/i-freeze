@@ -14,7 +14,7 @@ class DynamicBaseUrlInterceptor(private val preferencesGateway: PreferencesGatew
         val originalRequest = chain.request()
         val requestBuilder = originalRequest.newBuilder()
 
-        val baseUrlString = "https://security.flothers.com:8443/api/"
+        val baseUrlString = "https://central.flothers.com:8443/api/"
 //        val baseUrlString = preferencesGateway.loadBaseUrl()
         if (baseUrlString != null) {
             baseUrl = baseUrlString.toHttpUrlOrNull()

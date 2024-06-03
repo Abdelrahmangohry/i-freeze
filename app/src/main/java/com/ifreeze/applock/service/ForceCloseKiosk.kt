@@ -14,8 +14,20 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ifreeze.applock.R
+import com.ifreeze.applock.helper.getAppIconByPackageName
+import com.ifreeze.applock.helper.toImageBitmap
+import com.ifreeze.applock.presentation.adapter.AdapterKiosk
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.patient.data.cashe.PreferencesGateway
 
@@ -53,29 +65,16 @@ class ForceCloseKiosk : Service() {
         // Ensure proper handling of overlay permissions and user experience
         chatHeadView = LayoutInflater.from(this).inflate(R.layout.create_kiosk_mode, null)
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val kioskPackageList = preferenc.getList("kioskApplications")
 
+        val recyclerView = chatHeadView?.findViewById<RecyclerView>(R.id.firstRow)
+//        recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerView?.layoutManager = GridLayoutManager(this, 3)
+        recyclerView?.adapter = AdapterKiosk(this, kioskPackageList)
 
-        val btn = chatHeadView?.findViewById<Button>(R.id.tryHereAgain)
-        val instagram = chatHeadView?.findViewById<Button>(R.id.instagram)
         val iFreeze = chatHeadView?.findViewById<ImageView>(R.id.i_freeze)
 
-        btn?.setOnClickListener {
-            val packageName = "com.facebook.katana"
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-            startActivity(intent)
-        }
-
-        instagram?.setOnClickListener {
-            val packageName = "com.instagram.android"
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-            startActivity(intent)
-        }
-
         iFreeze?.setOnClickListener {
-
-//            val packageName = "com.ifreeze.applock"
-//            val intent = packageManager.getLaunchIntentForPackage(packageName)
-//            startActivity(intent)
             showPasswordDialog()
         }
 
@@ -92,11 +91,6 @@ class ForceCloseKiosk : Service() {
         Log.d("abdo", "createChatHeadView : view created location")
     }
 
-    // Method to stop the Accessibility Service
-    private fun stopAccessibilityService() {
-        val intent = Intent(this, AccessibilityServices::class.java)
-        stopService(intent)
-    }
 
     private fun showPasswordDialog() {
         val builder = AlertDialog.Builder(applicationContext)
@@ -110,12 +104,12 @@ class ForceCloseKiosk : Service() {
             val enteredPassword = input.text.toString()
             if (enteredPassword == correctPassword) {
                 preferenc.update("BlockState", false)
-//                removeChatHeadView()
-//                stopSelf()
-//                stopAccessibilityService()
+                Toast.makeText(applicationContext, "Kiosk mode stopped", Toast.LENGTH_SHORT).show()
+                removeChatHeadView()
+//
             } else {
                 dialog.dismiss()
-                Toast.makeText(this, "Incorrect password", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "Incorrect password", Toast.LENGTH_SHORT).show()
             }
         }
         builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }

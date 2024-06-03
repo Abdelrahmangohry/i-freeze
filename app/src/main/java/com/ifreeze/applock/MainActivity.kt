@@ -110,42 +110,18 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("HardwareIds")
     @RequiresApi(34)
     override fun onCreate(savedInstanceState: Bundle?) {
-//enableEdgeToEdge(
-//    statusBarStyle = SystemBarStyimprele.light(
-//        0xFFFFFFFF.toInt(), 0xFFFFFFFF.toInt()
-//    ),
-//    navigationBarStyle = SystemBarStyle.light(
-//        0xFFFFFFFF.toInt(), 0xFFFFFFFF.toInt()
-//    ),
-//)
+
         super.onCreate(savedInstanceState)
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, MyDeviceAdminReceiver::class.java)
         preference = PreferencesGateway(applicationContext)
         val locationService = Intent(this, LOCATION_SERVICE::class.java)
+        var applicationNames = preference.getList("kioskApplications")
         var deviceId = preference.load("responseID", "")
         val enabledServicesSetting = Settings.Secure.getString(
             contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         )
-
-        window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.FOCUSABLES_TOUCH_MODE
-                        or View.GONE
-                )
-
-        enterImmersiveMode()
-//        //Hide the status bar.
-//        window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-//
-//
-//        //You must hide action bar when you hide status bar.
-//        actionBar?.hide()
-
-
 
         //getting the device Name
         val deviceName: String = Build.BRAND + Build.MODEL
@@ -194,7 +170,7 @@ class MainActivity : ComponentActivity() {
                 macAddress = androidId,
                 serialNumber = androidId
             )
-            val baseUrl = "https://security.flothers.com:8443/api/"
+            val baseUrl = "https://central.flothers.com:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
             authViewModel.getUserLogin(deviceDto)
@@ -226,6 +202,17 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+            })
+
+            authViewModel.getKioskApps()
+            authViewModel._getkioskApps.observe(this, Observer { response ->
+                if (response.isSuccessful) {
+                    val applicationNamesList =
+                        response.body()?.data?.map { it.packageName } ?: emptyList()
+                    Log.d("kioskapp", "applicationNames $applicationNamesList")
+                    preference.saveList("kioskApplications", applicationNamesList)
+                    applicationNames = applicationNamesList as ArrayList<String>
+                }
             })
         }
 
@@ -332,7 +319,8 @@ class MainActivity : ComponentActivity() {
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         insetsController?.let {
             it.hide(WindowInsetsCompat.Type.systemBars())
-            it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            it.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 
@@ -543,7 +531,7 @@ fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: ()
                     .padding(vertical = 18.dp, horizontal = 14.dp)
                     .fillMaxWidth(),
 
-            ) {
+                ) {
 
                 Box(
                     modifier = Modifier

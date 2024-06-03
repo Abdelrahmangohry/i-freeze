@@ -6,6 +6,7 @@ import com.ifreeze.data.model.DeviceDTO
 import com.ifreeze.data.model.Location
 import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
+import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
@@ -60,5 +61,10 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
         licenseID: String
     ) : Response<BaseUlrResponse> {
         return repo.getCloudURL(licenseID)
+    }
+
+    suspend fun  getKioskApps(
+    ) : Response<MobileConfigurationResponse> {
+        return repo.getKioskApps()
     }
 }
