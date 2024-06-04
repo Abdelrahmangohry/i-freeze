@@ -92,10 +92,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var compName: ComponentName
     private lateinit var preference: PreferencesGateway
     lateinit var navController: NavHostController
-
     // Inject AuthViewModel using Hilt
     private val authViewModel: AuthViewModel by viewModels()
-
     val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -122,7 +120,6 @@ class MainActivity : ComponentActivity() {
             contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         )
-
         //getting the device Name
         val deviceName: String = Build.BRAND + Build.MODEL
         //getting the operating system version
@@ -132,6 +129,19 @@ class MainActivity : ComponentActivity() {
         val androidId: String =
             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 
+
+        setContent {
+            window.statusBarColor = getColor(R.color.blue)
+            AppLockTheme {
+                navController = rememberNavController()
+                SetupNavGraph(
+
+                    navController = navController,
+                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }
+                )
+
+            }
+        }
 
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
@@ -154,6 +164,7 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+
         if (!isNetworkAvailable(this)) {
             Toast.makeText(
                 this,
@@ -201,7 +212,6 @@ class MainActivity : ComponentActivity() {
                             .show()
                     }
                 }
-
             })
 
             authViewModel.getKioskApps()
@@ -214,20 +224,6 @@ class MainActivity : ComponentActivity() {
                     applicationNames = applicationNamesList as ArrayList<String>
                 }
             })
-        }
-
-
-        setContent {
-            window.statusBarColor = getColor(R.color.blue)
-            AppLockTheme {
-                navController = rememberNavController()
-                SetupNavGraph(
-
-                    navController = navController,
-                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }
-                )
-
-            }
         }
     }
 
@@ -253,19 +249,6 @@ class MainActivity : ComponentActivity() {
         return ipAddress
     }
 
-    fun CreateKiskoMode() {
-        if (deviceManager.isDeviceOwnerApp(applicationContext.getPackageName())) {
-            Log.d("islam", "CcreateKiskoMode : ${preference.load("kisko", false)}")
-            if (preference.load("kisko", false) == false) {
-                preference.update("kisko", true)
-                startLockTask()
-            } else {
-                preference.update("kisko", true)
-                stopLockTask()
-            }
-        }
-    }
-
     fun checkOverlayPermission() {
         if (!Settings.canDrawOverlays(applicationContext)) {
             val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
@@ -274,14 +257,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun isValidUrl(url: String): Boolean {
-        return try {
-            val uri = URI(url)
-            uri.isAbsolute && (uri.scheme == "http" || uri.scheme == "https")
-        } catch (e: Exception) {
-            false
-        }
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
@@ -300,9 +275,6 @@ class MainActivity : ComponentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    fun permissions() {
-
-    }
 
     fun systemScan() {
         this.startActivity(
@@ -311,17 +283,6 @@ class MainActivity : ComponentActivity() {
                 FullSystemScan::class.java
             )
         )
-    }
-
-    private fun enterImmersiveMode() {
-        val window = window
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-        insetsController?.let {
-            it.hide(WindowInsetsCompat.Type.systemBars())
-            it.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        }
     }
 
     fun webActivity() {
@@ -433,12 +394,9 @@ fun HeaderLogo() {
                     .padding(top = 90.dp, start = 10.dp)
                     .align(Alignment.Center),
                 fontSize = 19.sp
-
             )
-
         }
     }
-
 }
 
 @Composable
@@ -482,7 +440,6 @@ fun GeneralOptionsUI(
             onClick = {
                 navController.navigate(Screen.WebManager.route)
             }
-
         )
 
         GeneralSettingItem(
@@ -492,7 +449,6 @@ fun GeneralOptionsUI(
             onClick = {
                 navController.navigate(Screen.AppManager.route)
             }
-
         )
 
         GeneralSettingItem(
@@ -572,48 +528,6 @@ fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: ()
     }
 }
 
-
-@Composable
-fun SupportOptionsUI(moveToApps: () -> Unit, kisko: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 14.dp)
-            .padding(top = 10.dp)
-    ) {
-        Text(
-            text = "Support",
-            color = SecondaryColor,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(vertical = 8.dp)
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "Phone Applications ",
-            onClick = {
-                moveToApps()
-            }
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "kiosk mode",
-            onClick = {
-                kisko()
-            }
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "Privacy Policy",
-            onClick = {}
-        )
-        SupportItem(
-            icon = R.drawable.ic_baseline_keyboard_arrow_right_24,
-            mainText = "About",
-            onClick = {}
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

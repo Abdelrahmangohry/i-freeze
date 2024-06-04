@@ -122,8 +122,6 @@ class AutoSyncWorker @AssistedInject constructor(
                 appName = installedAppsList
             )
 
-
-
             val checklicenseData = api.checkLicenseData(licenseID!!)
             if (checklicenseData.isSuccessful){
                 val responseBody = checklicenseData.body()?.toString()
@@ -143,8 +141,8 @@ class AutoSyncWorker @AssistedInject constructor(
 
             if (userLocationResponse.isSuccessful) {
                 Log.d("abdo", "User location updated successfully")
-
             }
+
             if (response.isSuccessful) {
                 val cloudList = response.body()?.data?.exceptionWifi
                 val newList = ArrayList<String>().apply {
@@ -157,7 +155,6 @@ class AutoSyncWorker @AssistedInject constructor(
                     }
                 }
                 preference.saveList("allowedWifiList", newList)
-
 
                 val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
                 val newListCloudBlockedWebSites = ArrayList<String>().apply {
