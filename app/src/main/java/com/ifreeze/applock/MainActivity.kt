@@ -181,7 +181,7 @@ class MainActivity : ComponentActivity() {
                 macAddress = androidId,
                 serialNumber = androidId
             )
-            val baseUrl = "https://central.flothers.com:8443/api/"
+            val baseUrl = "http://192.168.1.250:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
             authViewModel.getUserLogin(deviceDto)

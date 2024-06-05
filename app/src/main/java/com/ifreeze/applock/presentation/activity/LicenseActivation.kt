@@ -178,7 +178,7 @@ fun licenseKey(
 
                 ElevatedButton(
                     onClick = {
-                        val newBaseUrl = "https://central.flothers.com:8443/api/"
+                        val newBaseUrl = "http://192.168.1.250:8443/api/"
 
                         preference.saveBaseUrl(newBaseUrl)
                         Log.d("abdo", "newBaseUrl $newBaseUrl")
