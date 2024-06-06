@@ -93,31 +93,69 @@ class ForceCloseKiosk : Service() {
 
 
     private fun showPasswordDialog() {
-        val builder = AlertDialog.Builder(applicationContext)
-        builder.setTitle("Enter Password")
+        val builder = AlertDialog.Builder(this) // Use 'this' instead of applicationContext
+        val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val dialogView = inflater.inflate(R.layout.dialog_password, null)
 
-        val input = EditText(applicationContext)
-        input.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-        builder.setView(input)
+        builder.setView(dialogView)
 
-        builder.setPositiveButton("OK") { dialog, _ ->
+        val input = dialogView.findViewById<EditText>(R.id.passwordInput)
+        val buttonOk = dialogView.findViewById<Button>(R.id.buttonOk)
+
+        // Set up number buttons
+        val numberButtons = listOf(
+            dialogView.findViewById<Button>(R.id.button1),
+            dialogView.findViewById<Button>(R.id.button2),
+            dialogView.findViewById<Button>(R.id.button3),
+            dialogView.findViewById<Button>(R.id.button4),
+            dialogView.findViewById<Button>(R.id.button5),
+            dialogView.findViewById<Button>(R.id.button6),
+            dialogView.findViewById<Button>(R.id.button7),
+            dialogView.findViewById<Button>(R.id.button8),
+            dialogView.findViewById<Button>(R.id.button9),
+            dialogView.findViewById<Button>(R.id.button10),
+            dialogView.findViewById<Button>(R.id.button11),
+        )
+
+        for (button in numberButtons) {
+            button.setOnClickListener {
+                input.append(button.text)
+            }
+        }
+
+        // Set up delete button
+        val buttonDelete = dialogView.findViewById<Button>(R.id.buttonDelete)
+        buttonDelete.setOnClickListener {
+            val currentText = input.text.toString()
+            if (currentText.isNotEmpty()) {
+                input.setText(currentText.dropLast(1))
+            }
+        }
+
+        val alertDialog = builder.create()
+        // Set up OK button
+        buttonOk.setOnClickListener {
             val enteredPassword = input.text.toString()
             if (enteredPassword == correctPassword) {
                 preferenc.update("BlockState", false)
-                Toast.makeText(applicationContext, "Kiosk mode stopped", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Kiosk mode stopped", Toast.LENGTH_SHORT).show()
                 removeChatHeadView()
-//
+                alertDialog.dismiss()
             } else {
-                dialog.dismiss()
-                Toast.makeText(applicationContext, "Incorrect password", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Incorrect password", Toast.LENGTH_SHORT).show()
             }
         }
-        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
 
-        // Ensure the AlertDialog uses a theme that allows it to be displayed from a Service context
-        val alertDialog = builder.create()
+
         alertDialog.window?.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
         alertDialog.show()
+
+        // Adjust the dialog size to match typical AlertDialog
+        val window = alertDialog.window
+        val layoutParams = window?.attributes
+        layoutParams?.width = WindowManager.LayoutParams.WRAP_CONTENT
+        layoutParams?.height = WindowManager.LayoutParams.WRAP_CONTENT
+        window?.attributes = layoutParams
     }
 
     // Removes the chat head view

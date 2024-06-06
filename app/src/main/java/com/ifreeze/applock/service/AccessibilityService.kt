@@ -64,16 +64,18 @@ class AccessibilityServices : AccessibilityService() {
         return browserList.any { packageName.startsWith(it) }
     }
 
-    //////////////
-//    private fun getAppDatabaseInstance(): AppsDB {
-//        return RoomDBModule.provideRoomDB(applicationContext)
-//    }
-    ////////////////
-
     private fun isKioskPackage(packageName: String): Boolean {
         val kioskPackageList = preferenc.getList("kioskApplications")
-
+        Log.d("abdo", "kioskPackageList $kioskPackageList")
         return kioskPackageList.any { packageName.startsWith(it) }
+    }
+
+    private fun isSystemInKioskPackage(packageName: String): Boolean {
+        val systemList= listOf(
+        "com.touchtype.swiftkey",
+
+        )
+        return systemList.any { packageName.startsWith(it) }
     }
 
 
@@ -85,19 +87,18 @@ class AccessibilityServices : AccessibilityService() {
         kioskIntent = Intent(applicationContext, ForceCloseKiosk::class.java)
         val blockState = preferenc.load("BlockState", false)
         blockedAppList = preferenc.getList("blockedAppsList")
-//        Log.d("abdo", "this issssss blockedAppList $blockedAppList")
+
 
         allowedAppsList = preferenc.getList("allowedAppsList")
 
         // Get the package name from the AccessibilityEvent
         val packageName = p0?.packageName.toString()
         Log.d("abdo", "this issssss packageName $packageName")
-        if (!isKioskPackage(packageName) && blockState == true){
+
+        if (!isKioskPackage(packageName) && blockState == true && !isSystemInKioskPackage(packageName)) {
             startService(kioskIntent)
             Log.d("abdo", "i started the service")
-        }
-
-        else{
+        } else {
             stopService(kioskIntent)
             Log.d("abdo", "i stopped the service")
         }
@@ -115,7 +116,6 @@ class AccessibilityServices : AccessibilityService() {
         }
 
     }
-
 
 
     fun killThisPackageIfRunning(context: Context, packageName: String?) {
@@ -136,16 +136,10 @@ class AccessibilityServices : AccessibilityService() {
         serviceScope.launch {
             // Ensure appsList is initialized before proceeding
             blockedAppList = preferenc.getList("blockedAppsList")
-            Log.d("abdo", " blockedAppList $blockedAppList")
             allowedAppsList = preferenc.getList("allowedAppsList")
             val isWhitelistEnabled = preferenc.load("Whitelist", false) ?: false
             val isBlacklistEnabled = preferenc.load("Blacklist", false) ?: false
             val isBrowsersEnabled = preferenc.load("Browsers", false) ?: false
-//        if (!::blockedAppList.isInitialized){
-//            serviceScope.launch {
-//                blockedAppList = preferenc.getList("blockedAppsList")
-//            }
-//        }
             val isAppInBrowserList = isBrowsers(packageName)
             if (isBrowsersEnabled && isAppInBrowserList) {
                 applicationContext.startService(serviceIntent)
@@ -157,23 +151,15 @@ class AccessibilityServices : AccessibilityService() {
             val isAppInWhitelist = isAppInList(packageName, allowedAppsList)
             val isAppInBlacklist = isAppInList(packageName, blockedAppList)
 
-            Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
-
-            Log.d("abdo", "isWhitelistEnabled $isWhitelistEnabled")
-            Log.d("abdo", "isBlacklistEnabled $isBlacklistEnabled")
-//        Log.d("islam", "isAppInBlacklist $isAppInBlacklist")
             if (isWhitelistEnabled) {
                 if (isSystemApp(packageName)) {
-                    Log.d("abdo", "this is system app ${isSystemApp(packageName)}")
                     applicationContext.stopService(serviceIntent)
                     removeOverlayAndViewBinding()
                 } else if (!isAppInWhitelist) {
-                    Log.d("abdo", "else is white list enabled")
                     applicationContext.startService(serviceIntent)
                     killAppAndShowOverlay(packageName)
                 }
             } else if (isBlacklistEnabled && isAppInBlacklist) {
-                Log.d("abdo", "blacklist enabled")
                 applicationContext.startService(serviceIntent)
                 killAppAndShowOverlay(packageName)
             } else {
@@ -185,11 +171,9 @@ class AccessibilityServices : AccessibilityService() {
 
     private fun isSystemApp(packageName: String): Boolean {
         val packageManager = applicationContext.packageManager
-        Log.d("abdo", "system app 0 $packageManager")
 
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
-            Log.d("abdo", "system app 1 $packageInfo")
             return packageInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
         } catch (e: PackageManager.NameNotFoundException) {
             Log.d(TAG, "isSystemApp: $e")
@@ -204,6 +188,7 @@ class AccessibilityServices : AccessibilityService() {
     private fun removeOverlayKioskMode() {
         kioskApp?.removeChatHeadView()
     }
+
     private fun killAppAndShowOverlay(packageName: String) {
         killThisPackageIfRunning(applicationContext, packageName)
         serviceApp?.createChatHeadView()
