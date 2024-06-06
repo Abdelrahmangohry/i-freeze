@@ -38,9 +38,9 @@ class HomeFragment : Fragment() {
 
         mainActivityRef.binding.topSearchBar.setText("")
         binding.searchView.setQuery("",false)
-        mainActivityRef.binding.webIcon.setImageResource(R.drawable.ic_search)
+//        mainActivityRef.binding.webIcon.setImageResource(R.drawable.ic_search)
 
-        mainActivityRef.binding.refreshBtn.visibility = View.GONE
+//        mainActivityRef.binding.refreshBtn.visibility = View.GONE
 
         binding.searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(result: String?): Boolean {
@@ -52,7 +52,16 @@ class HomeFragment : Fragment() {
             }
             override fun onQueryTextChange(p0: String?): Boolean = false
         })
-        mainActivityRef.binding.goBtn.setOnClickListener {
+//        mainActivityRef.binding.goBtn.setOnClickListener {
+//            if(checkForInternet(requireContext()))
+//                changeTab(mainActivityRef.binding.topSearchBar.text.toString(),
+//                    BrowseFragment(mainActivityRef.binding.topSearchBar.text.toString())
+//                )
+//            else
+//                Snackbar.make(binding.root, "Internet Not Connected\uD83D\uDE03", 3000).show()
+//        }
+
+        mainActivityRef.binding.topSearchBar.setOnClickListener {
             if(checkForInternet(requireContext()))
                 changeTab(mainActivityRef.binding.topSearchBar.text.toString(),
                     BrowseFragment(mainActivityRef.binding.topSearchBar.text.toString())
@@ -66,10 +75,5 @@ class HomeFragment : Fragment() {
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
         binding.recyclerView.adapter = BookmarkAdapter(requireContext())
 
-//        if(MainWebActivity.bookmarkList.size < 1)
-//            binding.viewAllBtn.visibility = View.GONE
-//        binding.viewAllBtn.setOnClickListener {
-//            startActivity(Intent(requireContext(), BookmarkActivity::class.java))
-//        }
     }
 }

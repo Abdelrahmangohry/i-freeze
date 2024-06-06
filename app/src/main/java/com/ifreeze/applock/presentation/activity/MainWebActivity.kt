@@ -73,9 +73,8 @@ class MainWebActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-        }
+
+
         binding = ActivityMainWebBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -136,14 +135,6 @@ class MainWebActivity : AppCompatActivity() {
                     changeTab("Home", HomeFragment())
                     self.dismiss()
                 }
-//                .setPositiveButton("Home"){self, _ ->
-//                    changeTab("Home", HomeFragment())
-//                    self.dismiss()
-//                }
-//                .setNeutralButton("Google"){self, _ ->
-//                    changeTab("Google", BrowseFragment(urlNew = "www.google.com"))
-//                    self.dismiss()
-//                }
                 .create()
 
             bindingTabs.tabsRV.setHasFixedSize(true)
@@ -342,7 +333,7 @@ class MainWebActivity : AppCompatActivity() {
         if(enable){
             WindowCompat.setDecorFitsSystemWindows(window, false)
             WindowInsetsControllerCompat(window, binding.root).let { controller ->
-                controller.hide(WindowInsetsCompat.Type.systemBars())
+//                controller.hide(WindowInsetsCompat.Type.systemBars())
                 controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         }else{

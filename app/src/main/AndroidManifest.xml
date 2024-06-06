@@ -83,7 +83,7 @@
         <activity
             android:name=".presentation.activity.MainWebActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan" />
+           />
 
         <service
             android:name=".service.ForceCloseService"

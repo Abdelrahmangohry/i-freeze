@@ -5,13 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutDescription="@xml/activity_main_scene"
-    tools:context=".presentation.activity.MainWebActivity">
+    tools:context=".presentation.activity.MainWebActivity"
+    android:fitsSystemWindows="true"
+    >
 
     <LinearLayout
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:background="@drawable/frame_background"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,45 +24,85 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:orientation="horizontal">
-
+            android:orientation="horizontal"
+android:layout_marginHorizontal="5dp"
+            >
+            <ImageView
+                android:id="@+id/back_arrow"
+                android:layout_width="35dp"
+                android:layout_height="40dp"
+                android:padding="5dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_back"
+                app:tint="@color/darkGrey"
+                android:contentDescription="@string/back_arrow_description"
+                android:clickable="true"
+                />
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/webIcon"
-                android:layout_width="25dp"
+                android:layout_width="0dp"
+                android:layout_marginHorizontal="5dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_search" />
+                 />
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/topSearchBar"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="45dp"
                 android:layout_weight="1"
+                android:layout_gravity="center"
                 android:background="@drawable/custom_design"
                 android:hint="@string/enter_url"
-                android:paddingHorizontal="5dp"
+                android:paddingHorizontal="15dp"
                 android:singleLine="true"
-                android:textColorHint="#757575" />
+                android:textColorHint="#757575"
+                android:imeOptions="actionSearch"
+                android:inputType="textUri"
+                />
 
+<!--            <ImageButton-->
+<!--                android:id="@+id/refreshBtn"-->
+<!--                android:layout_width="50dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="?attr/selectableItemBackground"-->
+<!--                android:contentDescription="@string/refresh_btn"-->
+<!--                android:src="@drawable/ic_refresh"-->
+<!--                tools:ignore="RedundantDescriptionCheck" />-->
 
-            <ImageButton
-                android:id="@+id/refreshBtn"
-                android:layout_width="50dp"
-                android:layout_height="match_parent"
-                android:background="?attr/selectableItemBackground"
-                android:contentDescription="@string/refresh_btn"
-                android:src="@drawable/ic_refresh"
-                tools:ignore="RedundantDescriptionCheck" />
-
-            <ImageButton
-                android:id="@+id/goBtn"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tabsBtn"
                 android:layout_width="40dp"
                 android:layout_height="match_parent"
-                android:background="?attr/selectableItemBackground"
-                android:contentDescription="@string/go_btn"
-                android:src="@drawable/ic_forward"
+                android:layout_marginHorizontal="5dp"
+                android:layout_marginVertical="8dp"
+                android:background="@drawable/custom_tabs_textview"
+                android:gravity="center"
+                android:text="@string/one"
+                android:textColor="@color/black"
                 tools:ignore="RedundantDescriptionCheck" />
 
+            <ImageView
+                android:id="@+id/settingBtn"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_marginVertical="8dp"
+                android:src="@drawable/ic_settings"
+                android:background="@drawable/custom_tabs_textview"
+                android:gravity="center"
+                android:textColor="@color/black"
+                tools:ignore="RedundantDescriptionCheck"
+                android:contentDescription="@string/back_arrow_description" />
 
+<!--            <ImageButton-->
+<!--                android:id="@+id/goBtn"-->
+<!--                android:layout_width="40dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="?attr/selectableItemBackground"-->
+<!--                android:contentDescription="@string/go_btn"-->
+<!--                android:src="@drawable/ic_forward"-->
+<!--                tools:ignore="RedundantDescriptionCheck" />-->
         </LinearLayout>
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -78,69 +122,7 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/toolbarBottom" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-
-
-    <LinearLayout
-        android:id="@+id/toolbarBottom"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-
-        >
-        <LinearLayout
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_width="50dp"
-            android:layout_weight="1"
-            android:layout_marginHorizontal="20dp"
-            >
-
-
-            <ImageView
-                android:id="@+id/back_arrow"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:padding="10dp"
-
-                android:src="@drawable/sheild"
-                android:background="@drawable/custom_round_shape"
-                app:tint="@color/black"
-                android:contentDescription="@string/back_arrow_description"
-                android:clickable="true"
-                />
-        </LinearLayout>
-
-            <ImageView
-                android:id="@+id/settingBtn"
-                android:layout_width="40dp"
-                android:layout_height="match_parent"
-                android:padding="5dp"
-                android:layout_marginHorizontal="4dp"
-                android:layout_marginVertical="8dp"
-                android:src="@drawable/ic_settings"
-                android:background="@drawable/custom_tabs_textview"
-                android:gravity="center"
-                android:textColor="@color/black"
-                tools:ignore="RedundantDescriptionCheck"
-                android:contentDescription="@string/back_arrow_description" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tabsBtn"
-                android:layout_width="40dp"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginVertical="8dp"
-                android:background="@drawable/custom_tabs_textview"
-                android:gravity="center"
-                android:text="@string/one"
-                android:textColor="@color/black"
-                tools:ignore="RedundantDescriptionCheck" />
-
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout >
