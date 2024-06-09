@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
 import android.view.*
 import android.webkit.*
 import androidx.core.app.ShareCompat
@@ -61,12 +62,7 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
 
         binding.webView.webViewClient = MyWebViewClient(isBlacklistedChecked, isWhitelistedChecked)
 
-        // binding.webView.loadUrl(urlNew)
-        //  binding.webView.loadUrl("https://www.google.com/search?q=$urlNew")
-//        binding.webView.setOnTouchListener { _, motionEvent ->
-//            mainRef.binding.root.onTouchEvent(motionEvent)
-//            return@setOnTouchListener false
-//        }
+
         binding.webView.reload()
 
         binding.webView.post {
@@ -99,6 +95,14 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
             request: WebResourceRequest?
         ): Boolean {
             val url = request?.url.toString()
+            Log.d("abdo", "this is the url $url")
+            // Check if the URL is an external link
+            if (!url.startsWith("https://$urlNew") && !url.startsWith("http://$urlNew")) {
+                // Open the external link in your WebView
+
+                view?.loadUrl(url)
+                return true
+            }
 
             // Check against the blacklist
             if (isBlacklistedChecked == true && isBlockedWebsite(url)) {
@@ -158,54 +162,6 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
         return true
     }
 
-//    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
-//    override fun onResume() {
-//        super.onResume()
-//
-//
-//        MainWebActivity.tabsList[MainWebActivity.myPager.currentItem].name =
-//            binding.webView.url.toString()
-//        MainWebActivity.tabsBtn.text = MainWebActivity.tabsList.size.toString()
-//
-//        //for downloading file using external download manager
-//        binding.webView.setDownloadListener { url, _, _, _, _ ->
-//            startActivity(
-//                Intent(Intent.ACTION_VIEW).setData(
-//                    Uri.parse(url)
-//                )
-//            )
-//        }
-//
-//        val mainRef = requireActivity() as MainWebActivity
-//
-//        mainRef.binding.refreshBtn.visibility = View.VISIBLE
-//        mainRef.binding.refreshBtn.setOnClickListener {
-//            binding.webView.reload()
-//        }
-//
-//
-//        binding.webView.apply {
-//            settings.javaScriptEnabled = true
-//            settings.setSupportZoom(true)
-//            settings.builtInZoomControls = true
-//            settings.displayZoomControls = false
-//            webViewClient = object : WebViewClient() {
-//
-//                override fun doUpdateVisitedHistory(
-//                    view: WebView?,
-//                    url: String?,
-//                    isReload: Boolean
-//                ) {
-//                    super.doUpdateVisitedHistory(view, url, isReload)
-//                    mainRef.binding.topSearchBar.text = SpannableStringBuilder(url)
-//                    MainWebActivity.tabsList[MainWebActivity.myPager.currentItem].name =
-//                        url.toString()
-//                }
-//            }
-//
-//
-//        }
-//    }
 
     override fun onPause() {
         super.onPause()

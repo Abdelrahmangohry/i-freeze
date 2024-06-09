@@ -142,7 +142,16 @@ fun dropDownOptions(navController: NavController) {
                 DropdownMenuItem(
                     text = { Text("Start Kiosk") },
                     onClick = {
+
+                        if(preference.load("BlockState", true)!!){
+                            expanded = false
+                            Toast.makeText(context, "Kiosk already activated", Toast.LENGTH_SHORT).show()
+                        }
+                        else{
                         preference.update("BlockState", true)
+                        expanded = false
+                        Toast.makeText(context, "Kiosk mode activated", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 )
             }

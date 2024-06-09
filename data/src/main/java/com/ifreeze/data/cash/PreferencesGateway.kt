@@ -21,32 +21,12 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
             .apply()
     }
 
-
-    fun createLockedAppsList(appList: List<String>) {
-        for (i in appList.indices) {
-            save("app_$i", appList[i])
-        }
-        save("listSize", appList.size)
-    }
-
-    fun createWithListApps(appList: List<String>) {
-        for (i in appList.indices) {
-            save("white_$i", appList[i])
-        }
-        save("whitelistSize", appList.size)
-    }
-
     inline fun <reified T : Any> load(key: String, defaultValue: T): T? {
         return context
             .getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
             .run { getValue(key, defaultValue) }
     }
 
-    fun isSaved(key: String): Boolean {
-        return context
-            .getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .contains(key)
-    }
     fun remove(key: String) {
         context
             .getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
@@ -55,13 +35,6 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
             .apply()
     }
 
-    fun clearAll() {
-        context
-            .getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .apply()
-    }
 
     inline fun <reified T : Any> SharedPreferences.Editor.putValue(
         key: String,
@@ -114,19 +87,6 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
         }
         return temp
     }
-    fun insertSSIDName(ssid :String){
-        val size=load("SSIDSize",0)?:0
-        save("SSIDSize",size+1)
-        save("SSID$size",ssid)
-    }
-    fun getSSIDList(): List<String>? {
-        val temp: MutableList<String> = ArrayList()
-        val size: Int = load("SSIDSize",0)?:0
-        for (i in 0 until size) {
-            temp.add(load("SSID$i","")?:"")
-        }
-        return temp
-    }
 
     fun getWhiteAppsList(): List<String>? {
         val temp: MutableList<String> = ArrayList()
@@ -140,21 +100,6 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
         save("EXTRA_LAST_APP", packageName?:"")
     }
 
-    fun clearBlackList() {
-        val size: Int = load("listSize",0)?:0
-        for (i in 0 until size) {
-            remove("app_$i")
-        }
-        remove("listSize")
-    }
-    fun clearWhiteList() {
-        val size: Int = load("listSize",0)?:0
-        for (i in 0 until size) {
-            remove("white_$i")
-        }
-        remove("whitelistSize")
-
-    }
 
     fun saveList(key: String, list: List<String>) {
         val jsonString = gson.toJson(list)

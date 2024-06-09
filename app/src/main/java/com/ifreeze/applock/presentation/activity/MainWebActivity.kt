@@ -2,16 +2,21 @@ package com.ifreeze.applock.presentation.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.print.PrintAttributes
 import android.print.PrintJob
 import android.print.PrintManager
+import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.webkit.WebView
@@ -72,20 +77,22 @@ class MainWebActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-
         binding = ActivityMainWebBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+// Initialize myPager here
+        myPager = binding.myPager
+        tabsBtn = binding.tabsBtn
+        backArrow  = binding.backArrow
+
+
+        handleIntent(intent)
         getAllBookmarks()
 
         tabsList.add(Tab("Home", HomeFragment()))
         binding.myPager.adapter = TabsAdapter(supportFragmentManager, lifecycle)
         binding.myPager.isUserInputEnabled = false
-        myPager = binding.myPager
-        tabsBtn = binding.tabsBtn
-        backArrow  = binding.backArrow
+
 
         initializeView()
         changeFullscreen(enable = true)
@@ -94,6 +101,26 @@ class MainWebActivity : AppCompatActivity() {
             onBackPressed()
         }
     }
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        // Handle the new intent with a URL
+        handleIntent(intent)
+    }
+    private fun handleIntent(intent: Intent?) {
+        intent?.data?.let { uri ->
+            // A URL was provided in the intent, load it in the WebView or handle it as needed
+            loadUrl(uri.toString())
+        }
+    }
+
+    private fun loadUrl(url: String) {
+        Log.d("abdo", "this is the url should opened $url")
+        // Remove "https://" or "http://" from the URL
+        val newUrl = url.replace("https://", "")
+        changeTab(url, BrowseFragment(newUrl))
+        changeFullscreen(enable = true)
+    }
+
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onBackPressed() {

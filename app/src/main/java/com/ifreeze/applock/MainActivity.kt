@@ -9,6 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -20,6 +21,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -143,6 +145,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        if (!isDefaultBrowser()) {
+            showDefaultBrowserDialog()
+        }
+
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
@@ -181,7 +187,7 @@ class MainActivity : ComponentActivity() {
                 macAddress = androidId,
                 serialNumber = androidId
             )
-            val baseUrl = "http://192.168.1.250:8443/api/"
+            val baseUrl = "https://security.flothers.com:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
             authViewModel.getUserLogin(deviceDto)
@@ -191,6 +197,7 @@ class MainActivity : ComponentActivity() {
                     deviceId = response.body().toString().trim()
                     Log.d("deviceID", "this is device id $deviceId")
                     preference.save("responseID", deviceId!!)
+                    preference.update("BlockState", false)
                     Toast.makeText(
                         this,
                         "License is Activated",
@@ -224,6 +231,37 @@ class MainActivity : ComponentActivity() {
                     applicationNames = applicationNamesList as ArrayList<String>
                 }
             })
+        }
+    }
+
+    private fun showDefaultBrowserDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Set as Default Browser")
+            .setMessage("Would you like to set this app as your default browser?")
+            .setPositiveButton("Yes") { dialog, which ->
+                openDefaultAppsSettings()
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private fun isDefaultBrowser(): Boolean {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
+        val resolveInfo = packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        val defaultBrowserPackageName = resolveInfo?.activityInfo?.packageName
+        return defaultBrowserPackageName == packageName
+    }
+
+    private fun openDefaultAppsSettings() {
+        val intent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            // If the above intent doesn't work, fall back to a more general settings intent
+            val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$packageName")
+            }
+            startActivity(fallbackIntent)
         }
     }
 
