@@ -112,3 +112,32 @@ data class AppInfo(
     val packageName: String,
     val isActive: Boolean,
 )
+
+
+//Send Alert
+data class AlertBody(
+    val deviceId: String,
+    val logName: String,
+    val time: String,
+    val action: String,
+    val description: String,
+    val source: String
+)
+
+
+data class AlertResponse (
+    val time: String
+)
+
+//Send Alert
+data class ProactiveResultsBody(
+    val deviceId: String,
+    val processName: String,
+    val time: String,
+    val severity: String,
+    val source: String,
+
+)
+data class ProactiveResultsResponse (
+    val time: String
+)

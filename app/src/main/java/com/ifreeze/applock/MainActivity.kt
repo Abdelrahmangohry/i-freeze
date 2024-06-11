@@ -145,9 +145,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        if (!isDefaultBrowser()) {
-            showDefaultBrowserDialog()
-        }
+//        if (!isDefaultBrowser()) {
+//            showDefaultBrowserDialog()
+//        }
 
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(

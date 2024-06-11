@@ -55,12 +55,15 @@ import androidx.navigation.NavController
 import com.ifreeze.applock.presentation.AppsViewModel
 import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.nav_graph.Screen
+import com.ifreeze.data.model.AlertBody
+import com.ifreeze.data.model.DeviceDTO
 import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
-
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Composable
 fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
@@ -81,7 +84,39 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
     val developerOptionsEnabled = areDeveloperOptionsEnabled(context)
     val untrustedAppsList by remember { mutableStateOf(sharedPreferences.getList(("UntrustedApps"))) }
 
-    if(isNetworkAvailable(context)){
+    // Function to send alert
+    fun sendAlert(issueName: String) {
+        val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
+        var deviceId = sharedPreferences.load("responseID", "")
+        val message: List<AlertBody> = listOf(
+            AlertBody(
+                deviceId = "4E29E0D6-FE60-4AE9-B3CE-680B2F2C1A2F",
+                logName = issueName,
+                time = currentTime,
+                action = "String",
+                description = "String",
+                source = "String"
+            )
+        )
+        authViewModel.sendAlert(message)
+        Log.d("Alert", "Sending alert for issue: $issueName")
+        Log.d("Alert", "message $message")
+    }
+
+    // Function to handle scan button click
+    fun performScan() {
+        clicked = false
+        loading = true
+        scope.launch {
+            loadProgress { progress ->
+                currentProgress = progress
+            }
+            loading = false
+            clicked = true
+        }
+    }
+
+    if (isNetworkAvailable(context)) {
         authViewModel.unTrustedApps()
         authViewModel._untrustedAppsFlow.observe(lifecycle, Observer { response ->
             if (response.isSuccessful) {
@@ -90,17 +125,9 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
                 Log.d("abdo", "this is Untrusted app $appNames")
             } else {
                 Log.d("abdo", "this is Untrusted app error ${response.errorBody()}")
-
             }
         })
     }
-//    else{
-//        Toast.makeText(context, "Please Enable Internet Connection", Toast.LENGTH_SHORT).show()
-//    }
-
-
-    val fakeAppsList = appsNamesList.filter { untrustedAppsList.contains(it) }
-    Log.d("abdo", "fakeAppsList: $fakeAppsList")
 
     Column(
         modifier = Modifier
@@ -126,19 +153,29 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
                             .padding(20.dp)
 
                     ) {
+                        val checkItems = mutableListOf<Pair<String, Boolean>>()
                         if (lockedScreen) {
                             CheckItem("Lock Screen", true)
+                            checkItems.add("Lock Screen" to true)
                         } else {
                             CheckItem("There Is No Lock Screen", false)
+                            checkItems.add("There Is No Lock Screen" to false)
                         }
                         CheckItem("Android Version", true)
+                        checkItems.add("Android Version" to true)
                         CheckItem("Rooted Device", true)
+                        checkItems.add("Rooted Device" to rooted)
                         if (developerOptionsEnabled) {
                             CheckItem("Developer options are enabled", false)
+                            checkItems.add("Developer options are enabled" to false)
                         } else {
                             CheckItem("Developer Option Disabled", true)
+                            checkItems.add("Developer Option Disabled" to true)
                         }
-                        UntrustedApps("Untrusted Applications", fakeAppsList)
+                        UntrustedApps("Untrusted Applications", untrustedAppsList)
+                        checkItems.filter { it.second }.forEach { (issueName, _) ->
+                            sendAlert(issueName)
+                        }
                     }
 
                 } else {
@@ -156,17 +193,7 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
                             )
                         }
                         Button(
-                            onClick = {
-                                clicked = false
-                                loading = true
-                                scope.launch {
-                                    loadProgress { progress ->
-                                        currentProgress = progress
-                                    }
-                                    loading = false
-                                    clicked = true
-                                }
-                            },
+                            onClick = { performScan() },
                             border = BorderStroke(width = 6.dp, color = Color.White),
                             modifier = Modifier
                                 .size(300.dp)
@@ -190,6 +217,22 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
             }
         }
     }
+}
+
+fun sendAlert(preferences: PreferencesGateway,authViewModel: AuthViewModel, issueName: String) {
+    val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
+    var deviceId = preferences.load("responseID", "")
+    val message : List<AlertBody> = listOf(AlertBody(
+        deviceId = "4E29E0D6-FE60-4AE9-B3CE-680B2F2C1A2F",
+        logName = issueName, // Set the issue name as logName
+        time = currentTime,
+        action = "String",
+        description = "String",
+        source = "String"
+    ))
+    authViewModel.sendAlert(message)
+    Log.d("Alert", "Sending alert for issue: $issueName")
+    Log.d("Alert", "message $message")
 }
 
 @Composable

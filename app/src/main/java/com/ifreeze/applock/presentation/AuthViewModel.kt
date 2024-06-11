@@ -3,6 +3,8 @@ package com.ifreeze.applock.presentation
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ifreeze.data.model.AlertBody
+import com.ifreeze.data.model.AlertResponse
 import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
@@ -11,6 +13,8 @@ import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
 import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
+import com.ifreeze.data.model.ProactiveResultsBody
+import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
@@ -32,6 +36,8 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
     var _checkLicenseDataFlow: MutableLiveData<Response<Boolean>> = MutableLiveData()
     var _getcloudURL: MutableLiveData<Response<BaseUlrResponse>> = MutableLiveData()
     var _getkioskApps: MutableLiveData<Response<MobileConfigurationResponse>> = MutableLiveData()
+    var _sendAlert: MutableLiveData<Response<AlertResponse>> = MutableLiveData()
+    var _proactiveAlert: MutableLiveData<Response<ProactiveResultsResponse>> = MutableLiveData()
 
 
     fun getUserLogin(deviceDto: DeviceDTO) {
@@ -106,7 +112,22 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         }
     }
 
+    fun sendAlert(message: List<AlertBody>
+    ) {
+        viewModelScope.launch {
+            val response10 = useCase.sendAlert(message)
+            _sendAlert.value = response10
+
+        }
+    }
+
+    fun sendProactiveResults(message: ProactiveResultsBody
+    ) {
+        viewModelScope.launch {
+            val response10 = useCase.sendProactiveResults(message)
+            _proactiveAlert.value = response10
+
+        }
+    }
+
 }
-
-
-

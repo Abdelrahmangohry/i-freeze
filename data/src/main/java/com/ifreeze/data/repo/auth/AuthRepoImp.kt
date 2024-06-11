@@ -1,5 +1,7 @@
 package com.ifreeze.data.repo.auth
 
+import com.ifreeze.data.model.AlertBody
+import com.ifreeze.data.model.AlertResponse
 import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
@@ -8,6 +10,8 @@ import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
 import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
+import com.ifreeze.data.model.ProactiveResultsBody
+import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
@@ -57,5 +61,13 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
 
     override suspend fun getKioskApps(): Response<MobileConfigurationResponse> {
         return api.getKioskApps()
+    }
+
+    override suspend fun sendAlert(message: List<AlertBody>): Response<AlertResponse> {
+        return api.sendAlert(message)
+    }
+
+    override suspend fun sendProactiveResults(message: ProactiveResultsBody): Response<ProactiveResultsResponse> {
+        return api.sendProactiveResults(message)
     }
 }

@@ -37,6 +37,7 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
     lateinit var blockedWebsites: ArrayList<String>
     lateinit var allowedWebsites: ArrayList<String>
 
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
         inflater: LayoutInflater,

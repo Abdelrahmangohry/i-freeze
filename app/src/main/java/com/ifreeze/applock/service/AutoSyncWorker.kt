@@ -2,6 +2,7 @@ package com.ifreeze.applock.service
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,6 +10,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
@@ -17,6 +19,10 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.ifreeze.applock.presentation.activity.areDeveloperOptionsEnabled
+import com.ifreeze.applock.presentation.activity.hasLockScreenPassword
+import com.ifreeze.applock.presentation.activity.isDeviceRooted
+import com.ifreeze.data.model.AlertBody
 import com.ifreeze.data.model.LocationDataAddress
 import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
@@ -27,6 +33,10 @@ import com.ifreeze.di.NetWorkModule
 import com.patient.data.cashe.PreferencesGateway
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -55,6 +65,13 @@ class AutoSyncWorker @AssistedInject constructor(
         context.contentResolver,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )
+    ///
+    val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
+    val checkItems = mutableListOf<Pair<String, Boolean>>()
+    val lockedScreen = lockScreen(context)
+    val rooted = deviceRootedEnable()
+    val developerOptionsEnabled = developerOptionsEnabled(context)
+    ///
     init {
         failureCount = preference.load("failureCount", 0)!!
         LocationHelper.getLocation(context, this)
@@ -204,10 +221,40 @@ class AutoSyncWorker @AssistedInject constructor(
                     preference.save("time", it.time)
 
                 }
-            } else {
+            }
+            else {
                 Log.d("abdo", "Retrying.... before ")
                 applicationContext.startService(serviceIntent)
             }
+
+            if (lockedScreen) {
+                checkItems.add("Lock Screen" to true)
+            } else {
+                checkItems.add("There Is No Lock Screen" to false)
+            }
+            checkItems.add("Android Version" to true)
+            checkItems.add("Rooted Device" to rooted)
+            if (developerOptionsEnabled) {
+                checkItems.add("Developer options are enabled" to false)
+            } else {
+                checkItems.add("Developer Option Disabled" to true)
+            }
+            checkItems.filter { it.second }.forEach { (issueName, _) ->
+                val message : List<AlertBody> = listOf(AlertBody(
+                    deviceId = "4E29E0D6-FE60-4AE9-B3CE-680B2F2C1A2F",
+                    logName = issueName,
+                    time = currentTime,
+                    action = "String",
+                    description = "String",
+                    source = "String"
+                ))
+                val alertIssues = api.sendAlert(message)
+                if (alertIssues.isSuccessful) {
+                    Log.d("abdo", "mobile Issues Sent Successfully")
+
+                }
+            }
+
         } catch (e: Exception) {
 
             Log.e("abdo", "Error", e)
@@ -266,4 +313,36 @@ fun getInstalledApps(context: Context): List<String> {
         apps.add(name)
     }
     return apps
+}
+
+
+fun lockScreen(context: Context): Boolean {
+    val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+    return keyguardManager.isKeyguardSecure
+}
+
+
+fun deviceRootedEnable(): Boolean {
+    return try {
+        val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "ls /data"))
+        val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
+        val output = StringBuilder()
+        var line: String?
+        while (bufferedReader.readLine().also { line = it } != null) {
+            output.append(line)
+        }
+        process.waitFor()
+        output.toString().isNotEmpty()
+    } catch (e: Exception) {
+        false
+    }
+}
+
+
+fun developerOptionsEnabled(context: Context): Boolean {
+    return Settings.Secure.getInt(
+        context.contentResolver,
+        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+        0
+    ) != 0
 }

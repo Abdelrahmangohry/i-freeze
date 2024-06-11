@@ -1,5 +1,7 @@
 package com.ifreeze.data.remote
 
+import com.ifreeze.data.model.AlertBody
+import com.ifreeze.data.model.AlertResponse
 import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
@@ -8,6 +10,8 @@ import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
 import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
+import com.ifreeze.data.model.ProactiveResultsBody
+import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
@@ -66,6 +70,16 @@ interface UserApi {
     @GET("KioskApp")
     suspend fun getKioskApps(
     ): Response<MobileConfigurationResponse>
+
+    @POST("alerts")
+    suspend fun sendAlert(
+        @Body message: List<AlertBody>
+    ): Response<AlertResponse>
+
+    @POST("ProactiveResults")
+    suspend fun sendProactiveResults(
+        @Body message: ProactiveResultsBody
+    ): Response<ProactiveResultsResponse>
 
 }
 

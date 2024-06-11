@@ -1,5 +1,7 @@
 package com.ifreeze.domain
 
+import com.ifreeze.data.model.AlertBody
+import com.ifreeze.data.model.AlertResponse
 import com.ifreeze.data.model.BaseUlrResponse
 import com.ifreeze.data.model.Data
 import com.ifreeze.data.model.DeviceDTO
@@ -8,6 +10,8 @@ import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
 import com.ifreeze.data.model.MobileConfigurationResponse
 import com.ifreeze.data.model.MobileResponse
+import com.ifreeze.data.model.ProactiveResultsBody
+import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
@@ -66,5 +70,15 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
     suspend fun  getKioskApps(
     ) : Response<MobileConfigurationResponse> {
         return repo.getKioskApps()
+    }
+
+    suspend fun  sendAlert(message: List<AlertBody>
+    ) : Response<AlertResponse> {
+        return repo.sendAlert(message)
+    }
+
+    suspend fun  sendProactiveResults(message: ProactiveResultsBody
+    ) : Response<ProactiveResultsResponse> {
+        return repo.sendProactiveResults(message)
     }
 }
