@@ -121,7 +121,7 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         }
     }
 
-    fun sendProactiveResults(message: ProactiveResultsBody
+    fun sendProactiveResults(message: List<ProactiveResultsBody>
     ) {
         viewModelScope.launch {
             val response10 = useCase.sendProactiveResults(message)

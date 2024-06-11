@@ -2,6 +2,7 @@ package com.ifreeze.applock.presentation.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
@@ -35,9 +36,9 @@ import java.security.MessageDigest
 class FullSystemScan : AppCompatActivity() {
 
     // Define constants
-    private val EXTERNAL_STORAGE_PERMISSION_CODE = 101
-    private val FILE_SIZE_ESTIMATE = 1024 // Estimated average file size in bytes
 
+    private val FILE_SIZE_ESTIMATE = 1024 // Estimated average file size in bytes
+    var EXTERNAL_STORAGE_PERMISSION_CODE = 145
     // Views
     private lateinit var callLogTextView: TextView
     private lateinit var numberOfAffectedFiles: TextView
@@ -48,7 +49,7 @@ class FullSystemScan : AppCompatActivity() {
 
     //    private lateinit var btn2: Button
     private var hashesList = mutableListOf<Pair<String, String>>()
-    private var hashesListDatabase = mutableListOf<String>()
+
     private var affectedList = mutableListOf<String>()
     private lateinit var numberOfScannedFiles: TextView
     private lateinit var loadingProgressBar: ProgressBar
@@ -68,29 +69,23 @@ class FullSystemScan : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_full_system_scan)
         preference = PreferencesGateway(this)
-        val savedHashList = preference.getList("hashesListDatabase")
-        Log.d("abdo", "savedHashList $savedHashList")
+        val hashesListDatabase = preference.getList("hashesListDatabase")
+        // Request permission if not granted
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                EXTERNAL_STORAGE_PERMISSION_CODE
+            )
+        }
+
         GlobalScope.launch(Dispatchers.IO) {
             //Copy the database file from assets to internal storage
-            copyDatabaseFile()
-            // Open the database
-            database = openOrCreateDatabase("scan.db", Context.MODE_PRIVATE, null)
-
-            // Query the database and retrieve data from the specific table
-            val cursor = database.rawQuery("SELECT * FROM Malware_hashs", null)
-
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    val columnName = cursor.getString(cursor.getColumnIndex("sha256"))
-                    if (columnName.isNullOrEmpty()) {
-                        continue
-                    } else {
-                        hashesListDatabase.add(columnName)
-                        // Process the retrieved data as needed
-                    }
-                }
-                preference.saveList("hashesListDatabase", hashesListDatabase)
-                cursor.close()
                 Log.d("abdo", "hashlist $hashesList")
                 // Compare the lists here and update UI accordingly
                 for (pair in hashesList) {
@@ -99,9 +94,8 @@ class FullSystemScan : AppCompatActivity() {
                         Log.d("abdo", "affectedList $affectedList")
                     }
                 }
-
             }
-        }
+
 
         // Initialize loading spinner
         loadingProgressBar = findViewById(R.id.loadingProgressBar)
@@ -122,14 +116,15 @@ class FullSystemScan : AppCompatActivity() {
             progressBar.progress = 0 // Reset progress bar
             startTime = System.currentTimeMillis() // Start time for estimating time
             counter = 0
+            val downloadDirectory =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            Log.d("abdo", "rootDirectory $downloadDirectory")
             GlobalScope.launch(Dispatchers.IO) {
 
                 processedSize = 0 // Reset processed size
                 progressBar.progress = 0 // Reset progress bar
                 startTime = System.currentTimeMillis()
-                val downloadDirectory =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                Log.d("abdo", "rootDirectory $downloadDirectory")
+
                 runOnUiThread {
                     loadingProgressBar.visibility = View.VISIBLE
                     estimatedTimeTextView.visibility = View.GONE
@@ -165,41 +160,9 @@ class FullSystemScan : AppCompatActivity() {
         }
 
 
-        // Request permission if not granted
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                EXTERNAL_STORAGE_PERMISSION_CODE
-            )
-        }
+
     }
 
-    private fun copyDatabaseFile() {
-        try {
-            val DATABASE_NAME = "scan.db"
-            val inputStream: InputStream = assets.open(DATABASE_NAME)
-            val outputFile = File(getDatabasePath(DATABASE_NAME).path)
-            val outputStream = FileOutputStream(outputFile)
-
-            val buffer = ByteArray(1024)
-            var length: Int
-            while (inputStream.read(buffer).also { length = it } > 0) {
-                outputStream.write(buffer, 0, length)
-            }
-
-            outputStream.flush()
-            outputStream.close()
-            inputStream.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            Log.d("abdo", "cann't read data base")
-        }
-    }
 
     // onRequestPermissionsResult function remains the same
 
@@ -217,7 +180,6 @@ class FullSystemScan : AppCompatActivity() {
 
     private suspend fun getHashCodeFromFiles(directory: File) {
         val rootDirectory = Environment.getExternalStorageDirectory()
-        Log.d("HashLog", "Root directory: $rootDirectory")
 
         if (rootDirectory.exists() && rootDirectory.canRead()) {
             val hashes = mutableListOf<Pair<String, String>>()
@@ -233,17 +195,6 @@ class FullSystemScan : AppCompatActivity() {
         }
     }
 
-    private fun countFiles(directory: File): Int {
-        var count = 0
-        directory.listFiles()?.forEach { file ->
-            if (file.isDirectory) {
-                count += countFiles(file)
-            } else {
-                count++
-            }
-        }
-        return count
-    }
 
     private suspend fun scanDirectory(directory: File, hashes: MutableList<Pair<String, String>>) {
         Log.d("HashLog", "Scanning directory: ${directory.absolutePath}")
@@ -285,7 +236,6 @@ class FullSystemScan : AppCompatActivity() {
 
         return stringBuilder.toString()
     }
-
 
     private suspend fun updateProgress() {
         withContext(Dispatchers.Main) {

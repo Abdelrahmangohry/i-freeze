@@ -35,5 +35,5 @@ interface AuthRepo {
 
     suspend fun getKioskApps(): Response<MobileConfigurationResponse>
     suspend fun sendAlert(message: List<AlertBody>): Response<AlertResponse>
-    suspend fun sendProactiveResults(message: ProactiveResultsBody): Response<ProactiveResultsResponse>
+    suspend fun sendProactiveResults(message: List<ProactiveResultsBody>): Response<ProactiveResultsResponse>
 }

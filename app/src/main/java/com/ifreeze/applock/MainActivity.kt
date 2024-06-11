@@ -4,11 +4,13 @@ import LightPrimaryColor
 import SecondaryColor
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -62,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -85,6 +88,13 @@ import java.net.URI
 import androidx.lifecycle.Observer
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.data.model.DeviceDTO
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
@@ -94,6 +104,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var compName: ComponentName
     private lateinit var preference: PreferencesGateway
     lateinit var navController: NavHostController
+    private val EXTERNAL_STORAGE_PERMISSION_CODE = 105
     // Inject AuthViewModel using Hilt
     private val authViewModel: AuthViewModel by viewModels()
     val requestPermissionLauncher = registerForActivityResult(
@@ -107,7 +118,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    @SuppressLint("HardwareIds")
+    @SuppressLint("HardwareIds", "Range")
     @RequiresApi(34)
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -130,8 +141,11 @@ class MainActivity : ComponentActivity() {
         //getting the AndroidID
         val androidId: String =
             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        var hashesListDatabase = mutableListOf<String>()
+        //    private lateinit var btn2: Button
 
-
+        lateinit var database: SQLiteDatabase
+        Log.d("abdo", "deviceId $deviceId")
         setContent {
             window.statusBarColor = getColor(R.color.blue)
             AppLockTheme {
@@ -171,6 +185,18 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                EXTERNAL_STORAGE_PERMISSION_CODE
+            )
+        }
+
         if (!isNetworkAvailable(this)) {
             Toast.makeText(
                 this,
@@ -187,7 +213,7 @@ class MainActivity : ComponentActivity() {
                 macAddress = androidId,
                 serialNumber = androidId
             )
-            val baseUrl = "https://security.flothers.com:8443/api/"
+            val baseUrl = "http://192.168.1.250:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
             authViewModel.getUserLogin(deviceDto)
@@ -221,16 +247,75 @@ class MainActivity : ComponentActivity() {
                 }
             })
 
-            authViewModel.getKioskApps()
-            authViewModel._getkioskApps.observe(this, Observer { response ->
+            authViewModel.newUpdateUserData(deviceId!!)
+            authViewModel._newFlow.observe(this, Observer { response ->
                 if (response.isSuccessful) {
                     val applicationNamesList =
-                        response.body()?.data?.map { it.packageName } ?: emptyList()
+                        response.body()?.data?.deviceKioskApps ?: emptyList()
                     Log.d("kioskapp", "applicationNames $applicationNamesList")
                     preference.saveList("kioskApplications", applicationNamesList)
                     applicationNames = applicationNamesList as ArrayList<String>
                 }
             })
+        }
+
+
+
+    GlobalScope.launch(Dispatchers.IO) {
+        //Copy the database file from assets to internal storage
+        copyDatabaseFileMain()
+        // Open the database
+        database = openOrCreateDatabase("scan.db", Context.MODE_PRIVATE, null)
+
+        // Query the database and retrieve data from the specific table
+        val cursor = database.rawQuery("SELECT * FROM Malware_hashs", null)
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                val columnName = cursor.getString(cursor.getColumnIndex("sha256"))
+                if (columnName.isNullOrEmpty()) {
+                    continue
+                } else {
+                    hashesListDatabase.add(columnName)
+                    // Process the retrieved data as needed
+                }
+            }
+            preference.saveList("hashesListDatabase", hashesListDatabase)
+            cursor.close()
+//            Log.d("abdo", "hashlist $hashesList")
+//            // Compare the lists here and update UI accordingly
+//            for (pair in hashesList) {
+//                if (pair.second in hashesListDatabase) {
+//                    affectedList.add(pair.first)
+//                    Log.d("abdo", "affectedList $affectedList")
+//                }
+//            }
+
+        }
+    }
+
+
+    }
+
+    fun copyDatabaseFileMain() {
+        try {
+            val DATABASE_NAME = "scan.db"
+            val inputStream: InputStream = assets.open(DATABASE_NAME)
+            val outputFile = File(getDatabasePath(DATABASE_NAME).path)
+            val outputStream = FileOutputStream(outputFile)
+
+            val buffer = ByteArray(1024)
+            var length: Int
+            while (inputStream.read(buffer).also { length = it } > 0) {
+                outputStream.write(buffer, 0, length)
+            }
+
+            outputStream.flush()
+            outputStream.close()
+            inputStream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Log.d("abdo", "cann't read data base")
         }
     }
 

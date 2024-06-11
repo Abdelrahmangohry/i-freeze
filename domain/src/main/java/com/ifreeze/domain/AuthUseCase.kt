@@ -77,7 +77,7 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
         return repo.sendAlert(message)
     }
 
-    suspend fun  sendProactiveResults(message: ProactiveResultsBody
+    suspend fun  sendProactiveResults(message: List<ProactiveResultsBody>
     ) : Response<ProactiveResultsResponse> {
         return repo.sendProactiveResults(message)
     }

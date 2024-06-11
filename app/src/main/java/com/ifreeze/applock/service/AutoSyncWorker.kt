@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -22,10 +23,12 @@ import androidx.work.WorkerParameters
 import com.ifreeze.applock.presentation.activity.areDeveloperOptionsEnabled
 import com.ifreeze.applock.presentation.activity.hasLockScreenPassword
 import com.ifreeze.applock.presentation.activity.isDeviceRooted
+import com.ifreeze.applock.service.AutoSyncWorker.Companion.hashesList
 import com.ifreeze.data.model.AlertBody
 import com.ifreeze.data.model.LocationDataAddress
 import com.ifreeze.data.model.LocationModel
 import com.ifreeze.data.model.MobileApps
+import com.ifreeze.data.model.ProactiveResultsBody
 import com.ifreeze.data.remote.UserApi
 import com.ifreeze.data.repo.auth.LocationHelper
 import com.ifreeze.di.NetWorkModule
@@ -33,8 +36,13 @@ import com.ifreeze.di.NetWorkModule
 import com.patient.data.cashe.PreferencesGateway
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -55,9 +63,8 @@ class AutoSyncWorker @AssistedInject constructor(
     private val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
     private val kioskIntent = Intent(context, ForceCloseKiosk::class.java)
     private val locationService = Intent(context, LocationService::class.java)
-
     private val installedAppsList = getInstalledApps(context)
-
+    val hashesListDatabase = preference.getList("hashesListDatabase")
     private var failureCount = preference.load("failureCount", 0)
     private var isFailureLimitReached = preference.load("isFailureLimitReached", false)
     private val licenseID = preference.load("licenseID", "")
@@ -72,6 +79,13 @@ class AutoSyncWorker @AssistedInject constructor(
     val rooted = deviceRootedEnable()
     val developerOptionsEnabled = developerOptionsEnabled(context)
     ///
+    val downloadDirectory =
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
+    companion object {
+        val hashesList = mutableListOf<Pair<String, String>>()
+    }
+
     init {
         failureCount = preference.load("failureCount", 0)!!
         LocationHelper.getLocation(context, this)
@@ -227,12 +241,11 @@ class AutoSyncWorker @AssistedInject constructor(
                 applicationContext.startService(serviceIntent)
             }
 
-            if (lockedScreen) {
+            if (!lockedScreen) {
                 checkItems.add("Lock Screen" to true)
             } else {
                 checkItems.add("There Is No Lock Screen" to false)
             }
-            checkItems.add("Android Version" to true)
             checkItems.add("Rooted Device" to rooted)
             if (developerOptionsEnabled) {
                 checkItems.add("Developer options are enabled" to false)
@@ -241,12 +254,12 @@ class AutoSyncWorker @AssistedInject constructor(
             }
             checkItems.filter { it.second }.forEach { (issueName, _) ->
                 val message : List<AlertBody> = listOf(AlertBody(
-                    deviceId = "4E29E0D6-FE60-4AE9-B3CE-680B2F2C1A2F",
+                    deviceId = deviceId,
                     logName = issueName,
                     time = currentTime,
                     action = "String",
                     description = "String",
-                    source = "String"
+                    source = "Settings Alerts"
                 ))
                 val alertIssues = api.sendAlert(message)
                 if (alertIssues.isSuccessful) {
@@ -254,6 +267,32 @@ class AutoSyncWorker @AssistedInject constructor(
 
                 }
             }
+            getHashCodeFromFiles(downloadDirectory)
+
+            // Compare hashesList with hashesListDatabase
+            val matchedHashes = hashesList.filter { hashPair ->
+                hashesListDatabase?.contains(hashPair.second) == true
+            }
+
+            // If there are matches, send the proactive result
+            if (matchedHashes.isNotEmpty()) {
+                val messagePro: List<ProactiveResultsBody> = matchedHashes.map { matchedHash ->
+                    ProactiveResultsBody(
+                        deviceId = deviceId,
+                        processName = matchedHash.first, // file path as processName
+                        time = currentTime,
+                        severity = "High",
+                        source = "Proactive Scan"
+                    )
+                }
+
+                val proActiveResult = api.sendProactiveResults(messagePro)
+                if (proActiveResult.isSuccessful) {
+                    Log.d("abdo", "Proactive result sent successfully")
+                }
+            }
+
+
 
         } catch (e: Exception) {
 
@@ -345,4 +384,58 @@ fun developerOptionsEnabled(context: Context): Boolean {
         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
         0
     ) != 0
+}
+
+private suspend fun getHashCodeFromFiles(directory: File) {
+    withContext(Dispatchers.IO) {
+        if (directory.exists() && directory.canRead()) {
+            val hashes = mutableListOf<Pair<String, String>>()
+            scanDirectory(directory, hashes)
+            // Log each file path and its hash
+            hashes.forEachIndexed { index, pair ->
+                Log.d("HashLog", "File ${index + 1}: Path: ${pair.first}, Hash: ${pair.second}")
+                hashesList.add(pair)
+            }
+        } else {
+            Log.d("HashLog", "Cannot access directory.")
+        }
+    }
+}
+
+
+private fun scanDirectory(directory: File, hashes: MutableList<Pair<String, String>>) {
+    if (directory.isDirectory) {
+        directory.listFiles()?.forEach { file ->
+            if (file.isDirectory) {
+                scanDirectory(file, hashes)
+            } else {
+                val hash = getFileHash(file)
+                hashes.add(Pair(file.absolutePath, hash))
+            }
+        }
+    } else {
+        Log.d("HashLog", "${directory.absolutePath} is not a directory.")
+    }
+}
+
+private fun getFileHash(file: File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val fis = FileInputStream(file)
+    val byteArray = ByteArray(1024)
+    var bytesCount: Int
+
+    while (fis.read(byteArray).also { bytesCount = it } != -1) {
+        digest.update(byteArray, 0, bytesCount)
+    }
+    fis.close()
+
+    val hashedBytes = digest.digest()
+
+    // Convert byte array to hexadecimal string
+    val stringBuilder = StringBuilder()
+    for (byte in hashedBytes) {
+        stringBuilder.append(String.format("%02x", byte))
+    }
+
+    return stringBuilder.toString()
 }

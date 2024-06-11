@@ -10,7 +10,8 @@ data class Device(
     val blockedApps: List<String>,
     val exceptionApps: List<String>,
     val blockedWebsites: List<String>,
-    val exceptionWebsites: List<String>
+    val exceptionWebsites: List<String>,
+    val deviceKioskApps: List<String>
 )
 data class DeviceConfigurations(
     val blockWiFi : Boolean,

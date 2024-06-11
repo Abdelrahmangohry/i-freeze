@@ -169,12 +169,23 @@ fun autoSyncButton() {
         context.contentResolver,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )
-
+    val EXTERNAL_STORAGE_PERMISSION_CODE = 1235
     val locationService = Intent(context, LocationService::class.java)
     Row(modifier = Modifier.padding(15.dp)) {
         Button(
             onClick = {
-
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        context as Activity,
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                        EXTERNAL_STORAGE_PERMISSION_CODE
+                    )
+                    return@Button
+                }
                 val locationPermissionRequestCode = 456
                 if (deviceId.isNullOrEmpty()) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)

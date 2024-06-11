@@ -87,12 +87,12 @@ fun KioskMode(
     val preference = PreferencesGateway(context)
 
     var applicationNames by remember { mutableStateOf(preference.getList("kioskApplications")) }
+    var deviceId = preference.load("responseID", "")
 
-
-    authViewModel.getKioskApps()
-    authViewModel._getkioskApps.observe(lifecycle, Observer { response ->
+    authViewModel.newUpdateUserData(deviceId!!)
+    authViewModel._newFlow.observe(lifecycle, Observer { response ->
         if (response.isSuccessful) {
-            val applicationNamesList = response.body()?.data?.map { it.packageName } ?: emptyList()
+            val applicationNamesList = response.body()?.data?.deviceKioskApps ?: emptyList()
             Log.d("kioskapp", "applicationNames $applicationNamesList")
             preference.saveList("kioskApplications", applicationNamesList)
             applicationNames = applicationNamesList as ArrayList<String>

@@ -67,7 +67,7 @@ class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
         return api.sendAlert(message)
     }
 
-    override suspend fun sendProactiveResults(message: ProactiveResultsBody): Response<ProactiveResultsResponse> {
+    override suspend fun sendProactiveResults(message: List<ProactiveResultsBody>): Response<ProactiveResultsResponse> {
         return api.sendProactiveResults(message)
     }
 }
