@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.presentation.AuthViewModel
+import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.data.model.TicketMessageBody
 import com.patient.data.cashe.PreferencesGateway
 
@@ -50,14 +51,14 @@ fun SupportTeam(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
         HeaderSupport(onBackPressed = { navController.popBackStack() })
-        ticketBody()
+        ticketBody(navController)
 
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ticketBody() {
+fun ticketBody( navController: NavController) {
     val authViewModel: AuthViewModel = hiltViewModel()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -206,6 +207,7 @@ fun ticketBody() {
                             "We Received Your Ticket Successfully",
                             Toast.LENGTH_SHORT
                         ).show()
+                        navController.navigate(Screen.AdminAccess.route)
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally),

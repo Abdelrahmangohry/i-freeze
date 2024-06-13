@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.gesture.GestureOverlayView
 import androidx.activity.compose.BackHandler
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.*
@@ -30,21 +31,27 @@ import com.ifreeze.applock.presentation.activity.SupportTeam
 import com.ifreeze.applock.presentation.screen.HomeScreen
 import com.ifreeze.applock.presentation.screen.NetworkControl
 import com.ifreeze.applock.presentation.screen.SplashScreen
+import com.patient.data.cashe.PreferencesGateway
 
 @RequiresApi(34)
 fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
     activity : Activity, context:Context, wifi: () -> Unit,
-    lifecycle: LifecycleOwner, webStart : () -> Unit, fileScan : () -> Unit
+    lifecycle: LifecycleOwner, webStart : () -> Unit, fileScan : () -> Unit,preferences: PreferencesGateway,
+    requestPermissionLauncher: ActivityResultLauncher<String>
 ) {
+
+    val isDisplayed = preferences.load("isDisplayed", false)
+
     navigation(
-        startDestination = Screen.AdminAccess.route,
+        startDestination = Screen.AdminAccess.route ,
+//        startDestination = if(isDisplayed == true) Screen.AdminAccess.route else Screen.Splash.route,
         route = HOME_GRAPH_ROUTE
     ) {
         composable(
             route = Screen.AdminAccess.route
         ) {
-            AdminAccess(navController = navController, webStart)
+            AdminAccess(navController = navController, webStart,requestPermissionLauncher)
         }
         composable(
             route = Screen.Login.route
@@ -66,23 +73,14 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.KioskMode.route
         ) {
-//            BackHandler(true) {
-//
-//
-//            }
 
-//            GestureOverlayView
-//            (showPasswordDialog(context, ))
-                KioskMode(navController = navController, lifecycle)
+            KioskMode(navController = navController, lifecycle)
 
         }
-
-
-
         composable(
             route = Screen.Splash.route
         ) {
-            SplashScreen(navController = navController)
+            SplashScreen(navController = navController,preferences)
         }
         composable(
             route = Screen.BlackList.route

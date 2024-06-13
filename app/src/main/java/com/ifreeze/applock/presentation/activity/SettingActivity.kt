@@ -79,11 +79,11 @@ fun HeaderSetting(onBackPressed: () -> Unit) {
             )
         }
         Text(
-            text = "Settings",
+            text = "Permissions",
             color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 30.dp).padding(horizontal = 95.dp),
+                .padding(top = 8.dp, bottom = 30.dp).padding(horizontal = 75.dp),
             fontWeight = FontWeight.ExtraBold,
             fontSize = 22.sp
         )
@@ -129,7 +129,7 @@ fun GeneralOptionsUISetting(
         GeneralSettingItem(
             icon = R.drawable.admin,
             mainText = "Admin Permission",
-            subText = "For get access and control over apps",
+            subText = "Provide admin privilege to i-Freeze",
             onClick = {
                 if (!deviceManager.isDeviceOwnerApp(activity.packageName)){
                     val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
@@ -144,7 +144,7 @@ fun GeneralOptionsUISetting(
         GeneralSettingItem(
             icon = R.drawable.draw,
             mainText = "Over Draw ",
-            subText = "can create a layout over other apps",
+            subText = "Enable the screen control option in settings",
             onClick = {
                 Log.d("islam", "GeneralOptionsUISetting :drawAction ")
 
@@ -161,7 +161,7 @@ fun GeneralOptionsUISetting(
         GeneralSettingItem(
             icon = R.drawable.ic_baseline_check_24,
             mainText = "Accessibility Service",
-            subText = "This is essential part of Android's",
+            subText = "Activate the proactive feature in mobile settings",
             onClick = {
                 val enabledServicesSetting = Settings.Secure.getString(context.contentResolver,
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
@@ -178,7 +178,7 @@ fun GeneralOptionsUISetting(
         GeneralSettingItem(
             icon = R.drawable.location,
             mainText = "Location Permission",
-            subText = "Enable location access for better functionality",
+            subText = "Permit location accessibility",
             onClick = {
                 val locationPermissionRequestCode = 123
                 // Check if location permission is already granted
@@ -195,28 +195,6 @@ fun GeneralOptionsUISetting(
             }
         )
 
-//            toggleLocationSettingItem(
-//                icon = R.drawable.map,
-//                mainText = "Track Location",
-//                subText = "Click Here to Track The Location",
-//                isChecked = locationBlockedState.value!!,
-//                onCheckedChange = { isCheckedLocation ->
-//
-//                    preference.update("locationBlocked", isCheckedLocation)
-//                    locationBlockedState.value = isCheckedLocation
-//                    if (isCheckedLocation && !isLocationEnabled(context)) {
-//                        Log.d("abdo", "i am here")
-//                        Log.d("abdo", "isCheckedLocation $isCheckedLocation")
-//                        context.startService(serviceIntent)
-//                    } else {
-//                        Log.d("abdo", "iam in else")
-//                        context.stopService(serviceIntent)
-//                    }
-//                },
-//                onClick = {
-//
-//                }
-//            )
     }
 }
 

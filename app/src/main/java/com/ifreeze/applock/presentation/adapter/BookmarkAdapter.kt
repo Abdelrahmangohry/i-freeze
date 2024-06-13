@@ -48,7 +48,7 @@ class BookmarkAdapter(private val context: Context, private val isActivity: Bool
             when{
                 checkForInternet(context) -> {
                     changeTab(MainWebActivity.bookmarkList[position].name,
-                BrowseFragment(urlNew = MainWebActivity.bookmarkList[position].url)
+                BrowseFragment.newInstance(MainWebActivity.bookmarkList[position].url)
                     )
                     if(isActivity) (context as Activity).finish()
                 }

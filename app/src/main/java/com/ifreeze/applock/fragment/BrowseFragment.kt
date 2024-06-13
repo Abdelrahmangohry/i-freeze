@@ -27,7 +27,8 @@ import com.ifreeze.applock.presentation.activity.changeTab
 import com.patient.data.cashe.PreferencesGateway
 
 
-class BrowseFragment(private var urlNew: String) : Fragment() {
+class BrowseFragment : Fragment() {
+    private var urlNew: String? = null
     private var isBlacklistedChecked: Boolean = false
     private var isWhitelistedChecked: Boolean = false
     lateinit var binding: FragmentBrowseBinding
@@ -37,6 +38,25 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
     lateinit var blockedWebsites: ArrayList<String>
     lateinit var allowedWebsites: ArrayList<String>
 
+    // Companion object to create new instances of the fragment with arguments
+    companion object {
+        private const val ARG_URL = "url"
+
+        fun newInstance(url: String): BrowseFragment {
+            val fragment = BrowseFragment()
+            val args = Bundle()
+            args.putString(ARG_URL, url)
+            fragment.arguments = args
+            return fragment
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            urlNew = it.getString(ARG_URL)
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
@@ -67,17 +87,15 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
         binding.webView.reload()
 
         binding.webView.post {
-            if (isBlacklistedChecked && isBlockedWebsite(urlNew)) {
-                binding.webView.loadUrl("file:///android_asset/error_page.html")
-            } else if (isWhitelistedChecked && isWhitelistWebsite(urlNew)) {
-                binding.webView.loadUrl("file:///android_asset/error_page.html")
-
-            } else {
-                binding.webView.loadUrl("https://$urlNew")
-//                binding.webView.loadUrl("https://www.google.com/search?q=$urlNew")
-
+            urlNew?.let {
+                if (isBlacklistedChecked && isBlockedWebsite(it)) {
+                    binding.webView.loadUrl("file:///android_asset/error_page.html")
+                } else if (isWhitelistedChecked && isWhitelistWebsite(it)) {
+                    binding.webView.loadUrl("file:///android_asset/error_page.html")
+                } else {
+                    binding.webView.loadUrl("https://$it")
+                }
             }
-
         }
 
 
@@ -225,37 +243,31 @@ class BrowseFragment(private var urlNew: String) : Fragment() {
 
         when (item.title) {
             "Open in New Tab" -> {
-                changeTab(url.toString(), BrowseFragment(url.toString()))
+                changeTab(url.toString(), BrowseFragment.newInstance(url.toString()))
             }
 
             "Open Tab in Background" -> {
-                changeTab(url.toString(), BrowseFragment(url.toString()), isBackground = true)
+                changeTab(url.toString(), BrowseFragment.newInstance(url.toString()), isBackground = true)
+
             }
 
             "View Image" -> {
-                if (imgUrl != null) {
-                    if (imgUrl.contains("base64")) {
-                        val pureBytes = imgUrl.substring(imgUrl.indexOf(",") + 1)
+                imgUrl?.let {
+                    if (it.contains("base64")) {
+                        val pureBytes = it.substring(it.indexOf(",") + 1)
                         val decodedBytes = Base64.decode(pureBytes, Base64.DEFAULT)
-                        val finalImg =
-                            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-
+                        val finalImg = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                         val imgView = ShapeableImageView(requireContext())
                         imgView.setImageBitmap(finalImg)
-
-                        val imgDialog =
-                            MaterialAlertDialogBuilder(requireContext()).setView(imgView).create()
+                        val imgDialog = MaterialAlertDialogBuilder(requireContext()).setView(imgView).create()
                         imgDialog.show()
-
-                        imgView.layoutParams.width =
-                            Resources.getSystem().displayMetrics.widthPixels
-                        imgView.layoutParams.height =
-                            (Resources.getSystem().displayMetrics.heightPixels * .75).toInt()
+                        imgView.layoutParams.width = Resources.getSystem().displayMetrics.widthPixels
+                        imgView.layoutParams.height = (Resources.getSystem().displayMetrics.heightPixels * .75).toInt()
                         imgView.requestLayout()
-
                         imgDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-                    } else changeTab(imgUrl, BrowseFragment(imgUrl))
+                    } else {
+                        changeTab(it, BrowseFragment.newInstance(it))
+                    }
                 }
             }
 

@@ -227,7 +227,7 @@ fun sendAlert(preferences: PreferencesGateway,authViewModel: AuthViewModel, issu
         logName = issueName, // Set the issue name as logName
         time = currentTime,
         action = "String",
-        description = "String",
+        description = "$issueName Found",
         source = "String"
     ))
     authViewModel.sendAlert(message)

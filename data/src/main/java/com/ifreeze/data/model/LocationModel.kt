@@ -24,6 +24,7 @@ data class DeviceConfigurations(
     val licenseId : String,
     val time: String,
     val kiosk: Boolean,
+    val locationTracker: Boolean,
 
 
 )
@@ -90,7 +91,7 @@ data class TicketMessageBody(
 )
 
 data class TicketResponse (
-    var data    : String,
+    var data    : TicketMessageBody,
 )
 
 //////Get Base Url

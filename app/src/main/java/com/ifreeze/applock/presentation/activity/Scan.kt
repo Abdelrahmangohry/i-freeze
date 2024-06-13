@@ -39,8 +39,8 @@ fun Scan(navController: NavController, filesScan: () -> Unit) {
 
             GeneralSettingItem(
                 icon = R.drawable.icon_settings,
-                mainText = "Scan Properties",
-                subText = "Scan Properties",
+                mainText = "Scan Settings",
+                subText = "Check the configured settings on mobile",
                 onClick = {
                     navController.navigate(Screen.ScanProperties.route)
                 }
@@ -50,7 +50,7 @@ fun Scan(navController: NavController, filesScan: () -> Unit) {
             GeneralSettingItem(
                 icon = R.drawable.folder,
                 mainText = "Scan Files",
-                subText = "Scan Files",
+                subText = "Detect infected files in mobile storage",
                 onClick = {
                     filesScan()
                 }

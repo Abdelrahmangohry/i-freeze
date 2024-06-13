@@ -44,7 +44,7 @@ class HomeFragment : Fragment() {
         binding.searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(result: String?): Boolean {
                 if(checkForInternet(requireContext()))
-                    changeTab(result!!, BrowseFragment(result))
+                    changeTab(result!!, BrowseFragment.newInstance(result))
                 else
                     Snackbar.make(binding.root, "Internet Not Connected\uD83D\uDE03", 3000).show()
                 return true
@@ -55,7 +55,7 @@ class HomeFragment : Fragment() {
         mainActivityRef.binding.topSearchBar.setOnClickListener {
             if(checkForInternet(requireContext()))
                 changeTab(mainActivityRef.binding.topSearchBar.text.toString(),
-                    BrowseFragment(mainActivityRef.binding.topSearchBar.text.toString())
+                    BrowseFragment.newInstance(mainActivityRef.binding.topSearchBar.text.toString())
                 )
             else
                 Snackbar.make(binding.root, "Internet Not Connected\uD83D\uDE03", 3000).show()

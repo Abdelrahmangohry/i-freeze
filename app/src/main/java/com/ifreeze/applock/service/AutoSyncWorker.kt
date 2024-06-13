@@ -94,13 +94,15 @@ class AutoSyncWorker @AssistedInject constructor(
 
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
+
+//            val baseUrl = "https://security.flothers.com:8443/api/"
             val getNewBaseUrl = api.getCloudURL(deviceId!!)
             if (getNewBaseUrl.isSuccessful){
                 val updatedUrl = getNewBaseUrl.body()?.data?.url
                 Log.d("server", "updatedUrl from auto sync $updatedUrl")
                 preference.saveBaseUrl(updatedUrl!!)
             }
-
+//            preference.saveBaseUrl(baseUrl)
 
             if (failureCount!! >= 120) {
                 isFailureLimitReached = true
@@ -121,7 +123,7 @@ class AutoSyncWorker @AssistedInject constructor(
             ) {
                 Toast.makeText(
                     applicationContext,
-                    "Please enable i-Freeze permissions in app settings",
+                    "Please enable i-Freeze permissions in app permissions",
                     Toast.LENGTH_SHORT
                 )
                     .show()
@@ -145,7 +147,7 @@ class AutoSyncWorker @AssistedInject constructor(
                 deviceId = deviceId!!
             )
 
-            val response = api.newUpdateUserData(deviceId)
+
             val userLocationResponse = api.userLocation(userLocation)
 
             val mobileApplication = MobileApps(
@@ -174,6 +176,8 @@ class AutoSyncWorker @AssistedInject constructor(
                 Log.d("abdo", "User location updated successfully")
             }
 
+
+            val response = api.newUpdateUserData(deviceId)
             if (response.isSuccessful) {
                 val cloudList = response.body()?.data?.exceptionWifi
                 val newList = ArrayList<String>().apply {
@@ -187,18 +191,25 @@ class AutoSyncWorker @AssistedInject constructor(
                 }
                 preference.saveList("allowedWifiList", newList)
 
-                val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
-                val newListCloudBlockedWebSites = ArrayList<String>().apply {
-                    addAll(blockedWebsites ?: emptyList())
-                    cloudBlockedWebSites?.forEach {
-                        it
-                        if (it !in blockedWebsites.orEmpty()) {
-                            add(it.toLowerCase().trim())
-                        }
-                    }
+                val cloudAllowedWebSites = response.body()?.data?.exceptionWebsites
+                if (cloudAllowedWebSites != null) {
+                    preference.saveList("allowedWebsites", cloudAllowedWebSites)
                 }
-                preference.saveList("blockedWebsites", newListCloudBlockedWebSites)
 
+                val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
+                Log.d("allowed", "cloudBlockedWebSites $cloudBlockedWebSites")
+//                val newListCloudBlockedWebSites = ArrayList<String>().apply {
+//                    addAll(blockedWebsites ?: emptyList())
+//                    cloudBlockedWebSites?.forEach {
+//                        it
+//                        if (it !in blockedWebsites.orEmpty()) {
+//                            add(it.toLowerCase().trim())
+//                        }
+//                    }
+//                }
+                if (cloudBlockedWebSites != null) {
+                preference.saveList("blockedWebsites", cloudBlockedWebSites)
+                }
                 val responseData = response.body()?.data?.device
                 val blockedAppsList = response.body()?.data?.blockedApps
                 if (blockedAppsList != null) { // Check for null
@@ -209,7 +220,7 @@ class AutoSyncWorker @AssistedInject constructor(
                 val allowedAppsList = response.body()?.data?.exceptionApps
                 if (allowedAppsList != null) { // Check for null
                     preference.saveList("allowedAppsList", allowedAppsList)
-                    Log.d("abdo", "this is blocked apps list $allowedAppsList")
+                    Log.d("allowed", "this is allowe apps list $allowedAppsList")
                 } else {
                     Log.d("abdo", "Blocked apps list is null")
                 }
@@ -221,6 +232,7 @@ class AutoSyncWorker @AssistedInject constructor(
                     preference.update("WebWhitelist", it.whiteListURLs)
                     preference.update("WifiBlocked", it.blockWiFi)
                     preference.update("BlockState", it.kiosk)
+                    preference.update("locationBlocked", it.kiosk)
                     if (it.kiosk) {
                         applicationContext.startService(kioskIntent)
                     } else {
@@ -248,9 +260,9 @@ class AutoSyncWorker @AssistedInject constructor(
             }
             checkItems.add("Rooted Device" to rooted)
             if (developerOptionsEnabled) {
-                checkItems.add("Developer options are enabled" to false)
+                checkItems.add("Developer options are enabled" to true)
             } else {
-                checkItems.add("Developer Option Disabled" to true)
+                checkItems.add("Developer Option Disabled" to false)
             }
             checkItems.filter { it.second }.forEach { (issueName, _) ->
                 val message : List<AlertBody> = listOf(AlertBody(
@@ -258,7 +270,7 @@ class AutoSyncWorker @AssistedInject constructor(
                     logName = issueName,
                     time = currentTime,
                     action = "String",
-                    description = "String",
+                    description = "$issueName Found",
                     source = "Settings Alerts"
                 ))
                 val alertIssues = api.sendAlert(message)

@@ -79,7 +79,7 @@ fun AppManager(navController: NavController ,viewModel: AppsViewModel = hiltView
                 ToggleSettingItem(
                     icon = R.drawable.app_blocking,
                     mainText = "Blacklisted Apps",
-                    subText = "Identified Restricted Applications",
+                    subText = "Block certain mobile applications",
                     isChecked = it,
                     onCheckedChange = {
                         preference.save("Blacklist", it)
@@ -104,7 +104,7 @@ fun AppManager(navController: NavController ,viewModel: AppsViewModel = hiltView
             ToggleSettingItem(
                 icon = R.drawable.white_list,
                 mainText = "Whitelisted Apps",
-                subText = "Approved Applications List",
+                subText = "Activate whitelisted applications",
                 isChecked = isWhitelistedChecked.value!!,
 
                 onCheckedChange = {
@@ -126,8 +126,8 @@ fun AppManager(navController: NavController ,viewModel: AppsViewModel = hiltView
 
             ToggleSettingItem(
                 icon = R.drawable.browsers_12,
-                mainText = "Browsers",
-                subText = "Disable All Browsers",
+                mainText = "Block browsers",
+                subText = "Disable all mobile browsers",
                 isChecked = isBrowsersListedChecked.value!!,
                 onCheckedChange = {
                     preference.save("Browsers", it)
@@ -243,7 +243,7 @@ Row (modifier = Modifier.fillMaxWidth().padding(top = 20.dp)){
         )
     }
     Text(
-        text = "Application Manager",
+        text = "App Manager",
         color = Color.White,
 
         modifier = Modifier

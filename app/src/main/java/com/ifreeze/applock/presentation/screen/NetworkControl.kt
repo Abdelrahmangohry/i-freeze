@@ -75,8 +75,8 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
         wifiBlockedState.value?.let {
             ToggleSettingItem(
                 icon = R.drawable.wifi_icon,
-                mainText = "Block WiFi",
-                subText = "Click Here to Block WiFi",
+                mainText = "Block Wi-Fi",
+                subText = "Click here to Block Wi-Fi connections",
                 isChecked = it,
                 onCheckedChange = { isChecked ->
                     preference.update("WifiBlocked", isChecked)
@@ -106,8 +106,8 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
 
         ToggleSettingItem(
             icon = R.drawable.white_list,
-            mainText = "WhiteList WiFi",
-            subText = "The White List WiFi",
+            mainText = "WhiteList Wi-Fi",
+            subText = "Define whitelisted Wi-Fi connections",
             isChecked = wifiAllowedState.value!!,
 
             onCheckedChange = {

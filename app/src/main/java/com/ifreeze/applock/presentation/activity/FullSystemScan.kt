@@ -112,6 +112,7 @@ class FullSystemScan : AppCompatActivity() {
 
         // Button click listener
         btn.setOnClickListener {
+            affectedList = mutableListOf()
             numberOfScannedFiles.text = ""
             progressBar.progress = 0 // Reset progress bar
             startTime = System.currentTimeMillis() // Start time for estimating time

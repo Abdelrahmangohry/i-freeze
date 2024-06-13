@@ -178,6 +178,7 @@ fun licenseKey(
 
                 ElevatedButton(
                     onClick = {
+
                         val newBaseUrl = "http://192.168.1.250:8443/api/"
 
                         preference.saveBaseUrl(newBaseUrl)
@@ -214,7 +215,7 @@ fun licenseKey(
                                     ) {
                                         Toast.makeText(
                                             context,
-                                            "Please enable i-Freeze permissions in app settings",
+                                            "Please enable i-Freeze permissions in app permissions",
                                             Toast.LENGTH_SHORT
                                         )
                                             .show()

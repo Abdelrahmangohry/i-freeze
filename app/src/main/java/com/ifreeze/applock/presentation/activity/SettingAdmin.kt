@@ -97,9 +97,9 @@ fun HeaderAdmin(onBackPressed: () -> Unit) {
             color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 30.dp).padding(horizontal = 95.dp),
+                .padding(top = 8.dp, bottom = 30.dp).padding(horizontal = 75.dp),
             fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
+            fontSize = 20.sp
         )
     }
 }
@@ -146,95 +146,95 @@ fun GeneralOptionsUIAdmin(
             .padding(top = 10.dp)
     ) {
 
-        GeneralSettingItem(
-            icon = R.drawable.admin,
-            mainText = "Admin Permission",
-            subText = "For get access and control over apps",
-            onClick = {
-                if (!deviceManager.isDeviceOwnerApp(activity.packageName)) {
-                    val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                    intent.putExtra(
-                        DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                        "You should enable the app!"
-                    )
-                    activity.startActivityForResult(intent, 1)
-                } else {
-                    Toast.makeText(context, "the admin permission is add ", Toast.LENGTH_SHORT)
-                        .show()
-                }
-                Log.d("islam", "GeneralOptionsUISetting :admin ")
-//                AdminAction()
-            }
-        )
-        GeneralSettingItem(
-            icon = R.drawable.draw,
-            mainText = "Over Draw ",
-            subText = "can create a layout over other apps",
-            onClick = {
-                Log.d("islam", "GeneralOptionsUISetting :drawAction ")
+//        GeneralSettingItem(
+//            icon = R.drawable.admin,
+//            mainText = "Admin Permission",
+//            subText = "For get access and control over apps",
+//            onClick = {
+//                if (!deviceManager.isDeviceOwnerApp(activity.packageName)) {
+//                    val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+//                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+//                    intent.putExtra(
+//                        DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+//                        "You should enable the app!"
+//                    )
+//                    activity.startActivityForResult(intent, 1)
+//                } else {
+//                    Toast.makeText(context, "the admin permission is add ", Toast.LENGTH_SHORT)
+//                        .show()
+//                }
+//                Log.d("islam", "GeneralOptionsUISetting :admin ")
+////                AdminAction()
+//            }
+//        )
+//        GeneralSettingItem(
+//            icon = R.drawable.draw,
+//            mainText = "Over Draw ",
+//            subText = "can create a layout over other apps",
+//            onClick = {
+//                Log.d("islam", "GeneralOptionsUISetting :drawAction ")
+//
+//                if (!Settings.canDrawOverlays(context)) {
+//                    val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+//                    myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    context.startActivity(myIntent)
+//                } else {
+//                    Toast.makeText(
+//                        context, "Over Draw Already Enabled", Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }
+//        )
+//        GeneralSettingItem(
+//            icon = R.drawable.ic_baseline_check_24,
+//            mainText = "Accessibility Service",
+//            subText = "This is essential part of Android's",
+//            onClick = {
+//                val enabledServicesSetting = Settings.Secure.getString(
+//                    context.contentResolver,
+//                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+//                )
+//                if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true) {
+//                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+//                    context.startActivity(intent)
+//                } else {
+//                    Toast.makeText(
+//                        context,
+//                        "Accessibility Service Already Enabled",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }
+//        )
 
-                if (!Settings.canDrawOverlays(context)) {
-                    val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                    myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(myIntent)
-                } else {
-                    Toast.makeText(
-                        context, "Over Draw Already Enabled", Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        )
-        GeneralSettingItem(
-            icon = R.drawable.ic_baseline_check_24,
-            mainText = "Accessibility Service",
-            subText = "This is essential part of Android's",
-            onClick = {
-                val enabledServicesSetting = Settings.Secure.getString(
-                    context.contentResolver,
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-                )
-                if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true) {
-                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                    context.startActivity(intent)
-                } else {
-                    Toast.makeText(
-                        context,
-                        "Accessibility Service Already Enabled",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        )
-
-        GeneralSettingItem(
-            icon = R.drawable.location,
-            mainText = "Location Permission",
-            subText = "Enable location access for better functionality",
-            onClick = {
-                val locationPermissionRequestCode = 123
-                // Check if location permission is already granted
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    // Location permission is not granted, request it
-                    ActivityCompat.requestPermissions(
-                        context as Activity,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        locationPermissionRequestCode
-                    )
-                } else {
-                    // Location permission is already granted
-                    Toast.makeText(
-                        context,
-                        "Location permission is already granted",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        )
+//        GeneralSettingItem(
+//            icon = R.drawable.location,
+//            mainText = "Location Permission",
+//            subText = "Enable location access for better functionality",
+//            onClick = {
+//                val locationPermissionRequestCode = 123
+//                // Check if location permission is already granted
+//                if (ContextCompat.checkSelfPermission(
+//                        context,
+//                        Manifest.permission.ACCESS_FINE_LOCATION
+//                    ) != PackageManager.PERMISSION_GRANTED
+//                ) {
+//                    // Location permission is not granted, request it
+//                    ActivityCompat.requestPermissions(
+//                        context as Activity,
+//                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+//                        locationPermissionRequestCode
+//                    )
+//                } else {
+//                    // Location permission is already granted
+//                    Toast.makeText(
+//                        context,
+//                        "Location permission is already granted",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }
+//        )
 
         toggleLocationAdminItem(
             icon = R.drawable.map,

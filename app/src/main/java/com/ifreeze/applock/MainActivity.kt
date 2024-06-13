@@ -129,6 +129,7 @@ class MainActivity : ComponentActivity() {
         val locationService = Intent(this, LOCATION_SERVICE::class.java)
         var applicationNames = preference.getList("kioskApplications")
         var deviceId = preference.load("responseID", "")
+
         val enabledServicesSetting = Settings.Secure.getString(
             contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
@@ -153,7 +154,7 @@ class MainActivity : ComponentActivity() {
                 SetupNavGraph(
 
                     navController = navController,
-                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }
+                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference, requestPermissionLauncher
                 )
 
             }
@@ -162,40 +163,13 @@ class MainActivity : ComponentActivity() {
 //        if (!isDefaultBrowser()) {
 //            showDefaultBrowserDialog()
 //        }
+// Observe the error LiveData and show a toast message if an error occurs
+//        authViewModel.error.observe(this, Observer { errorMessage ->
+//            errorMessage?.let {
+//                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+//            }
+//        })
 
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) -> {
-                Log.d("abdo", "autoSync started")
-                if (!isLocationEnabled(this)) {
-                    startService(locationService)
-                } else {
-                    stopService(locationService)
-                    startAutoSyncWorker(this)
-                }
-            }
-
-            else -> {
-                requestPermissionLauncher.launch(
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-
-            }
-        }
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                EXTERNAL_STORAGE_PERMISSION_CODE
-            )
-        }
 
         if (!isNetworkAvailable(this)) {
             Toast.makeText(
@@ -213,6 +187,7 @@ class MainActivity : ComponentActivity() {
                 macAddress = androidId,
                 serialNumber = androidId
             )
+
             val baseUrl = "http://192.168.1.250:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
@@ -239,7 +214,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Toast.makeText(
                             this,
-                            "Please enable i-Freeze permissions in app settings",
+                            "Please enable i-Freeze permissions in app permissions",
                             Toast.LENGTH_SHORT
                         )
                             .show()
@@ -537,7 +512,7 @@ fun GeneralOptionsUI(
         GeneralSettingItem(
             icon = R.drawable.scan,
             mainText = "System Scan",
-            subText = "Keep Your Mobile Secure and Initiate a Scan",
+            subText = "Initiate a scan to detect mobile threats",
             onClick = {
                 navController.navigate(Screen.Scan.route)
 
@@ -547,7 +522,7 @@ fun GeneralOptionsUI(
         GeneralSettingItem(
             icon = R.drawable.network_check,
             mainText = "Network Control",
-            subText = "Administrate Your Wireless Network",
+            subText = "Manage mobile network connections",
             onClick = {
                 navController.navigate(Screen.NetworkControl.route)
 
@@ -559,7 +534,7 @@ fun GeneralOptionsUI(
         GeneralSettingItem(
             icon = R.drawable.web,
             mainText = "Web Filter",
-            subText = "Manage Website Allowances",
+            subText = "Set a policy for accessing websites",
             onClick = {
                 navController.navigate(Screen.WebManager.route)
             }
@@ -567,8 +542,8 @@ fun GeneralOptionsUI(
 
         GeneralSettingItem(
             icon = R.drawable.manage,
-            mainText = "Application Manager",
-            subText = "Manage Applications Permission",
+            mainText = "App Manager",
+            subText = "Select permitted applications on mobile",
             onClick = {
                 navController.navigate(Screen.AppManager.route)
             }
@@ -577,13 +552,11 @@ fun GeneralOptionsUI(
         GeneralSettingItem(
             icon = R.drawable.icon_settings,
             mainText = "Settings",
-            subText = "Configure App Permissions",
+            subText = "Modify i-Freeze settings and permissions",
             onClick = {
                 navController.navigate(Screen.SettingAdmin.route)
             }
         )
-
-
     }
 }
 
@@ -647,57 +620,6 @@ fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: ()
                 }
 
             }
-        }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SupportItem(icon: Int, mainText: String, onClick: () -> Unit) {
-    Card(
-        onClick = { onClick() },
-        modifier = Modifier
-            .padding(bottom = 8.dp)
-            .fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(shape = Shape.medium)
-                        .background(LightPrimaryColor)
-                ) {
-                    Icon(
-                        painter = painterResource(id = icon),
-                        contentDescription = "",
-                        tint = Color.Unspecified,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(14.dp))
-
-                Text(
-                    text = mainText,
-                    color = SecondaryColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            Icon(
-                painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_right_24),
-                contentDescription = "",
-                modifier = Modifier.size(16.dp)
-            )
-
         }
     }
 }

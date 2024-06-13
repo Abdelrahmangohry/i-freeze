@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.VectorDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -20,6 +21,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.webkit.WebView
+import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -41,10 +43,12 @@ import com.example.browser.model.Bookmark
 import com.example.browser.model.Tab
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textview.MaterialTextView
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.ifreeze.applock.MainActivity
 import com.ifreeze.applock.R
 import com.ifreeze.applock.databinding.ActivityMainWebBinding
 import com.ifreeze.applock.databinding.BookmarkDialogBinding
@@ -73,6 +77,7 @@ class MainWebActivity : AppCompatActivity() {
         lateinit var myPager: ViewPager2
         lateinit var tabsBtn: MaterialTextView
         lateinit var backArrow : ImageView
+        lateinit var mainActivity : FloatingActionButton
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,6 +89,7 @@ class MainWebActivity : AppCompatActivity() {
         myPager = binding.myPager
         tabsBtn = binding.tabsBtn
         backArrow  = binding.backArrow
+        mainActivity  = binding.mainActivity
 
 
         handleIntent(intent)
@@ -99,6 +105,10 @@ class MainWebActivity : AppCompatActivity() {
 
         binding.backArrow.setOnClickListener {
             onBackPressed()
+        }
+
+        binding.mainActivity.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
         }
     }
     override fun onNewIntent(intent: Intent?) {
@@ -117,7 +127,7 @@ class MainWebActivity : AppCompatActivity() {
         Log.d("abdo", "this is the url should opened $url")
         // Remove "https://" or "http://" from the URL
         val newUrl = url.replace("https://", "")
-        changeTab(url, BrowseFragment(newUrl))
+        changeTab(url, BrowseFragment.newInstance(newUrl))
         changeFullscreen(enable = true)
     }
 

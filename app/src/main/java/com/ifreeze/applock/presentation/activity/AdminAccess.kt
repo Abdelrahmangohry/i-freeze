@@ -8,6 +8,9 @@ import android.content.pm.PackageManager
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -69,9 +72,42 @@ import com.patient.data.cashe.PreferencesGateway
 fun AdminAccess(
     navController: NavController,
     webStart: () -> Unit,
+    requestPermissionLauncher: ActivityResultLauncher<String>,
     viewModel: AppsViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    val locationService = Intent(context, LocationService::class.java)
 
+    val EXTERNAL_STORAGE_PERMISSION_CODE = 1234
+    when (PackageManager.PERMISSION_GRANTED) {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) -> {
+            Log.d("abdo", "autoSync started")
+            if (!isLocationEnabled(context)) {
+                context.startService(locationService)
+            } else {
+                context.stopService(locationService)
+                startAutoSyncWorker(context)
+            }
+        }
+        else -> {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    if (ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        ActivityCompat.requestPermissions(
+            context as Activity,
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+            EXTERNAL_STORAGE_PERMISSION_CODE
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -121,7 +157,7 @@ fun dropDownOptions(navController: NavController) {
                 onDismissRequest = { expanded = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text("Settings") },
+                    text = { Text("Permissions") },
                     onClick = {
                             navController.navigate(Screen.Setting.route)
                     }
@@ -184,7 +220,9 @@ fun autoSyncButton() {
                         arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                         EXTERNAL_STORAGE_PERMISSION_CODE
                     )
-                    return@Button
+                    Toast.makeText(context, "Allow Read Files", Toast.LENGTH_SHORT)
+                        .show()
+
                 }
                 val locationPermissionRequestCode = 456
                 if (deviceId.isNullOrEmpty()) {
@@ -208,7 +246,7 @@ fun autoSyncButton() {
                 ) {
                     Toast.makeText(
                         context,
-                        "Please enable i-Freeze permissions in app settings",
+                        "Please enable i-Freeze permissions in app permissions",
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -312,7 +350,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
         GeneralSettingItem(
             icon = R.drawable.scan,
             mainText = "System Scan",
-            subText = "Initiate a scan to detect threats",
+            subText = "Initiate a scan to detect mobile threats",
             onClick = {
                 if (deviceId.isNullOrEmpty()) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
@@ -336,8 +374,8 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
 
         GeneralSettingItem(
             icon = R.drawable.web,
-            mainText = "Web Access",
-            subText = "Roam within the Allowed Boundaries",
+            mainText = "Web Browser",
+            subText = "Access websites safely with AI protection",
             onClick = {
 
                 if (deviceId.isNullOrEmpty()) {
@@ -362,7 +400,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
         GeneralSettingItem(
             icon = R.drawable.admin,
             mainText = "Admin Login",
-            subText = "Administrative Privileges",
+            subText = "Admin portal login to change mobile policies",
             onClick = {
                 Log.d("abdo", "isFailureLimitReached $isFailureLimitReached")
                 Log.d("abdo", "isLicenseValid $isLicenseValid")
@@ -379,7 +417,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                         .show()
                     return@GeneralSettingItem
                 } else {
-                    navController.navigate(Screen.Home.route)
+                    navController.navigate(Screen.Login.route)
                 }
             }
         )
@@ -387,8 +425,8 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
 
         GeneralSettingItem(
             icon = R.drawable.contact_support,
-            mainText = "Support",
-            subText = "Contact Us",
+            mainText = "Request Support",
+            subText = "Create a new ticket with technical support",
             onClick = {
                 navController.navigate(Screen.SupportTeam.route)
             }
@@ -396,8 +434,8 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
 
         GeneralSettingItem(
             icon = R.drawable.apps,
-            mainText = "Applications",
-            subText = "Access applications",
+            mainText = "Kiosk Apps",
+            subText = "Check permitted applications in Kiosk mode",
             onClick = {
                 navController.navigate(Screen.KioskMode.route)
             }
