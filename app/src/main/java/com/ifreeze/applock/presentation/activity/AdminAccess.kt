@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -72,7 +73,6 @@ import com.patient.data.cashe.PreferencesGateway
 fun AdminAccess(
     navController: NavController,
     webStart: () -> Unit,
-    requestPermissionLauncher: ActivityResultLauncher<String>,
     viewModel: AppsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -93,7 +93,7 @@ fun AdminAccess(
             }
         }
         else -> {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+//            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
@@ -206,23 +206,33 @@ fun autoSyncButton() {
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )
     val EXTERNAL_STORAGE_PERMISSION_CODE = 1235
-    val locationService = Intent(context, LocationService::class.java)
     Row(modifier = Modifier.padding(15.dp)) {
         Button(
             onClick = {
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        context as Activity,
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        EXTERNAL_STORAGE_PERMISSION_CODE
-                    )
-                    Toast.makeText(context, "Allow Read Files", Toast.LENGTH_SHORT)
-                        .show()
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.READ_MEDIA_IMAGES
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                            EXTERNAL_STORAGE_PERMISSION_CODE
+                        )
+                    }
+                }else{
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                            EXTERNAL_STORAGE_PERMISSION_CODE
+                        )
+                    }
                 }
                 val locationPermissionRequestCode = 456
                 if (deviceId.isNullOrEmpty()) {
@@ -341,6 +351,10 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
     val deviceId = preference.load("responseID", "")
     var isFailureLimitReached = preference.load("isFailureLimitReached", false)
     var isLicenseValid = preference.load("validLicense", true)
+    val enabledServicesSetting = Settings.Secure.getString(
+        context.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )
     Column(
         modifier = Modifier
             .padding(horizontal = 14.dp)
@@ -356,6 +370,22 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
                         .show()
                     return@GeneralSettingItem
+                }else if (
+                        !Settings.canDrawOverlays(context) ||
+                        enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        Toast.makeText(
+                            context,
+                            "Please enable i-Freeze permissions in app permissions",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        return@GeneralSettingItem
+
                 } else if (isFailureLimitReached!! || !isLicenseValid!!) {
                     Toast.makeText(
                         context,
@@ -416,7 +446,25 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                     )
                         .show()
                     return@GeneralSettingItem
-                } else {
+                }
+                else if (
+                    !Settings.canDrawOverlays(context) ||
+                    enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Toast.makeText(
+                        context,
+                        "Please enable i-Freeze permissions in app permissions",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@GeneralSettingItem
+
+                }
+                else {
                     navController.navigate(Screen.Login.route)
                 }
             }

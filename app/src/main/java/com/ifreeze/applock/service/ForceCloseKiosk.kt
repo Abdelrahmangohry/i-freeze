@@ -21,12 +21,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ifreeze.applock.R
 import com.ifreeze.applock.helper.getAppIconByPackageName
 import com.ifreeze.applock.helper.toImageBitmap
+import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.adapter.AdapterKiosk
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.patient.data.cashe.PreferencesGateway
@@ -65,6 +67,7 @@ class ForceCloseKiosk : Service() {
         // Ensure proper handling of overlay permissions and user experience
         chatHeadView = LayoutInflater.from(this).inflate(R.layout.create_kiosk_mode, null)
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
         val kioskPackageList = preferenc.getList("kioskApplications")
 
         val recyclerView = chatHeadView?.findViewById<RecyclerView>(R.id.firstRow)

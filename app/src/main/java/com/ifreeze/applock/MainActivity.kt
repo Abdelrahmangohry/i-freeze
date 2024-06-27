@@ -103,6 +103,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var deviceManager: DevicePolicyManager
     private lateinit var compName: ComponentName
     private lateinit var preference: PreferencesGateway
+    lateinit var database: SQLiteDatabase
     lateinit var navController: NavHostController
     private val EXTERNAL_STORAGE_PERMISSION_CODE = 105
     // Inject AuthViewModel using Hilt
@@ -126,7 +127,7 @@ class MainActivity : ComponentActivity() {
         deviceManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         compName = ComponentName(this, MyDeviceAdminReceiver::class.java)
         preference = PreferencesGateway(applicationContext)
-        val locationService = Intent(this, LOCATION_SERVICE::class.java)
+
         var applicationNames = preference.getList("kioskApplications")
         var deviceId = preference.load("responseID", "")
 
@@ -145,7 +146,7 @@ class MainActivity : ComponentActivity() {
         var hashesListDatabase = mutableListOf<String>()
         //    private lateinit var btn2: Button
 
-        lateinit var database: SQLiteDatabase
+
         Log.d("abdo", "deviceId $deviceId")
         setContent {
             window.statusBarColor = getColor(R.color.blue)
@@ -154,7 +155,7 @@ class MainActivity : ComponentActivity() {
                 SetupNavGraph(
 
                     navController = navController,
-                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference, requestPermissionLauncher
+                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference
                 )
 
             }
@@ -188,7 +189,8 @@ class MainActivity : ComponentActivity() {
                 serialNumber = androidId
             )
 
-            val baseUrl = "http://192.168.1.250:8443/api/"
+//            val baseUrl = "http://192.168.1.250:8443/api/"
+            val baseUrl = "https://security.flothers.com:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
             authViewModel.getUserLogin(deviceDto)
@@ -277,20 +279,27 @@ class MainActivity : ComponentActivity() {
             val DATABASE_NAME = "scan.db"
             val inputStream: InputStream = assets.open(DATABASE_NAME)
             val outputFile = File(getDatabasePath(DATABASE_NAME).path)
-            val outputStream = FileOutputStream(outputFile)
 
-            val buffer = ByteArray(1024)
-            var length: Int
-            while (inputStream.read(buffer).also { length = it } > 0) {
-                outputStream.write(buffer, 0, length)
+            // Print the database path
+            Log.d("DatabasePath", "Database path: ${outputFile.path}")
+
+            if (!outputFile.exists()) {
+                val outputStream = FileOutputStream(outputFile)
+                val buffer = ByteArray(1024)
+                var length: Int
+                while (inputStream.read(buffer).also { length = it } > 0) {
+                    outputStream.write(buffer, 0, length)
+                }
+                outputStream.flush()
+                outputStream.close()
+                inputStream.close()
+                Log.d("abdo", "Database copied successfully.")
+            } else {
+                Log.d("abdo", "Database already exists.")
             }
-
-            outputStream.flush()
-            outputStream.close()
-            inputStream.close()
         } catch (e: IOException) {
             e.printStackTrace()
-            Log.d("abdo", "cann't read data base")
+            Log.d("DatabaseCopyError", "Cannot read database.")
         }
     }
 

@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -170,7 +171,7 @@ fun GeneralOptionsUISetting(
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                     context.startActivity(intent)
                 }else{
-                    Toast.makeText(context,"Accessibility Service Already Enabled", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,"Accessibility service is already enabled", Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -192,6 +193,44 @@ fun GeneralOptionsUISetting(
                     // Location permission is already granted
                     Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_SHORT).show()
                 }
+            }
+        )
+
+        GeneralSettingItem(
+
+            icon = R.drawable.folder,
+            mainText = "Files Permission",
+            subText = "Enable i-Freeze to scan files",
+            onClick = {
+                val EXTERNAL_STORAGE_PERMISSION_CODEE = 1234
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.READ_MEDIA_IMAGES
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                            EXTERNAL_STORAGE_PERMISSION_CODEE
+                        )
+                    }else{
+                        Toast.makeText(context, "Files access was granted", Toast.LENGTH_SHORT).show()
+                    }
+                }else{
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                            EXTERNAL_STORAGE_PERMISSION_CODEE
+                        )
+                    }
+                }
+
             }
         )
 

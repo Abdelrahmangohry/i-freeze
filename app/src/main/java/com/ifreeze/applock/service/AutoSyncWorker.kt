@@ -95,14 +95,14 @@ class AutoSyncWorker @AssistedInject constructor(
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
 
-//            val baseUrl = "https://security.flothers.com:8443/api/"
-            val getNewBaseUrl = api.getCloudURL(deviceId!!)
-            if (getNewBaseUrl.isSuccessful){
-                val updatedUrl = getNewBaseUrl.body()?.data?.url
-                Log.d("server", "updatedUrl from auto sync $updatedUrl")
-                preference.saveBaseUrl(updatedUrl!!)
-            }
-//            preference.saveBaseUrl(baseUrl)
+            val baseUrl = "https://security.flothers.com:8443/api/"
+//            val getNewBaseUrl = api.getCloudURL(deviceId!!)
+//            if (getNewBaseUrl.isSuccessful){
+//                val updatedUrl = getNewBaseUrl.body()?.data?.url
+//                Log.d("server", "updatedUrl from auto sync $updatedUrl")
+//                preference.saveBaseUrl(updatedUrl!!)
+//            }
+            preference.saveBaseUrl(baseUrl)
 
             if (failureCount!! >= 120) {
                 isFailureLimitReached = true
@@ -129,11 +129,10 @@ class AutoSyncWorker @AssistedInject constructor(
                     .show()
 
             }
-            val kioskApplications = api.getKioskApps()
-            if(kioskApplications.isSuccessful){
-                val applicationNamesList = kioskApplications.body()?.data?.map { it.packageName } ?: emptyList()
-                preference.saveList("kioskApplications", applicationNamesList)
-            }
+//            val kioskApplications = api.getKioskApps()
+//            if(kioskApplications.isSuccessful){
+//
+//            }
 
 
             val address = locationData.address ?: "Unknown Address"
@@ -179,6 +178,11 @@ class AutoSyncWorker @AssistedInject constructor(
 
             val response = api.newUpdateUserData(deviceId)
             if (response.isSuccessful) {
+                val applicationNamesList = response.body()?.data?.deviceKioskApps ?: emptyList()
+                preference.saveList("kioskApplications", applicationNamesList)
+                Log.d("kioskauto", "kiosk applications $applicationNamesList")
+
+
                 val cloudList = response.body()?.data?.exceptionWifi
                 val newList = ArrayList<String>().apply {
                     addAll(allowedList ?: emptyList())
@@ -244,6 +248,12 @@ class AutoSyncWorker @AssistedInject constructor(
                         applicationContext.stopService(serviceIntent)
                     }
                     preference.update("WifiWhite", it.whiteListWiFi)
+                    preference.update("locationBlocked", it.locationTracker)
+                    if (it.locationTracker) {
+                        applicationContext.startService(locationService)
+                    } else {
+                        applicationContext.stopService(locationService)
+                    }
                     preference.save("time", it.time)
 
                 }

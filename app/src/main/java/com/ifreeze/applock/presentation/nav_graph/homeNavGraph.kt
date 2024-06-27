@@ -38,7 +38,7 @@ fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
     activity : Activity, context:Context, wifi: () -> Unit,
     lifecycle: LifecycleOwner, webStart : () -> Unit, fileScan : () -> Unit,preferences: PreferencesGateway,
-    requestPermissionLauncher: ActivityResultLauncher<String>
+
 ) {
 
     val isDisplayed = preferences.load("isDisplayed", false)
@@ -51,7 +51,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.AdminAccess.route
         ) {
-            AdminAccess(navController = navController, webStart,requestPermissionLauncher)
+            AdminAccess(navController = navController, webStart)
         }
         composable(
             route = Screen.Login.route

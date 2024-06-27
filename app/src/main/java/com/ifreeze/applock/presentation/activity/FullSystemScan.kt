@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -71,18 +72,32 @@ class FullSystemScan : AppCompatActivity() {
         preference = PreferencesGateway(this)
         val hashesListDatabase = preference.getList("hashesListDatabase")
         // Request permission if not granted
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                EXTERNAL_STORAGE_PERMISSION_CODE
-            )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                    EXTERNAL_STORAGE_PERMISSION_CODE
+                )
+            }
+        }else{
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    EXTERNAL_STORAGE_PERMISSION_CODE
+                )
+            }
         }
+
 
         GlobalScope.launch(Dispatchers.IO) {
             //Copy the database file from assets to internal storage
@@ -112,7 +127,7 @@ class FullSystemScan : AppCompatActivity() {
 
         // Button click listener
         btn.setOnClickListener {
-            affectedList = mutableListOf()
+            btn.visibility = View.GONE
             numberOfScannedFiles.text = ""
             progressBar.progress = 0 // Reset progress bar
             startTime = System.currentTimeMillis() // Start time for estimating time

@@ -24,7 +24,6 @@ fun SetupNavGraph(
     webStart: () -> Unit,
     fileScan: () -> Unit,
     preferences: PreferencesGateway,
-    requestPermissionLauncher: ActivityResultLauncher<String>
 
 
 ){
@@ -33,6 +32,6 @@ fun SetupNavGraph(
         startDestination = HOME_GRAPH_ROUTE,
         route = ROOT_GRAPH_ROUTE
     ) {
-        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle,webStart, fileScan, preferences,requestPermissionLauncher)
+        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle,webStart, fileScan, preferences)
     }
 }

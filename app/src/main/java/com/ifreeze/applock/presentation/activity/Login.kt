@@ -210,11 +210,7 @@ fun Login(
                 ) {
                     Button(
                         onClick = {
-                            if (!isNetworkAvailable(context)) {
-                                Toast.makeText(context, "Please connect to the management server", Toast.LENGTH_SHORT)
-                                    .show()
-                                return@Button
-                            }
+
                             if (TextUtils.isEmpty(username.value.text)) {
                                 Toast.makeText(
                                     context,

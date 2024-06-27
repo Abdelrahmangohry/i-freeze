@@ -88,17 +88,24 @@ fun KioskMode(
 
     var applicationNames by remember { mutableStateOf(preference.getList("kioskApplications")) }
     var deviceId = preference.load("responseID", "")
-
-    authViewModel.newUpdateUserData(deviceId!!)
-    authViewModel._newFlow.observe(lifecycle, Observer { response ->
-        if (response.isSuccessful) {
-            val applicationNamesList = response.body()?.data?.deviceKioskApps ?: emptyList()
-            Log.d("kioskapp", "applicationNames $applicationNamesList")
-            preference.saveList("kioskApplications", applicationNamesList)
-            applicationNames = applicationNamesList as ArrayList<String>
-        }
-    })
-
+//    if (!isNetworkAvailable(context)) {
+//        Toast.makeText(
+//            context,
+//            "Please connect to the management server",
+//            Toast.LENGTH_SHORT
+//        ).show()
+//
+//    }else{
+//    authViewModel.newUpdateUserData(deviceId!!)
+//    authViewModel._newFlow.observe(lifecycle, Observer { response ->
+//        if (response.isSuccessful) {
+//            val applicationNamesList = response.body()?.data?.deviceKioskApps ?: emptyList()
+//            Log.d("kioskapp", "applicationNames $applicationNamesList")
+//            preference.saveList("kioskApplications", applicationNamesList)
+//            applicationNames = applicationNamesList as ArrayList<String>
+//        }
+//    })
+//    }
     Column(
         modifier = Modifier
             .fillMaxSize()

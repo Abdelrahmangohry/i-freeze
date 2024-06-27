@@ -4,6 +4,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -286,7 +288,8 @@ fun isMacAddress(mac: String): Boolean {
 
 @Composable
 fun HeaderMenu(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
+    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+        ) {
         IconButton(onClick = { onBackPressed() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -299,10 +302,11 @@ fun HeaderMenu(onBackPressed: () -> Unit) {
             color = Color.White,
 
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 55.dp),
+
+                .padding(top = 6.dp, bottom = 30.dp).weight(1f),
             fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
+            fontSize = 22.sp,
+            textAlign = TextAlign.Center
         )
     }
 }
