@@ -73,7 +73,8 @@ class AccessibilityServices : AccessibilityService() {
     private fun isSystemInKioskPackage(packageName: String): Boolean {
         val systemList= listOf(
         "com.touchtype.swiftkey",
-
+            "com.google.android.packageinstaller",
+            "com.hihonor.android.internal.app"
         )
         return systemList.any { packageName.startsWith(it) }
     }

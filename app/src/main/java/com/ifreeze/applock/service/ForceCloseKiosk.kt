@@ -2,6 +2,8 @@ package com.ifreeze.applock.service
 
 import android.app.AlertDialog
 import android.app.Service
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -26,9 +28,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ifreeze.applock.R
+import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.helper.getAppIconByPackageName
 import com.ifreeze.applock.helper.toImageBitmap
 import com.ifreeze.applock.presentation.AuthViewModel
+import com.ifreeze.applock.presentation.KioskActivity
 import com.ifreeze.applock.presentation.adapter.AdapterKiosk
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.patient.data.cashe.PreferencesGateway
@@ -37,6 +41,8 @@ class ForceCloseKiosk : Service() {
     private var chatHeadView: View? = null
     private val myBinder = BinderForce()
     private var windowManager: WindowManager? = null
+    private lateinit var devicePolicyManager: DevicePolicyManager
+    private lateinit var componentName: ComponentName
     private val correctPassword = "123"
     private lateinit var preferenc: PreferencesGateway
     inner class BinderForce : Binder() {
@@ -53,12 +59,21 @@ class ForceCloseKiosk : Service() {
         preferenc = PreferencesGateway(applicationContext)
         Log.d("abdo", "ForceCloseKiosk onCreate kiosk: ")
         createChatHeadView()
+        devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        componentName = ComponentName(this, MyDeviceAdminReceiver::class.java)
+        if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
+            devicePolicyManager.setLockTaskPackages(componentName, arrayOf(packageName))
+        }
+
+        KioskActivity.start(this)
+        Log.d("abdo", "kiosk started ...")
         super.onCreate()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d("abdo", "ForceCloseKiosk onDestroy kiosk")
+        KioskActivity.start(this)
         removeChatHeadView()
     }
 

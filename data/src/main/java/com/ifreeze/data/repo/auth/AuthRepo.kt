@@ -15,11 +15,13 @@ import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
+import com.ifreeze.data.model.VersionsDetails
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface AuthRepo {
     suspend fun getUserLogin(deviceDto: DeviceDTO ): Response<String>
@@ -36,4 +38,7 @@ interface AuthRepo {
     suspend fun getKioskApps(): Response<MobileConfigurationResponse>
     suspend fun sendAlert(message: List<AlertBody>): Response<AlertResponse>
     suspend fun sendProactiveResults(message: List<ProactiveResultsBody>): Response<ProactiveResultsResponse>
+
+    suspend fun getAllVersionsDetails(num: Double,id: String ): Response<VersionsDetails>
 }
+

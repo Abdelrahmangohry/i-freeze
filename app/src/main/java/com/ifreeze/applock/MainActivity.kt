@@ -190,7 +190,7 @@ class MainActivity : ComponentActivity() {
             )
 
 //            val baseUrl = "http://192.168.1.250:8443/api/"
-            val baseUrl = "https://security.flothers.com:8443/api/"
+            val baseUrl = "https://central.flothers.com:8443/api/"
             preference.saveBaseUrl(baseUrl)
 
             authViewModel.getUserLogin(deviceDto)

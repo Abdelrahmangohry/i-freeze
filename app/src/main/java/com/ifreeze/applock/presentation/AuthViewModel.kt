@@ -18,6 +18,7 @@ import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
+import com.ifreeze.data.model.VersionsDetails
 import com.ifreeze.domain.AuthUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -38,6 +39,7 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
     var _getkioskApps: MutableLiveData<Response<MobileConfigurationResponse>> = MutableLiveData()
     var _sendAlert: MutableLiveData<Response<AlertResponse>> = MutableLiveData()
     var _proactiveAlert: MutableLiveData<Response<ProactiveResultsResponse>> = MutableLiveData()
+    var _getVersionsDetails: MutableLiveData<Response<VersionsDetails>> = MutableLiveData()
 
 
     fun getUserLogin(deviceDto: DeviceDTO) {
@@ -126,6 +128,14 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
         viewModelScope.launch {
             val response10 = useCase.sendProactiveResults(message)
             _proactiveAlert.value = response10
+
+        }
+    }
+
+    fun getAllVersionsDetails(num: Double, id: String) {
+        viewModelScope.launch {
+            val response11 = useCase.getAllVersionsDetails(num,id)
+            _getVersionsDetails.value = response11
 
         }
     }

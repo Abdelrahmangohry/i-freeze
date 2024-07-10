@@ -15,6 +15,7 @@ import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
+import com.ifreeze.data.model.VersionsDetails
 import com.ifreeze.data.repo.auth.AuthRepo
 import retrofit2.Response
 import javax.inject.Inject
@@ -80,5 +81,10 @@ class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
     suspend fun  sendProactiveResults(message: List<ProactiveResultsBody>
     ) : Response<ProactiveResultsResponse> {
         return repo.sendProactiveResults(message)
+    }
+
+    suspend fun  getAllVersionsDetails(num: Double, id: String
+    ) : Response<VersionsDetails> {
+        return repo.getAllVersionsDetails(num, id)
     }
 }
