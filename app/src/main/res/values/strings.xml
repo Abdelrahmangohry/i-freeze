@@ -20,4 +20,8 @@
     <string name="web">Web Access</string>
     <string name="back_arrow_description">back arrow\n</string>
     <string name="wifiBlockMessage">Wi-Fi connection is not permitted by your organization.\n\nPlease disable Wi-Fi connection and ensure that mobile location is enabled.</string>
+    <string name="agora_app_id">ac5859c2692345dcb38e8f3c41392dc1</string>
+    <string name="agora_app_certificate">\n</string>
+
+
 </resources>

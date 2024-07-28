@@ -29,10 +29,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
-import com.ifreeze.applock.helper.getAppIconByPackageName
-import com.ifreeze.applock.helper.toImageBitmap
-import com.ifreeze.applock.presentation.AuthViewModel
-import com.ifreeze.applock.presentation.KioskActivity
 import com.ifreeze.applock.presentation.adapter.AdapterKiosk
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.patient.data.cashe.PreferencesGateway
@@ -65,7 +61,7 @@ class ForceCloseKiosk : Service() {
             devicePolicyManager.setLockTaskPackages(componentName, arrayOf(packageName))
         }
 
-        KioskActivity.start(this)
+//        KioskActivity.start(this)
         Log.d("abdo", "kiosk started ...")
         super.onCreate()
     }
@@ -73,7 +69,7 @@ class ForceCloseKiosk : Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d("abdo", "ForceCloseKiosk onDestroy kiosk")
-        KioskActivity.start(this)
+//        KioskActivity.start(this)
         removeChatHeadView()
     }
 

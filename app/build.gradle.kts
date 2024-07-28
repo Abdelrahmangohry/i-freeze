@@ -91,6 +91,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.hilt:hilt-common:1.2.0")
+    implementation("androidx.activity:activity:1.9.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -140,6 +141,19 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
 
     implementation("androidx.hilt:hilt-work:1.0.0")
+
+
+    implementation ("io.agora.rtc:full-sdk:4.3.2")
+    implementation ("io.agora.rtc:full-screen-sharing:4.3.2")
+
+    //ok http
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
+
+// Navigation Component
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.3.5")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.3.5")
 
 }
 kapt {

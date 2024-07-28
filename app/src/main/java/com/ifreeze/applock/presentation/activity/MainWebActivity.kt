@@ -111,11 +111,11 @@ class MainWebActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
         }
     }
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        // Handle the new intent with a URL
-        handleIntent(intent)
-    }
+//    override fun onNewIntent(intent: Intent?) {
+//        super.onNewIntent(intent)
+//        // Handle the new intent with a URL
+//        handleIntent(intent)
+//    }
     private fun handleIntent(intent: Intent?) {
         intent?.data?.let { uri ->
             // A URL was provided in the intent, load it in the WebView or handle it as needed

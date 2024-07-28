@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="screen_scenario_type" >
+        <item>SCREEN_SCENARIO_DOCUMENT</item>
+        <item>SCREEN_SCENARIO_GAMING</item>
+        <item>SCREEN_SCENARIO_VIDEO</item>
+    </string-array>
+</resources>
