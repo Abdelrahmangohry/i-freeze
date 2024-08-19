@@ -22,9 +22,9 @@ import javax.inject.Inject
 
 class AuthUseCase @Inject constructor(private val repo: AuthRepo) {
     suspend fun getUserLogin(
-        deviceDto: DeviceDTO
+        activationKey: String, deviceDto: DeviceDTO
     ) : Response<String> {
-        return repo.getUserLogin(deviceDto)
+        return repo.getUserLogin(activationKey, deviceDto)
     }
 
     suspend fun newUpdateUserData(

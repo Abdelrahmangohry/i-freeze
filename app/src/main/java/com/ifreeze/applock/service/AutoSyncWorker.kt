@@ -183,14 +183,14 @@ class AutoSyncWorker @AssistedInject constructor(
                 Log.d("abdo", "Is license valid: $isLicenseValid")
             }
 
-//            val mobileApplications = api.mobileApps(mobileApplication)
-//            if (mobileApplications.isSuccessful) {
-//                Log.d("abdo", "mobile application sent successfully")
-//                failureCount = 0
-//                Log.d("abdo", "failureCount from try $failureCount")
-//                preference.save("failureCount", failureCount!!)
-//                Log.d("abdo", "isFailureLimitReached from try $isFailureLimitReached")
-//            }
+            val mobileApplications = api.mobileApps(mobileApplication)
+            if (mobileApplications.isSuccessful) {
+                Log.d("abdo", "mobile application sent successfully")
+                failureCount = 0
+                Log.d("abdo", "failureCount from try $failureCount")
+                preference.save("failureCount", failureCount!!)
+                Log.d("abdo", "isFailureLimitReached from try $isFailureLimitReached")
+            }
 
             if (userLocationResponse.isSuccessful) {
                 Log.d("abdo", "User location updated successfully")
@@ -295,11 +295,11 @@ class AutoSyncWorker @AssistedInject constructor(
                     description = "$issueName Found",
                     source = "Settings Alerts"
                 ))
-//                val alertIssues = api.sendAlert(message)
-//                if (alertIssues.isSuccessful) {
-//                    Log.d("abdo", "mobile Issues Sent Successfully")
-//
-//                }
+                val alertIssues = api.sendAlert(message)
+                if (alertIssues.isSuccessful) {
+                    Log.d("abdo", "mobile Issues Sent Successfully")
+
+                }
             }
             getHashCodeFromFiles(downloadDirectory)
 
@@ -319,16 +319,13 @@ class AutoSyncWorker @AssistedInject constructor(
                     )
                 }
 
-//                val proActiveResult = api.sendProactiveResults(messagePro)
-//                if (proActiveResult.isSuccessful) {
-//                    Log.d("abdo", "Proactive result sent successfully")
-//                }
+                val proActiveResult = api.sendProactiveResults(messagePro)
+                if (proActiveResult.isSuccessful) {
+                    Log.d("abdo", "Proactive result sent successfully")
+                }
             }
 
-//                            downloadAndInstallZip(
-//                    "https://central.flothers.com:8443/Zip/Versions/InstalledApps/838d499d-8fcd-4357-948f-08dc07916c1e/1.0/Facebook.exe",
-//                    applicationContext
-//                )
+
 
             val getVersionsDet = api.getAllVersionsDetails(num, deviceId)
 
@@ -524,19 +521,7 @@ private suspend fun downloadAndInstallZip(url: String, context: Context, current
                     val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                     Log.d("download", "id $id")
                     installApk(context, File(downloadDirectory, "$currentName-111.apk"))
-//                    if (id == downloadId) {
-//                        val zipFile = File(downloadDirectory, "Facebook.zip")
-//                        Log.d("download", "zipFile $zipFile Exist")
-//                        if (zipFile.exists()) {
-//
-//                            unzipFile(zipFile, downloadDirectory)
-//                            Log.d("download", "zipFile $zipFile Complete")
-//                            installApk(context, File(downloadDirectory, "Facebook.apk"))
-//                            Log.d("download", "installApk ")
-//                        }
-//                        context?.unregisterReceiver(this)
-//                        cont.resume(Unit)
-//                    }
+
                 }
             }
             context.registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))

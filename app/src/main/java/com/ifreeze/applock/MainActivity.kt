@@ -172,69 +172,7 @@ class MainActivity : ComponentActivity() {
 //        })
 
 
-        if (!isNetworkAvailable(this)) {
-            Toast.makeText(
-                this,
-                "Please connect to the management server",
-                Toast.LENGTH_SHORT
-            ).show()
 
-        } else if (deviceId.isNullOrEmpty()) {
-
-            val deviceDto = DeviceDTO(
-                deviceName = deviceName,
-                operatingSystemVersion = operatingSystemVersion,
-                deviceIp = ipAddress,
-                macAddress = androidId,
-                serialNumber = androidId
-            )
-
-//            val baseUrl = "http://192.168.1.250:8443/api/"
-            val baseUrl = "https://central.flothers.com:8443/api/"
-            preference.saveBaseUrl(baseUrl)
-
-            authViewModel.getUserLogin(deviceDto)
-            authViewModel._loginFlow.observe(this, Observer { response ->
-                if (response.isSuccessful) {
-                    Log.d("abdo", response.body().toString())
-                    deviceId = response.body().toString().trim()
-                    Log.d("deviceID", "this is device id $deviceId")
-                    preference.save("responseID", deviceId!!)
-                    preference.update("BlockState", false)
-                    Toast.makeText(
-                        this,
-                        "License is Activated",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    if (
-                        !Settings.canDrawOverlays(this) ||
-                        enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
-                        ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        Toast.makeText(
-                            this,
-                            "Please enable i-Freeze permissions in app permissions",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                    }
-                }
-            })
-
-            authViewModel.newUpdateUserData(deviceId!!)
-            authViewModel._newFlow.observe(this, Observer { response ->
-                if (response.isSuccessful) {
-                    val applicationNamesList =
-                        response.body()?.data?.deviceKioskApps ?: emptyList()
-                    Log.d("kioskapp", "applicationNames $applicationNamesList")
-                    preference.saveList("kioskApplications", applicationNamesList)
-                    applicationNames = applicationNamesList as ArrayList<String>
-                }
-            })
-        }
 
 
 

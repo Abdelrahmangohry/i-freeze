@@ -10,6 +10,10 @@ sealed class Screen(val route:String){
     object Home : Screen(route = "home_screen")
     object GeneralWebView : Screen(route = "general_web_view")
     object Setting : Screen(route = "setting_screen")
+    object OnboardingScreen1 : Screen(route = "on_boarding_Screen_1")
+    object OnboardingScreen2 : Screen(route = "on_boarding_Screen_2")
+    object OnboardingScreen3 : Screen(route = "on_boarding_Screen_3")
+    object OnboardingScreen4 : Screen(route = "on_boarding_Screen_4")
 
     object SupportTeam : Screen(route = "support_team")
     object KioskMode : Screen(route = "kiosk_mode")

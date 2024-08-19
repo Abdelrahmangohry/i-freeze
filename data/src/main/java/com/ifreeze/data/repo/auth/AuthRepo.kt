@@ -24,7 +24,9 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface AuthRepo {
-    suspend fun getUserLogin(deviceDto: DeviceDTO ): Response<String>
+    suspend fun getUserLogin( activationKey : String
+                              ,deviceDto: DeviceDTO ):
+            Response<String>
 
     suspend fun newUpdateUserData(deviceId: String): Response<Data>
 

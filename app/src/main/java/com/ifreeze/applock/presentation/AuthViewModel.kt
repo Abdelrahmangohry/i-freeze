@@ -42,9 +42,9 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
     var _getVersionsDetails: MutableLiveData<Response<VersionsDetails>> = MutableLiveData()
 
 
-    fun getUserLogin(deviceDto: DeviceDTO) {
+    fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
         viewModelScope.launch {
-            val response = useCase.getUserLogin(deviceDto)
+            val response = useCase.getUserLogin(activationKey, deviceDto)
             _loginFlow.value = response
 
         }

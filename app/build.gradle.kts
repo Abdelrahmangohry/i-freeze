@@ -112,6 +112,11 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.google.code.gson:gson:2.10")
+
+    //Pager and Indicators - Accompanist
+//    implementation("com.google.accompanist:accompanist-pager:2.8.0")
+//    implementation("com.google.accompanist:accompanist-pager-indicators :2.8.0")
+
     kapt ("com.github.bumptech.glide:compiler:4.12.0")
     // Turbine is a small testing library for kotlinx.coroutines
     testImplementation("app.cash.turbine:turbine:0.7.0")

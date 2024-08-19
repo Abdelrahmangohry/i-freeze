@@ -92,6 +92,7 @@ fun AdminAccess(
                 startAutoSyncWorker(context)
             }
         }
+
         else -> {
 //            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
@@ -140,58 +141,58 @@ fun dropDownOptions(navController: NavController) {
     var isFailureLimitReached = preference.load("isFailureLimitReached", false)
     var isLicenseValid = preference.load("validLicense", true)
 
-        IconButton(
-            onClick = { expanded = !expanded },
+    IconButton(
+        onClick = { expanded = !expanded },
 
-            ) {
-            Icon(
-                Icons.Default.MoreVert,
-                contentDescription = "Options",
-                tint = Color.White,
-                modifier = Modifier.size(30.dp)
+        ) {
+        Icon(
+            Icons.Default.MoreVert,
+            contentDescription = "Options",
+            tint = Color.White,
+            modifier = Modifier.size(30.dp)
+        )
+
+        DropdownMenu(
+
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Permissions") },
+                onClick = {
+                    navController.navigate(Screen.Setting.route)
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Help") },
+                onClick = {
+                    handler.openUri("https://ifreeze.flothers.com/expert/")
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("License Activation") },
+                onClick = {
+                    navController.navigate(Screen.LicenseActivation.route)
+                }
             )
 
-            DropdownMenu(
+            DropdownMenuItem(
+                text = { Text("Start Kiosk") },
+                onClick = {
 
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Permissions") },
-                    onClick = {
-                            navController.navigate(Screen.Setting.route)
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Help") },
-                    onClick = {
-                        handler.openUri("https://ifreeze.flothers.com/expert/")
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("License Activation") },
-                    onClick = {
-                        navController.navigate(Screen.LicenseActivation.route)
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = { Text("Start Kiosk") },
-                    onClick = {
-
-                        if(preference.load("BlockState", true)!!){
-                            expanded = false
-                            Toast.makeText(context, "Kiosk already activated", Toast.LENGTH_SHORT).show()
-                        }
-                        else{
+                    if (preference.load("BlockState", true)!!) {
+                        expanded = false
+                        Toast.makeText(context, "Kiosk already activated", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
                         preference.update("BlockState", true)
                         expanded = false
                         Toast.makeText(context, "Kiosk mode activated", Toast.LENGTH_SHORT).show()
-                        }
                     }
-                )
-            }
+                }
+            )
         }
+    }
 
 
 }
@@ -221,7 +222,7 @@ fun autoSyncButton() {
                             EXTERNAL_STORAGE_PERMISSION_CODE
                         )
                     }
-                }else{
+                } else {
                     if (ContextCompat.checkSelfPermission(
                             context,
                             Manifest.permission.READ_EXTERNAL_STORAGE
@@ -241,7 +242,11 @@ fun autoSyncButton() {
                     return@Button
                 }
                 if (!isNetworkAvailable(context)) {
-                    Toast.makeText(context, "You Should Enable Internet Connection", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        context,
+                        "You Should Enable Internet Connection",
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     return@Button
                 }
@@ -370,21 +375,21 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                     Toast.makeText(context, "You Should Activate License", Toast.LENGTH_SHORT)
                         .show()
                     return@GeneralSettingItem
-                }else if (
-                        !Settings.canDrawOverlays(context) ||
-                        enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
-                        ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        Toast.makeText(
-                            context,
-                            "Please enable i-Freeze permissions in app permissions",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                        return@GeneralSettingItem
+                } else if (
+                    !Settings.canDrawOverlays(context) ||
+                    enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Toast.makeText(
+                        context,
+                        "Please enable i-Freeze permissions in app permissions",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@GeneralSettingItem
 
                 } else if (isFailureLimitReached!! || !isLicenseValid!!) {
                     Toast.makeText(
@@ -446,8 +451,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                     )
                         .show()
                     return@GeneralSettingItem
-                }
-                else if (
+                } else if (
                     !Settings.canDrawOverlays(context) ||
                     enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
                     ContextCompat.checkSelfPermission(
@@ -463,8 +467,7 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
                         .show()
                     return@GeneralSettingItem
 
-                }
-                else {
+                } else {
                     navController.navigate(Screen.Login.route)
                 }
             }
