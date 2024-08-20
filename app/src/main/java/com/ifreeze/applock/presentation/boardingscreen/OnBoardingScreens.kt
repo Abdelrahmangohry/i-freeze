@@ -466,8 +466,18 @@ fun OnboardingScreen3(
 @Composable
 fun OnboardingScreen4(navController: NavHostController) {
     val currentPage = remember { mutableStateOf(3) }
+Column(
+    modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8)),
+    verticalArrangement = Arrangement.Center,
+    horizontalAlignment = Alignment.CenterHorizontally
+) {
+    Text(text = "Welcome to i-Freeze", color = Color.White, fontSize = 22.sp)
+    Button(  colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)), onClick = {navController.navigate(Screen.AdminAccess.route)}){
+        Text(text = "Start Application", color = Color.White)
 
-    Text(text = "Fourth Page")
+    }
+}
+
 }
 
 @Composable
