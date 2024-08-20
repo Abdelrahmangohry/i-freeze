@@ -66,9 +66,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(route = Screen.OnboardingScreen4.route) {
             OnboardingScreen4(navController = navController)
             preferences.save("isDisplayed", true)
-            navController.navigate(Screen.AdminAccess.route) {
-                popUpTo(Screen.OnboardingScreen1.route) { inclusive = true }
-            }
+
         }
 
 

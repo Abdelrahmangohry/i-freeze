@@ -12,11 +12,13 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
@@ -63,8 +65,9 @@ import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.presentation.activity.GeneralSettingItem
 import com.ifreeze.applock.presentation.activity.HeaderLogo
 import com.ifreeze.applock.presentation.nav_graph.Screen
+import com.ifreeze.applock.presentation.screen.PermissionViewModel
 import com.ifreeze.applock.ui.theme.Shape
-
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun OnboardingScreen1(navController: NavHostController) {
@@ -73,7 +76,7 @@ fun OnboardingScreen1(navController: NavHostController) {
         pushStringAnnotation(tag = "Agreement", annotation = "https://www.google.com")
         withStyle(
             style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.White,
                 textDecoration = TextDecoration.Underline
             )
         ) {
@@ -84,7 +87,7 @@ fun OnboardingScreen1(navController: NavHostController) {
         pushStringAnnotation(tag = "Privacy Policy", annotation = "https://www.youtube.com")
         withStyle(
             style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.White,
                 textDecoration = TextDecoration.Underline
             )
         ) {
@@ -101,7 +104,7 @@ fun OnboardingScreen1(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -110,7 +113,7 @@ fun OnboardingScreen1(navController: NavHostController) {
             ClickableText(
                 text = annotatedText,
                 style = LocalTextStyle.current.copy(
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     color = Color.White,
                     textAlign = TextAlign.Center
                 ),
@@ -126,7 +129,6 @@ fun OnboardingScreen1(navController: NavHostController) {
                         }
                 }
             )
-            //additionalContent()
         }
 
         Row(
@@ -137,6 +139,9 @@ fun OnboardingScreen1(navController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 onClick = { navController.navigate(Screen.OnboardingScreen2.route) },
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
             ) {
@@ -162,7 +167,7 @@ fun OnboardingScreen2(navController: NavHostController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OnboardingImage(R.drawable.mob)
+            OnboardingImage(R.drawable.accessnew)
 
             Text(
                 modifier = Modifier.padding(15.dp),
@@ -175,32 +180,46 @@ fun OnboardingScreen2(navController: NavHostController) {
                 modifier = Modifier.fillMaxWidth().padding(15.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                Text(
-                    text = "1. Open Accessibility settings by tapping the setting button below",
-                    color = Color.White,
-                    fontSize = 16.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    NumberedCircle(1)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Open Accessibility settings by tapping the setting button below",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "2. Tap Installed apps or Installed services and select i-Freeze Antivirus",
-                    color = Color.White,
-                    fontSize = 16.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    NumberedCircle(2)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Tap Installed apps or Installed services and select i-Freeze Antivirus",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "3. Tap the toggle to give us permission",
-                    color = Color.White,
-                    fontSize = 16.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    NumberedCircle(3)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Tap the toggle to give us permission",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(15.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Button(colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
+            Button(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
                 onClick = {
                     val enabledServicesSetting = Settings.Secure.getString(
                         context.contentResolver,
@@ -218,9 +237,10 @@ fun OnboardingScreen2(navController: NavHostController) {
                         ).show()
                     }
                 }) {
-                Text(text = "SETTINGS", color = Color.White)
+                Text(text = "Settings", color = Color.White)
             }
-            Button(colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
+            Button(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
                 onClick = {
                     val enabledServicesSetting = Settings.Secure.getString(
                         context.contentResolver,
@@ -245,13 +265,22 @@ fun OnboardingScreen2(navController: NavHostController) {
 }
 
 @Composable
-fun OnboardingScreen3(navController: NavHostController) {
-    val currentPage = remember { mutableStateOf(2) }
+fun OnboardingScreen3(
+    navController: NavHostController,
+    viewModel: PermissionViewModel = viewModel()
+) {
     val context = LocalContext.current
     val deviceManager =
         context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
-    val nonGrantedPermissions = remember { mutableListOf<String>() }
+
+    // Collect the state flow as a state
+    val permissionState by viewModel.permissionState.collectAsState()
+
+    // Check initial permissions
+    LaunchedEffect(Unit) {
+        viewModel.checkPermissions(context, deviceManager, compName)
+    }
 
     Column(
         modifier = Modifier
@@ -266,6 +295,8 @@ fun OnboardingScreen3(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            OnboardingImage(R.drawable.accessabilitypref)
+
             GeneralSettingItemNew(
                 icon = R.drawable.admin,
                 mainText = "Admin Permission",
@@ -286,14 +317,15 @@ fun OnboardingScreen3(navController: NavHostController) {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+                    viewModel.updatePermission(context, "Admin Permission")
                 },
-                granted = deviceManager.isAdminActive(compName)
+                granted = permissionState["Admin Permission"] ?: false
             )
 
             GeneralSettingItemNew(
                 icon = R.drawable.draw,
                 mainText = "Over Draw",
-                subText = "Enable the screen control option in settings",
+                subText = "Enable the screen control option",
                 onClick = {
                     if (!Settings.canDrawOverlays(context)) {
                         val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
@@ -303,14 +335,15 @@ fun OnboardingScreen3(navController: NavHostController) {
                         Toast.makeText(context, "Over Draw is already enabled", Toast.LENGTH_SHORT)
                             .show()
                     }
+                    viewModel.updatePermission(context, "Over Draw")
                 },
-                granted = Settings.canDrawOverlays(context)
+                granted = permissionState["Over Draw"] ?: false
             )
 
             GeneralSettingItemNew(
                 icon = R.drawable.locked_icon,
                 mainText = "Install Unknown Apps",
-                subText = "Enable the screen control option in settings",
+                subText = "Enable install Apps",
                 onClick = {
                     if (!context.packageManager.canRequestPackageInstalls()) {
                         val settingsIntent =
@@ -325,8 +358,9 @@ fun OnboardingScreen3(navController: NavHostController) {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+                    viewModel.updatePermission(context, "Install Unknown Apps")
                 },
-                granted = context.packageManager.canRequestPackageInstalls()
+                granted = permissionState["Install Unknown Apps"] ?: false
             )
 
             GeneralSettingItemNew(
@@ -351,11 +385,10 @@ fun OnboardingScreen3(navController: NavHostController) {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+                    viewModel.updatePermission(context, "Location Permission")
                 },
-                granted = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+                granted = permissionState["Location Permission"] ?: false
+
             )
 
             GeneralSettingItemNew(
@@ -400,18 +433,9 @@ fun OnboardingScreen3(navController: NavHostController) {
                             ).show()
                         }
                     }
+                    viewModel.updatePermission(context, "Files Permission")
                 },
-                granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.READ_MEDIA_IMAGES
-                    ) == PackageManager.PERMISSION_GRANTED
-                } else {
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    ) == PackageManager.PERMISSION_GRANTED
-                }
+                granted = permissionState["Files Permission"] ?: false
             )
         }
 
@@ -423,43 +447,7 @@ fun OnboardingScreen3(navController: NavHostController) {
                 .padding(16.dp),
             colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
             onClick = {
-                // Check permissions
-                nonGrantedPermissions.clear()
-
-                if (!deviceManager.isAdminActive(compName)) {
-                    nonGrantedPermissions.add("Admin Permission")
-                }
-                if (!Settings.canDrawOverlays(context)) {
-                    nonGrantedPermissions.add("Over Draw")
-                }
-                if (!context.packageManager.canRequestPackageInstalls()) {
-                    nonGrantedPermissions.add("Install Unknown Apps")
-                }
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    nonGrantedPermissions.add("Location Permission")
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    if (ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.READ_MEDIA_IMAGES
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        nonGrantedPermissions.add("Files Permission")
-                    }
-                } else {
-                    if (ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        nonGrantedPermissions.add("Files Permission")
-                    }
-                }
-
+                val nonGrantedPermissions = permissionState.filterValues { !it }.keys
                 if (nonGrantedPermissions.isEmpty()) {
                     navController.navigate(Screen.OnboardingScreen4.route)
                 } else {
@@ -469,7 +457,6 @@ fun OnboardingScreen3(navController: NavHostController) {
                         Toast.LENGTH_LONG
                     ).show()
                 }
-
             }) {
             Text(text = "Next", color = Color.White)
         }
@@ -527,20 +514,20 @@ fun OnboardingScreen(
 //            onIndicatorClick = onIndicatorClick
 //        )
     }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Button(
+            onClick = onButtonClick,
+            colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
         ) {
-            Button(
-                onClick = onButtonClick,
-                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-            ) {
-                Text(text = buttonText, color = Color.White)
-            }
+            Text(text = buttonText, color = Color.White)
         }
+    }
 
 }
 
@@ -580,7 +567,7 @@ fun OnboardingImage(imageRes: Int) {
         painter = painterResource(id = imageRes),
         contentDescription = null,
         modifier = Modifier
-            .fillMaxHeight(0.35f).fillMaxWidth().padding(50.dp),
+            .fillMaxHeight(0.50f).fillMaxWidth().padding(15.dp),
         contentScale = ContentScale.Fit
     )
 
@@ -601,7 +588,7 @@ fun GeneralSettingItemNew(
         ),
         onClick = { onClick() },
         modifier = Modifier
-            .padding(bottom = 12.dp)
+            .padding(bottom = 10.dp)
             .fillMaxWidth()
     ) {
         Box(
@@ -646,8 +633,7 @@ fun GeneralSettingItemNew(
                         color = Color(0xFF175AA8),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
-
-                        )
+                    )
                 }
 
                 Icon(
@@ -657,5 +643,26 @@ fun GeneralSettingItemNew(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun NumberedCircle(number: Int) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(40.dp)  // Size of the circle
+            .background(
+                color = Color.White,
+                shape = CircleShape
+            ) // Circle shape with white background
+
+    ) {
+        Text(
+            text = number.toString(),
+            color = Color(0xFF175AA8),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
