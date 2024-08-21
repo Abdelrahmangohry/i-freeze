@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -25,6 +26,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -40,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -73,7 +76,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun OnboardingScreen1(navController: NavHostController) {
     val annotatedText = buildAnnotatedString {
         append("By proceeding, you confirm ")
-        pushStringAnnotation(tag = "Agreement", annotation = "https://www.google.com")
+        pushStringAnnotation(tag = "Agreement", annotation = "https://flothers.com/user_agreement")
         withStyle(
             style = SpanStyle(
                 color = Color.White,
@@ -84,7 +87,7 @@ fun OnboardingScreen1(navController: NavHostController) {
         }
         pop()
         append(" and ")
-        pushStringAnnotation(tag = "Privacy Policy", annotation = "https://www.youtube.com")
+        pushStringAnnotation(tag = "Privacy Policy", annotation = "https://flothers.com/privacy_policy")
         withStyle(
             style = SpanStyle(
                 color = Color.White,
@@ -265,23 +268,18 @@ fun OnboardingScreen2(navController: NavHostController) {
 }
 
 @Composable
-fun OnboardingScreen3(
-    navController: NavHostController,
-    viewModel: PermissionViewModel = viewModel()
-) {
+fun OnboardingScreen3(navController: NavHostController) {
     val context = LocalContext.current
-    val deviceManager =
-        context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+    val deviceManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
 
-    // Collect the state flow as a state
-    val permissionState by viewModel.permissionState.collectAsState()
+    // ViewModel to manage permission state
+    val viewModel: PermissionViewModel = viewModel()
 
-    // Check initial permissions
-    LaunchedEffect(Unit) {
-        viewModel.checkPermissions(context, deviceManager, compName)
-    }
-
+    // Observe permission states
+    val permissionStates by viewModel.permissionStates.collectAsState()
+    viewModel.checkAllPermissions(context, compName, deviceManager)
+    // Define UI
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -296,158 +294,120 @@ fun OnboardingScreen3(
             verticalArrangement = Arrangement.Center
         ) {
             OnboardingImage(R.drawable.accessabilitypref)
-
+            // Admin Permission Card
             GeneralSettingItemNew(
                 icon = R.drawable.admin,
                 mainText = "Admin Permission",
                 subText = "Provide admin privilege to i-Freeze",
                 onClick = {
                     if (!deviceManager.isAdminActive(compName)) {
-                        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                        intent.putExtra(
-                            DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                            "You should enable the app!"
-                        )
+                        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                            putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+                            putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
+                        }
                         context.startActivity(intent)
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Admin permission is already granted",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Admin permission is already granted", Toast.LENGTH_SHORT).show()
                     }
-                    viewModel.updatePermission(context, "Admin Permission")
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
-                granted = permissionState["Admin Permission"] ?: false
+                granted = permissionStates.adminPermission,
+                icon2 = if (permissionStates.adminPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
             )
 
+            // Over Draw Permission Card
             GeneralSettingItemNew(
                 icon = R.drawable.draw,
                 mainText = "Over Draw",
-                subText = "Enable the screen control option",
+                subText = "Enable the screen control option in settings",
                 onClick = {
                     if (!Settings.canDrawOverlays(context)) {
-                        val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                        myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
                         context.startActivity(myIntent)
                     } else {
-                        Toast.makeText(context, "Over Draw is already enabled", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(context, "Over Draw is already enabled", Toast.LENGTH_SHORT).show()
                     }
-                    viewModel.updatePermission(context, "Over Draw")
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
-                granted = permissionState["Over Draw"] ?: false
+                granted = permissionStates.drawOverPermission,
+                icon2 = if (permissionStates.drawOverPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
             )
 
+            // Install Unknown Apps Permission Card
             GeneralSettingItemNew(
                 icon = R.drawable.locked_icon,
                 mainText = "Install Unknown Apps",
-                subText = "Enable install Apps",
+                subText = "Enable the screen control option in settings",
                 onClick = {
                     if (!context.packageManager.canRequestPackageInstalls()) {
-                        val settingsIntent =
-                            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                            }
+                        val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        }
                         context.startActivity(settingsIntent)
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Install Unknown Apps is already enabled",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Install Unknown Apps is already enabled", Toast.LENGTH_SHORT).show()
                     }
-                    viewModel.updatePermission(context, "Install Unknown Apps")
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
-                granted = permissionState["Install Unknown Apps"] ?: false
+                granted = permissionStates.unknownAppsPermission,
+                icon2 = if (permissionStates.unknownAppsPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
             )
 
+            // Location Permission Card
             GeneralSettingItemNew(
                 icon = R.drawable.location,
                 mainText = "Location Permission",
                 subText = "Permit location accessibility",
                 onClick = {
-                    if (ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        ActivityCompat.requestPermissions(
-                            context as Activity,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            123
-                        )
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 123)
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Location permission is already granted",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_SHORT).show()
                     }
-                    viewModel.updatePermission(context, "Location Permission")
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
-                granted = permissionState["Location Permission"] ?: false
-
+                granted = permissionStates.locationPermission,
+                icon2 = if (permissionStates.locationPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
             )
 
+            // Files Permission Card
             GeneralSettingItemNew(
                 icon = R.drawable.folder,
                 mainText = "Files Permission",
                 subText = "Enable i-Freeze to scan files",
                 onClick = {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.READ_MEDIA_IMAGES
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            ActivityCompat.requestPermissions(
-                                context as Activity,
-                                arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
-                                1234
-                            )
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), 1234)
                         } else {
-                            Toast.makeText(
-                                context,
-                                "Files access is already granted",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Files access is already granted", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.READ_EXTERNAL_STORAGE
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            ActivityCompat.requestPermissions(
-                                context as Activity,
-                                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                                1234
-                            )
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1234)
                         } else {
-                            Toast.makeText(
-                                context,
-                                "Files access is already granted",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Files access is already granted", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    viewModel.updatePermission(context, "Files Permission")
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
-                granted = permissionState["Files Permission"] ?: false
+                granted = permissionStates.filesPermission,
+                icon2 = if (permissionStates.filesPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
             )
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Next Button
         Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
             onClick = {
-                val nonGrantedPermissions = permissionState.filterValues { !it }.keys
+                val nonGrantedPermissions = viewModel.checkAllPermissions(context, compName, deviceManager)
                 if (nonGrantedPermissions.isEmpty()) {
                     navController.navigate(Screen.OnboardingScreen4.route)
                 } else {
@@ -457,11 +417,13 @@ fun OnboardingScreen3(
                         Toast.LENGTH_LONG
                     ).show()
                 }
-            }) {
+            }
+        ) {
             Text(text = "Next", color = Color.White)
         }
     }
 }
+
 
 @Composable
 fun OnboardingScreen4(navController: NavHostController) {
@@ -471,8 +433,12 @@ Column(
     verticalArrangement = Arrangement.Center,
     horizontalAlignment = Alignment.CenterHorizontally
 ) {
-    Text(text = "Welcome to i-Freeze", color = Color.White, fontSize = 22.sp)
-    Button(  colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)), onClick = {navController.navigate(Screen.AdminAccess.route)}){
+    HeaderLogo()
+    OnboardingImage(R.drawable.welcome_page)
+
+    Text(modifier = Modifier.padding(vertical =5.dp ), text = "Welcome to i-Freeze", color = Color.White, fontSize = 25.sp)
+    Text(modifier = Modifier.padding(vertical =5.dp, horizontal = 15.dp ), text = "You can now manage and protect your mobile device", color = Color.White, fontSize = 22.sp)
+    Button(modifier = Modifier.padding(vertical = 10.dp), colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)), onClick = {navController.navigate(Screen.AdminAccess.route)}){
         Text(text = "Start Application", color = Color.White)
 
     }
@@ -590,7 +556,8 @@ fun GeneralSettingItemNew(
     mainText: String,
     subText: String,
     onClick: () -> Unit,
-    granted: Boolean
+    granted: Boolean,
+    icon2: ImageVector
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -598,7 +565,7 @@ fun GeneralSettingItemNew(
         ),
         onClick = { onClick() },
         modifier = Modifier
-            .padding(bottom = 10.dp)
+            .padding(bottom = 12.dp)
             .fillMaxWidth()
     ) {
         Box(
@@ -643,13 +610,14 @@ fun GeneralSettingItemNew(
                         color = Color(0xFF175AA8),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
-                    )
+
+                        )
                 }
 
                 Icon(
-                    imageVector = if (granted) Icons.Default.CheckCircle else Icons.Default.Cancel,
+                    imageVector = icon2,
                     contentDescription = null,
-                    tint = if (granted) Color.Green else Color.Red
+                    tint = if (granted) Color.Green else Color.DarkGray
                 )
             }
         }

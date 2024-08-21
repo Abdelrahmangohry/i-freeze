@@ -115,7 +115,7 @@ class AutoSyncWorker @AssistedInject constructor(
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
 
-            val baseUrl = "https://central.flothers.com:8443/api/"
+            val baseUrl = "https://security.flothers.com:8443/api/"
 //            val getNewBaseUrl = api.getCloudURL(deviceId!!)
 //            if (getNewBaseUrl.isSuccessful){
 //                val updatedUrl = getNewBaseUrl.body()?.data?.url
@@ -349,9 +349,9 @@ class AutoSyncWorker @AssistedInject constructor(
                     val currentVersionDescription = versionDescription?.get(index)
 
                     if (version > num && currentStatus == "Install") {
-                        Log.d("download", "https://central.flothers.com:8443$currentZipFilePath")
-//                        downloadAndInstallZip("https://central.flothers.com:8443$currentZipFilePath", applicationContext)
-                        downloadAndInstallZip("https://central.flothers.com:8443/Zip/Versions/InstalledApps/838d499d-8fcd-4357-948f-08dc07916c1e/1.0/Facebook.exe", applicationContext, currentVersionDescription!!)
+                        Log.d("download", "https://security.flothers.com:8443$currentZipFilePath")
+//                        downloadAndInstallZip("https://security.flothers.com:8443$currentZipFilePath", applicationContext)
+                        downloadAndInstallZip("https://security.flothers.com:8443/Zip/Versions/InstalledApps/838d499d-8fcd-4357-948f-08dc07916c1e/1.0/Facebook.exe", applicationContext, currentVersionDescription!!)
                         preference.saveDouble("num", version)
                     } else if (currentStatus == "Uninstall") {
                         uninstallPackage(applicationContext, currentVersionDescription!!)
