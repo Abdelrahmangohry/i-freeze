@@ -306,6 +306,7 @@ fun OnboardingScreen3(navController: NavHostController) {
                             putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
                         }
                         context.startActivity(intent)
+
                     } else {
                         Toast.makeText(context, "Admin permission is already granted", Toast.LENGTH_SHORT).show()
                     }
