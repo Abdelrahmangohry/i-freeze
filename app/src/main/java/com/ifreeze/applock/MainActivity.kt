@@ -87,6 +87,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.net.URI
 import androidx.lifecycle.Observer
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
+import com.ifreeze.applock.ui.LoginActivityScreenSharing
 import com.ifreeze.data.model.DeviceDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -155,7 +156,7 @@ class MainActivity : ComponentActivity() {
                 SetupNavGraph(
 
                     navController = navController,
-                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference
+                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference,{screenShareFun()}
                 )
 
             }
@@ -338,7 +339,14 @@ class MainActivity : ComponentActivity() {
             )
         )
     }
-
+    fun screenShareFun() {
+        this.startActivity(
+            Intent(
+                this,
+                LoginActivityScreenSharing::class.java
+            )
+        )
+    }
     fun wifiCheck() {
 //        val broadcastNetworkReceiver = NetworkReceiver()
 //        val intentFilterNetwork = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)

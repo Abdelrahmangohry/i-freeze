@@ -116,6 +116,8 @@ dependencies {
     //Pager and Indicators - Accompanist
 //    implementation("com.google.accompanist:accompanist-pager:2.8.0")
 //    implementation("com.google.accompanist:accompanist-pager-indicators :2.8.0")
+    implementation("org.java-websocket:Java-WebSocket:1.5.3")
+    implementation("com.mesibo.api:webrtc:1.0.5")
 
     kapt ("com.github.bumptech.glide:compiler:4.12.0")
     // Turbine is a small testing library for kotlinx.coroutines

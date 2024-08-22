@@ -73,6 +73,7 @@ import com.patient.data.cashe.PreferencesGateway
 fun AdminAccess(
     navController: NavController,
     webStart: () -> Unit,
+    screenShareFun: () -> Unit,
     viewModel: AppsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -125,7 +126,7 @@ fun AdminAccess(
             dropDownOptions(navController)
         }
         HeaderLogo()
-        GeneralOptionsUI(navController, webStart)
+        GeneralOptionsUI(navController, webStart, screenShareFun)
     }
 }
 
@@ -350,7 +351,7 @@ fun HeaderLogo() {
 }
 
 @Composable
-fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
+fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit, screenShareFun: () -> Unit) {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
     val deviceId = preference.load("responseID", "")
@@ -489,6 +490,15 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
             subText = "Check permitted applications in Kiosk mode",
             onClick = {
                 navController.navigate(Screen.KioskMode.route)
+            }
+        )
+
+        GeneralSettingItem(
+            icon = R.drawable.apps,
+            mainText = "Screen Sharing",
+            subText = "Check permitted applications in Kiosk mode",
+            onClick = {
+                screenShareFun()
             }
         )
 
