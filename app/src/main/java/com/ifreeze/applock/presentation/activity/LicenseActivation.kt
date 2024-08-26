@@ -157,15 +157,22 @@ fun licenseKey(
 
         Box(modifier = Modifier.background(color = Color.White)) {
             if (deviceId.isNullOrEmpty()) {
-                Text(
-                    text = "Please activate license key",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("xxxx-xxxx-xxxx-xxxx", color = Color.Black) },
+                    maxLines = 1,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = Color.Black, //min Text color // Color of the leading icon
+                        unfocusedBorderColor = Color.LightGray, // Border color when unfocused
+                        focusedBorderColor = Color.Black,
+                        cursorColor = Color.Black
+                    ),
+                    modifier = Modifier.padding(20.dp),
                 )
             } else {
                 Text(
-                    text = "License is activated",
+                    text = "License is Activated",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
@@ -178,22 +185,30 @@ fun licenseKey(
 
                 ElevatedButton(
                     onClick = {
-
-//                        val newBaseUrl = "http://192.168.1.250:8443/api/"
-                        val newBaseUrl = "https://security.flothers.com:8443/api/"
+                        val newBaseUrl = "https://security.flothers.com:8443"
 
                         preference.saveBaseUrl(newBaseUrl)
                         Log.d("abdo", "newBaseUrl $newBaseUrl")
                         if (!isNetworkAvailable(context)) {
                             Toast.makeText(
                                 context,
-                                "Please connect to the management server",
+                                "Please connect to the internet",
                                 Toast.LENGTH_SHORT
                             ).show()
                             return@ElevatedButton
                         }
 
-                            authViewModel.getUserLogin(deviceDto)
+                        if (text.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "Add License Key",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@ElevatedButton
+                        } else {
+                            Log.d("abdo", "license key $text")
+                            Log.d("abdo", "deviceDto $deviceDto")
+                            authViewModel.getUserLogin(text, deviceDto)
                             authViewModel._loginFlow.observe(lifecycle, Observer { response ->
                                 if (response.isSuccessful) {
                                     Log.d("abdo", response.body().toString())
@@ -216,21 +231,24 @@ fun licenseKey(
                                     ) {
                                         Toast.makeText(
                                             context,
-                                            "Please enable i-Freeze permissions in app permissions",
+                                            "Please enable i-Freeze permissions in app settings",
                                             Toast.LENGTH_SHORT
                                         )
                                             .show()
                                     }
                                     authViewModel.getCloudURL(deviceId!!)
                                     authViewModel._getcloudURL.observe(lifecycle, Observer{
-                                        response ->
+                                            response ->
                                         if (response.isSuccessful){
 
                                         }
                                     })
+                                    val updatedUrl = "https://192.168.1.90/"
+                                    preference.saveBaseUrl(updatedUrl)
 
                                     preference.save("IsVisible", false)
                                     preference.save("BoxShowed", false)
+
                                     navController.navigate(Screen.AdminAccess.route)
 
                                     authViewModel.newUpdateUserData(deviceId!!)
@@ -265,7 +283,7 @@ fun licenseKey(
                                 }
 
                             })
-
+                        }
                     },
                     modifier = Modifier.padding(vertical = 16.dp)
                         .align(Alignment.CenterHorizontally),

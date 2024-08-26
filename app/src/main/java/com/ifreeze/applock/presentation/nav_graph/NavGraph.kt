@@ -24,7 +24,7 @@ fun SetupNavGraph(
     webStart: () -> Unit,
     fileScan: () -> Unit,
     preferences: PreferencesGateway,
-
+    screenShareFun: () -> Unit
 
 ){
     NavHost(
@@ -32,6 +32,6 @@ fun SetupNavGraph(
         startDestination = HOME_GRAPH_ROUTE,
         route = ROOT_GRAPH_ROUTE
     ) {
-        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle,webStart, fileScan, preferences)
+        homeNavGraph(navController = navController  , activity,context,wifi, lifecycle,webStart, fileScan, preferences, screenShareFun)
     }
 }

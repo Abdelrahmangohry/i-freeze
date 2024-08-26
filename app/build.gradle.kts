@@ -4,7 +4,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     // hilt
     // kapt
-    id ("kotlin-kapt")
+    id("kotlin-kapt")
     id("com.google.gms.google-services")
 }
 
@@ -47,7 +47,7 @@ android {
             )
             signingConfig = signingConfigs.getByName("debug")
         }
-        debug{
+        debug {
 
         }
     }
@@ -111,7 +111,11 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.google.code.gson:gson:2.10")
-    kapt ("com.github.bumptech.glide:compiler:4.12.0")
+    kapt("com.github.bumptech.glide:compiler:4.12.0")
+
+//Web RTC
+    implementation("org.java-websocket:Java-WebSocket:1.5.3")
+    implementation("com.mesibo.api:webrtc:1.0.5")
     // Turbine is a small testing library for kotlinx.coroutines
     testImplementation("app.cash.turbine:turbine:0.7.0")
     // mockito
@@ -127,12 +131,12 @@ dependencies {
 
     val room_version = "2.4.2" // Use the latest version
 
-    implementation ("androidx.room:room-runtime:$room_version")
-    kapt ("androidx.room:room-compiler:$room_version")
-    annotationProcessor ("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
 
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation( "androidx.room:room-ktx:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
 
     implementation("androidx.paging:paging-runtime-ktx:3.2.0")
 

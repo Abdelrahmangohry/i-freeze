@@ -28,6 +28,10 @@ import com.ifreeze.applock.presentation.activity.WhiteList
 import com.ifreeze.applock.presentation.activity.WhiteListWeb
 import com.ifreeze.applock.presentation.activity.WhiteListWifi
 import com.ifreeze.applock.presentation.activity.SupportTeam
+import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen1
+import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen2
+import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen3
+import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen4
 import com.ifreeze.applock.presentation.screen.HomeScreen
 import com.ifreeze.applock.presentation.screen.NetworkControl
 import com.ifreeze.applock.presentation.screen.SplashScreen
@@ -38,20 +42,35 @@ fun NavGraphBuilder.homeNavGraph(
     navController: NavHostController,
     activity : Activity, context:Context, wifi: () -> Unit,
     lifecycle: LifecycleOwner, webStart : () -> Unit, fileScan : () -> Unit,preferences: PreferencesGateway,
-
+    screenShareFun: () -> Unit
 ) {
 
     val isDisplayed = preferences.load("isDisplayed", false)
 
     navigation(
-        startDestination = Screen.AdminAccess.route ,
+        startDestination = if(isDisplayed == true) Screen.AdminAccess.route else Screen.OnboardingScreen1.route,
 //        startDestination = if(isDisplayed == true) Screen.AdminAccess.route else Screen.Splash.route,
         route = HOME_GRAPH_ROUTE
     ) {
+        composable(route = Screen.OnboardingScreen1.route) {
+            OnboardingScreen1(navController = navController)
+        }
+        composable(route = Screen.OnboardingScreen2.route) {
+            OnboardingScreen2(navController = navController)
+        }
+        composable(route = Screen.OnboardingScreen3.route) {
+            OnboardingScreen3(navController = navController)
+        }
+        composable(route = Screen.OnboardingScreen4.route) {
+            OnboardingScreen4(navController = navController)
+            preferences.save("isDisplayed", true)
+
+        }
+
         composable(
             route = Screen.AdminAccess.route
         ) {
-            AdminAccess(navController = navController, webStart)
+            AdminAccess(navController = navController, webStart, screenShareFun)
         }
         composable(
             route = Screen.Login.route

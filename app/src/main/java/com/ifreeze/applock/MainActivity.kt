@@ -87,6 +87,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.net.URI
 import androidx.lifecycle.Observer
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
+import com.ifreeze.applock.ui.LoginActivityScreenSharing
 import com.ifreeze.data.model.DeviceDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -155,7 +156,7 @@ class MainActivity : ComponentActivity() {
                 SetupNavGraph(
 
                     navController = navController,
-                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference
+                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference,{screenShareFun()}
                 )
 
             }
@@ -172,93 +173,31 @@ class MainActivity : ComponentActivity() {
 //        })
 
 
-        if (!isNetworkAvailable(this)) {
-            Toast.makeText(
-                this,
-                "Please connect to the management server",
-                Toast.LENGTH_SHORT
-            ).show()
 
-        } else if (deviceId.isNullOrEmpty()) {
 
-            val deviceDto = DeviceDTO(
-                deviceName = deviceName,
-                operatingSystemVersion = operatingSystemVersion,
-                deviceIp = ipAddress,
-                macAddress = androidId,
-                serialNumber = androidId
-            )
 
-//            val baseUrl = "http://192.168.1.250:8443/api/"
-            val baseUrl = "https://security.flothers.com:8443/api/"
-            preference.saveBaseUrl(baseUrl)
 
-            authViewModel.getUserLogin(deviceDto)
-            authViewModel._loginFlow.observe(this, Observer { response ->
-                if (response.isSuccessful) {
-                    Log.d("abdo", response.body().toString())
-                    deviceId = response.body().toString().trim()
-                    Log.d("deviceID", "this is device id $deviceId")
-                    preference.save("responseID", deviceId!!)
-                    preference.update("BlockState", false)
-                    Toast.makeText(
-                        this,
-                        "License is Activated",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    if (
-                        !Settings.canDrawOverlays(this) ||
-                        enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
-                        ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        Toast.makeText(
-                            this,
-                            "Please enable i-Freeze permissions in app permissions",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
+        GlobalScope.launch(Dispatchers.IO) {
+            //Copy the database file from assets to internal storage
+            copyDatabaseFileMain()
+            // Open the database
+            database = openOrCreateDatabase("scan.db", Context.MODE_PRIVATE, null)
+
+            // Query the database and retrieve data from the specific table
+            val cursor = database.rawQuery("SELECT * FROM Malware_hashs", null)
+
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    val columnName = cursor.getString(cursor.getColumnIndex("sha256"))
+                    if (columnName.isNullOrEmpty()) {
+                        continue
+                    } else {
+                        hashesListDatabase.add(columnName)
+                        // Process the retrieved data as needed
                     }
                 }
-            })
-
-            authViewModel.newUpdateUserData(deviceId!!)
-            authViewModel._newFlow.observe(this, Observer { response ->
-                if (response.isSuccessful) {
-                    val applicationNamesList =
-                        response.body()?.data?.deviceKioskApps ?: emptyList()
-                    Log.d("kioskapp", "applicationNames $applicationNamesList")
-                    preference.saveList("kioskApplications", applicationNamesList)
-                    applicationNames = applicationNamesList as ArrayList<String>
-                }
-            })
-        }
-
-
-
-    GlobalScope.launch(Dispatchers.IO) {
-        //Copy the database file from assets to internal storage
-        copyDatabaseFileMain()
-        // Open the database
-        database = openOrCreateDatabase("scan.db", Context.MODE_PRIVATE, null)
-
-        // Query the database and retrieve data from the specific table
-        val cursor = database.rawQuery("SELECT * FROM Malware_hashs", null)
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                val columnName = cursor.getString(cursor.getColumnIndex("sha256"))
-                if (columnName.isNullOrEmpty()) {
-                    continue
-                } else {
-                    hashesListDatabase.add(columnName)
-                    // Process the retrieved data as needed
-                }
-            }
-            preference.saveList("hashesListDatabase", hashesListDatabase)
-            cursor.close()
+                preference.saveList("hashesListDatabase", hashesListDatabase)
+                cursor.close()
 //            Log.d("abdo", "hashlist $hashesList")
 //            // Compare the lists here and update UI accordingly
 //            for (pair in hashesList) {
@@ -268,8 +207,8 @@ class MainActivity : ComponentActivity() {
 //                }
 //            }
 
+            }
         }
-    }
 
 
     }
@@ -400,7 +339,14 @@ class MainActivity : ComponentActivity() {
             )
         )
     }
-
+    fun screenShareFun() {
+        this.startActivity(
+            Intent(
+                this,
+                LoginActivityScreenSharing::class.java
+            )
+        )
+    }
     fun wifiCheck() {
 //        val broadcastNetworkReceiver = NetworkReceiver()
 //        val intentFilterNetwork = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)

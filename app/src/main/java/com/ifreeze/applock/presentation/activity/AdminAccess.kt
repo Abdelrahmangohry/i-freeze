@@ -73,6 +73,7 @@ import com.patient.data.cashe.PreferencesGateway
 fun AdminAccess(
     navController: NavController,
     webStart: () -> Unit,
+    screenShareFun: () -> Unit,
     viewModel: AppsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -124,7 +125,7 @@ fun AdminAccess(
             dropDownOptions(navController)
         }
         HeaderLogo()
-        GeneralOptionsUI(navController, webStart)
+        GeneralOptionsUI(navController, webStart, screenShareFun)
     }
 }
 
@@ -206,7 +207,7 @@ fun autoSyncButton() {
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )
     val EXTERNAL_STORAGE_PERMISSION_CODE = 1235
-    Row(modifier = Modifier.padding(15.dp)) {
+    Row(modifier = Modifier.padding(start = 15.dp, top = 15.dp, end = 15.dp, bottom = 0.dp)) {
         Button(
             onClick = {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -345,7 +346,7 @@ fun HeaderLogo() {
 }
 
 @Composable
-fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
+fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit, screenShareFun: () -> Unit) {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
     val deviceId = preference.load("responseID", "")
@@ -489,6 +490,15 @@ fun GeneralOptionsUI(navController: NavController, webStart: () -> Unit) {
             }
         )
 
+        GeneralSettingItem(
+            icon = R.drawable.screen_share,
+            mainText = "Screen Sharing",
+            subText = "Screen Sharing",
+            onClick = {
+                screenShareFun()
+            }
+        )
+
     }
 }
 
@@ -501,7 +511,7 @@ fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: ()
         ),
         onClick = { onClick() },
         modifier = Modifier
-            .padding(bottom = 12.dp)
+            .padding(bottom = 8.dp)
             .fillMaxWidth()
 
 
@@ -514,13 +524,13 @@ fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: ()
         ) {
             Row(
                 modifier = Modifier
-                    .padding(vertical = 10.dp, horizontal = 14.dp)
+                    .padding(vertical = 8.dp, horizontal = 14.dp)
                     .fillMaxWidth(),
 
 
                 ) {
                 Row(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(

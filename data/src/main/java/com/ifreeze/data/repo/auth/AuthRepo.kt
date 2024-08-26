@@ -22,7 +22,9 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface AuthRepo {
-    suspend fun getUserLogin(deviceDto: DeviceDTO ): Response<String>
+    suspend fun getUserLogin( activationKey : String
+                              ,deviceDto: DeviceDTO ):
+            Response<String>
 
     suspend fun newUpdateUserData(deviceId: String): Response<Data>
 
