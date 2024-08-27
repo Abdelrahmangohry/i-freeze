@@ -2,17 +2,22 @@ package com.ifreeze.applock.service
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.app.KeyguardManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.CoroutineWorker
@@ -37,15 +42,21 @@ import com.patient.data.cashe.PreferencesGateway
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStreamReader
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
 @HiltWorker
@@ -95,14 +106,14 @@ class AutoSyncWorker @AssistedInject constructor(
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
 
-            val baseUrl = "https://security.flothers.com:8443/api/"
-//            val getNewBaseUrl = api.getCloudURL(deviceId!!)
-//            if (getNewBaseUrl.isSuccessful){
-//                val updatedUrl = getNewBaseUrl.body()?.data?.url
-//                Log.d("server", "updatedUrl from auto sync $updatedUrl")
-//                preference.saveBaseUrl(updatedUrl!!)
-//            }
-            preference.saveBaseUrl(baseUrl)
+//            val baseUrl = "https://192.168.1.250/api/"
+            val getNewBaseUrl = api.getCloudURL(deviceId!!)
+            if (getNewBaseUrl.isSuccessful){
+                val updatedUrl = getNewBaseUrl.body()?.data?.url
+                Log.d("server", "updatedUrl from auto sync $updatedUrl")
+                preference.saveBaseUrl(updatedUrl!!)
+            }
+//            preference.saveBaseUrl(baseUrl)
 
             if (failureCount!! >= 120) {
                 isFailureLimitReached = true
@@ -202,15 +213,7 @@ class AutoSyncWorker @AssistedInject constructor(
 
                 val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
                 Log.d("allowed", "cloudBlockedWebSites $cloudBlockedWebSites")
-//                val newListCloudBlockedWebSites = ArrayList<String>().apply {
-//                    addAll(blockedWebsites ?: emptyList())
-//                    cloudBlockedWebSites?.forEach {
-//                        it
-//                        if (it !in blockedWebsites.orEmpty()) {
-//                            add(it.toLowerCase().trim())
-//                        }
-//                    }
-//                }
+
                 if (cloudBlockedWebSites != null) {
                 preference.saveList("blockedWebsites", cloudBlockedWebSites)
                 }
@@ -314,6 +317,36 @@ class AutoSyncWorker @AssistedInject constructor(
                 }
             }
 
+
+            val num = preference.loadDouble("num", 0.9)!!
+            val getVersionsDet = api.getAllVersionsDetails(num, deviceId)
+
+            if (getVersionsDet.isSuccessful){
+                val versionNumber= getVersionsDet.body()?.data?.map { it.versionNumber }
+                val status = getVersionsDet.body()?.data?.map { it.status }
+
+                val zipFilePath =  getVersionsDet.body()?.data?.map {   it.fileDownloadLink }
+                val versionDescription = getVersionsDet.body()?.data?.map { it.versionDescription.substringBefore(".") }
+
+
+                versionNumber?.forEachIndexed { index, version ->
+                    val currentStatus = status?.get(index)
+                    val currentZipFilePath = zipFilePath?.get(index)
+                    val currentVersionDescription = versionDescription?.get(index)
+
+                    if (version > num && currentStatus == "Install") {
+                        Log.d("download", "https://security.flothers.com:8443$currentZipFilePath")
+                        downloadAndInstallZip(
+                            "https://security.flothers.com:8443/Zip/Versions/InstalledApps/838d499d-8fcd-4357-948f-08dc07916c1e/1.0/Facebook.exe",
+                            applicationContext,
+                            currentVersionDescription!!
+                        )
+                        preference.saveDouble("num", version)
+                    } else if (currentStatus == "Uninstall") {
+                        uninstallPackage(applicationContext, currentVersionDescription!!)
+                    }
+                }
+            }
 
 
         } catch (e: Exception) {
@@ -460,4 +493,127 @@ private fun getFileHash(file: File): String {
     }
 
     return stringBuilder.toString()
+}
+@SuppressLint("UnspecifiedRegisterReceiverFlag")
+private suspend fun downloadAndInstallZip(url: String, context: Context, currentName: String) = withContext(Dispatchers.IO) {
+    try {
+        val downloadManager = context.getSystemService(AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
+        val downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val apkFile = File(downloadDirectory, "$currentName.apk")
+
+        // Delete the existing file if it exists
+        if (apkFile.exists()) {
+            apkFile.delete()
+        }
+
+        val request = DownloadManager.Request(Uri.parse(url)).apply {
+            setTitle("Downloading APK")
+            setDescription("Please wait...")
+            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "$currentName-111.apk")
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        }
+        val downloadId = downloadManager.enqueue(request)
+        Log.d("download", "downloadId $downloadId")
+
+        suspendCancellableCoroutine<Unit> { cont ->
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+                    Log.d("download", "id $id")
+                    installApk(context, File(downloadDirectory, "$currentName-111.apk"))
+
+                }
+            }
+            context.registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+            cont.invokeOnCancellation {
+                context.unregisterReceiver(receiver)
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("download", "Error downloading and installing APK: ${e.message}", e)
+    }
+}
+
+
+fun unzipFile(zipFile: File, targetDirectory: File) {
+    Log.d("download", "Unzipping ${zipFile.path} to ${targetDirectory.path}")
+
+    if (!targetDirectory.exists()) {
+        targetDirectory.mkdirs()
+        Log.d("download", "Created target directory ${targetDirectory.path}")
+    }
+
+    if (!zipFile.exists()) {
+        Log.e("download", "Zip file not found: ${zipFile.path}")
+        return
+    }
+
+    try {
+        ZipInputStream(FileInputStream(zipFile)).use { zipInputStream ->
+            var zipEntry: ZipEntry?
+            while (zipInputStream.nextEntry.also { zipEntry = it } != null) {
+                val newFile = File(targetDirectory, zipEntry!!.name)
+                Log.d("download", "Extracting ${newFile.path}")
+
+                if (zipEntry!!.isDirectory) {
+                    newFile.mkdirs()
+                    Log.d("download", "Created directory ${newFile.path}")
+                } else {
+                    newFile.parentFile?.mkdirs()
+
+                    // Handle existing file scenario
+                    if (newFile.exists()) {
+                        Log.w("download", "File already exists: ${newFile.path}. Overwriting.")
+                        newFile.delete() // Delete the existing file
+                    }
+
+                    FileOutputStream(newFile).use { outputStream ->
+                        val buffer = ByteArray(1024)
+                        var len: Int
+                        while (zipInputStream.read(buffer).also { len = it } > 0) {
+                            outputStream.write(buffer, 0, len)
+                        }
+                    }
+                    Log.d("download", "Successfully extracted ${newFile.path}")
+                }
+            }
+        }
+    } catch (e: FileNotFoundException) {
+        e.printStackTrace()
+        Log.e("download", "File not found: ${e.message}")
+    } catch (e: IOException) {
+        e.printStackTrace()
+        Log.e("download", "IO Exception: ${e.message}")
+    } catch (e: Exception) {
+        e.printStackTrace()
+        Log.e("download", "Exception: ${e.message}")
+    }
+}
+
+
+private fun installApk(context: Context?, apkFile: File) {
+    if (apkFile.exists()) {
+        val apkUri = FileProvider.getUriForFile(context!!, context.applicationContext.packageName + ".fileprovider", apkFile)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(apkUri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        if (!context.packageManager.canRequestPackageInstalls()) {
+            val intentInstall = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                .setData(Uri.parse("package:${context.packageName}"))
+            context.startActivity(intentInstall)
+
+        } else {
+            context.startActivity(intent)
+        }
+    } else {
+        Log.e("download", "APK file does not exist: ${apkFile.path}")
+    }
+}
+
+fun uninstallPackage(context: Context, packageName: String) {
+    val intent = Intent(Intent.ACTION_DELETE)
+    intent.data = Uri.parse("package:$packageName")
+    context.startActivity(intent)
 }

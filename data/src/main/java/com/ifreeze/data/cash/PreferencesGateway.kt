@@ -146,5 +146,14 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
         return load(BASE_URL_KEY, "")
     }
 
+    fun saveDouble(key: String, value: Double) {
+        save(key, value)
+    }
+
+    fun loadDouble(key: String, defaultValue: Double): Double? {
+        return load(key, defaultValue)
+    }
+
+
 }
 

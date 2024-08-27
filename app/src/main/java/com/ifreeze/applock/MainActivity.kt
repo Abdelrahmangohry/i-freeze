@@ -19,6 +19,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -107,6 +108,7 @@ class MainActivity : ComponentActivity() {
     lateinit var database: SQLiteDatabase
     lateinit var navController: NavHostController
     private val EXTERNAL_STORAGE_PERMISSION_CODE = 105
+
     // Inject AuthViewModel using Hilt
     private val authViewModel: AuthViewModel by viewModels()
     val requestPermissionLauncher = registerForActivityResult(
@@ -156,24 +158,70 @@ class MainActivity : ComponentActivity() {
                 SetupNavGraph(
 
                     navController = navController,
-                    this, this, { wifiCheck() }, this, { webActivity() }, { systemScan() }, preference,{screenShareFun()}
+                    this,
+                    this,
+                    { wifiCheck() },
+                    this,
+                    { webActivity() },
+                    { systemScan() },
+                    preference,
+                    { screenShareFun() }
                 )
+                // Handle back press
+                BackHandler {
+                    finishAffinity() // Close the application
+                }
+
 
             }
         }
 
-//        if (!isDefaultBrowser()) {
-//            showDefaultBrowserDialog()
-//        }
-// Observe the error LiveData and show a toast message if an error occurs
-//        authViewModel.error.observe(this, Observer { errorMessage ->
-//            errorMessage?.let {
-//                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
-//            }
-//        })
 
 
+        if (!isNetworkAvailable(this)) {
+            Toast.makeText(
+                this,
+                "Please connect to the management server",
+                Toast.LENGTH_SHORT
+            ).show()
 
+        } else if (deviceId.isNullOrEmpty()) {
+
+            val deviceDto = DeviceDTO(
+                deviceName = deviceName,
+                operatingSystemVersion = operatingSystemVersion,
+                deviceIp = ipAddress,
+                macAddress = androidId,
+                serialNumber = androidId
+            )
+            val baseUrl = "http://192.168.1.250:8443/api/"
+            preference.saveBaseUrl(baseUrl)
+
+            authViewModel.getUserLogin(deviceDto)
+            authViewModel._loginFlow.observe(this, Observer { response ->
+                if (response.isSuccessful) {
+                    Log.d("abdo", response.body().toString())
+                    deviceId = response.body().toString().trim()
+                    Log.d("deviceID", "this is device id $deviceId")
+                    preference.save("responseID", deviceId!!)
+                    Toast.makeText(
+                        this,
+                        "License is Activated",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+            authViewModel.getKioskApps()
+            authViewModel._getkioskApps.observe(this, Observer { response ->
+                if (response.isSuccessful) {
+                    val applicationNamesList =
+                        response.body()?.data?.map { it.packageName } ?: emptyList()
+                    Log.d("kioskapp", "applicationNames $applicationNamesList")
+                    preference.saveList("kioskApplications", applicationNamesList)
+                    applicationNames = applicationNamesList as ArrayList<String>
+                }
+            })
+        }
 
 
 
@@ -255,7 +303,8 @@ class MainActivity : ComponentActivity() {
 
     private fun isDefaultBrowser(): Boolean {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
-        val resolveInfo = packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        val resolveInfo =
+            packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
         val defaultBrowserPackageName = resolveInfo?.activityInfo?.packageName
         return defaultBrowserPackageName == packageName
     }
@@ -339,6 +388,7 @@ class MainActivity : ComponentActivity() {
             )
         )
     }
+
     fun screenShareFun() {
         this.startActivity(
             Intent(
@@ -347,6 +397,7 @@ class MainActivity : ComponentActivity() {
             )
         )
     }
+
     fun wifiCheck() {
 //        val broadcastNetworkReceiver = NetworkReceiver()
 //        val intentFilterNetwork = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
@@ -362,7 +413,6 @@ class MainActivity : ComponentActivity() {
     }
 
 }
-
 
 @Composable
 fun Demo_DropDownMenu(navController: NavController) {

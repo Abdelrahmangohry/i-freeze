@@ -157,22 +157,15 @@ fun licenseKey(
 
         Box(modifier = Modifier.background(color = Color.White)) {
             if (deviceId.isNullOrEmpty()) {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = { Text("xxxx-xxxx-xxxx-xxxx", color = Color.Black) },
-                    maxLines = 1,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = Color.Black, //min Text color // Color of the leading icon
-                        unfocusedBorderColor = Color.LightGray, // Border color when unfocused
-                        focusedBorderColor = Color.Black,
-                        cursorColor = Color.Black
-                    ),
-                    modifier = Modifier.padding(20.dp),
+                Text(
+                    text = "Please activate license key",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
                 )
             } else {
                 Text(
-                    text = "License is Activated",
+                    text = "License is activated",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center).background(Color(0xFF175AA8))
@@ -185,105 +178,92 @@ fun licenseKey(
 
                 ElevatedButton(
                     onClick = {
-                        val newBaseUrl = "https://security.flothers.com:8443"
+                        val newBaseUrl = "http://192.168.1.250:8443/api/"
 
                         preference.saveBaseUrl(newBaseUrl)
                         Log.d("abdo", "newBaseUrl $newBaseUrl")
                         if (!isNetworkAvailable(context)) {
                             Toast.makeText(
                                 context,
-                                "Please connect to the internet",
+                                "Please connect to the management server",
                                 Toast.LENGTH_SHORT
                             ).show()
                             return@ElevatedButton
                         }
 
-                        if (text.isEmpty()) {
-                            Toast.makeText(
-                                context,
-                                "Add License Key",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            return@ElevatedButton
-                        } else {
-                            Log.d("abdo", "license key $text")
-                            Log.d("abdo", "deviceDto $deviceDto")
-                            authViewModel.getUserLogin(text, deviceDto)
-                            authViewModel._loginFlow.observe(lifecycle, Observer { response ->
-                                if (response.isSuccessful) {
-                                    Log.d("abdo", response.body().toString())
-                                    deviceId = response.body().toString().trim()
+                        authViewModel.getUserLogin(deviceDto)
+                        authViewModel._loginFlow.observe(lifecycle, Observer { response ->
+                            if (response.isSuccessful) {
+                                Log.d("abdo", response.body().toString())
+                                deviceId = response.body().toString().trim()
 
-                                    preference.save("responseID", deviceId!!)
+                                preference.save("responseID", deviceId!!)
+                                Toast.makeText(
+                                    context,
+                                    "License Activated",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                if (
+                                    !Settings.canDrawOverlays(context) ||
+                                    enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.ACCESS_FINE_LOCATION
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
                                     Toast.makeText(
                                         context,
-                                        "License Activated",
+                                        "Please enable i-Freeze permissions in app settings",
                                         Toast.LENGTH_SHORT
-                                    ).show()
+                                    )
+                                        .show()
+                                }
+                                authViewModel.getCloudURL(deviceId!!)
+                                authViewModel._getcloudURL.observe(lifecycle, Observer{
+                                        response ->
+                                    if (response.isSuccessful){
 
-                                    if (
-                                        !Settings.canDrawOverlays(context) ||
-                                        enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
-                                        ContextCompat.checkSelfPermission(
-                                            context,
-                                            Manifest.permission.ACCESS_FINE_LOCATION
-                                        ) != PackageManager.PERMISSION_GRANTED
-                                    ) {
-                                        Toast.makeText(
-                                            context,
-                                            "Please enable i-Freeze permissions in app settings",
-                                            Toast.LENGTH_SHORT
-                                        )
-                                            .show()
                                     }
-                                    authViewModel.getCloudURL(deviceId!!)
-                                    authViewModel._getcloudURL.observe(lifecycle, Observer{
-                                            response ->
-                                        if (response.isSuccessful){
+                                })
+
+                                preference.save("IsVisible", false)
+                                preference.save("BoxShowed", false)
+                                navController.navigate(Screen.AdminAccess.route)
+
+                                authViewModel.newUpdateUserData(deviceId!!)
+                                authViewModel._newFlow.observe(
+                                    lifecycle,
+                                    Observer { responseId ->
+                                        if (responseId.isSuccessful) {
+
+                                            val licenseID =
+                                                responseId.body()?.data?.device?.licenseId
+                                            Log.d(
+                                                "abdo",
+                                                "response body from license ${responseId.body()?.data?.device?.licenseId}"
+                                            )
+                                            preference.save("licenseID", licenseID!!)
+                                            preference.save(
+                                                "time",
+                                                "${responseId.body()?.data?.device?.time}"
+                                            )
+                                            val isLicenseValid = true
+                                            preference.save("validLicense", isLicenseValid)
 
                                         }
                                     })
-                                    val updatedUrl = "https://192.168.1.90/"
-                                    preference.saveBaseUrl(updatedUrl)
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Invalid License Activation Key",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@Observer
+                            }
 
-                                    preference.save("IsVisible", false)
-                                    preference.save("BoxShowed", false)
+                        })
 
-                                    navController.navigate(Screen.AdminAccess.route)
-
-                                    authViewModel.newUpdateUserData(deviceId!!)
-                                    authViewModel._newFlow.observe(
-                                        lifecycle,
-                                        Observer { responseId ->
-                                            if (responseId.isSuccessful) {
-
-                                                val licenseID =
-                                                    responseId.body()?.data?.device?.licenseId
-                                                Log.d(
-                                                    "abdo",
-                                                    "response body from license ${responseId.body()?.data?.device?.licenseId}"
-                                                )
-                                                preference.save("licenseID", licenseID!!)
-                                                preference.save(
-                                                    "time",
-                                                    "${responseId.body()?.data?.device?.time}"
-                                                )
-                                                val isLicenseValid = true
-                                                preference.save("validLicense", isLicenseValid)
-
-                                            }
-                                        })
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Invalid License Activation Key",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    return@Observer
-                                }
-
-                            })
-                        }
                     },
                     modifier = Modifier.padding(vertical = 16.dp)
                         .align(Alignment.CenterHorizontally),
