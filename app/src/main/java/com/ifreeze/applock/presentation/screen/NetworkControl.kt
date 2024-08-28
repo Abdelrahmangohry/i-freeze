@@ -4,7 +4,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,14 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,13 +27,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
+import com.ifreeze.applock.presentation.activity.HeaderMenu
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.applock.service.NetworkMonitoringService
 import com.ifreeze.applock.ui.theme.Shape
@@ -71,7 +63,7 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
         Column(
 
         ) {
-            HeaderMenu(onBackPressed = { navController.popBackStack() })
+            HeaderMenu(onBackPressed = { navController.popBackStack() }, "Network Control")
         }
 
         wifiBlockedState.value?.let {
@@ -136,30 +128,6 @@ fun NetworkControl(navController: NavController, wifi: () -> Unit) {
             }
         )
 
-    }
-}
-
-@Composable
-fun SSidName(ssid: String) {
-    Card(
-        modifier = Modifier
-
-            .fillMaxWidth()
-            .background(Color(0xFF175AA8))
-            .padding(horizontal = 10.dp)
-            .padding(top = 10.dp),
-
-        shape = Shape.large
-    )
-    {
-        Column(modifier = Modifier.padding(start = 10.dp).height(40.dp)) {
-            Text(
-                text = ssid,
-                style = TextStyle(fontWeight = FontWeight.Bold),
-                color = Color(0xFF175AA8)
-            )
-
-        }
     }
 }
 
@@ -232,81 +200,5 @@ fun ToggleSettingItem(
             }
         }
 
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SimpleInputTextWithButton(onValidMacSubmit: (String) -> Unit) {
-    val text = remember { mutableStateOf("") }
-    val isValidMac = remember(text.value) { isMacAddress(text.value) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = text.value,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.White)
-                .padding(15.dp),
-            onValueChange = { newText ->
-                text.value = newText
-            },
-            label = { Text(text = "MAC Address") },
-            placeholder = { Text(text = "Enter MAC Address (XX:XX:XX:XX:XX:XX)") },
-            isError = !isValidMac
-        )
-        if (!isValidMac) {
-            Text(
-                "Invalid MAC Address format",
-                color = Color.Red,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-        }
-
-        Button(
-            onClick = {
-                if (isValidMac) {
-                    onValidMacSubmit(text.value)
-                    text.value = "" // Clear the text field
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            enabled = isValidMac // Enable the button only if the MAC address is valid
-        ) {
-            Text("Submit")
-        }
-    }
-}
-
-fun isMacAddress(mac: String): Boolean {
-    val regex = Regex("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
-    return mac.matches(regex)
-}
-
-
-@Composable
-fun HeaderMenu(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
-        ) {
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-        Text(
-            text = "Network Control",
-            color = Color.White,
-
-            modifier = Modifier
-
-                .padding(top = 6.dp, bottom = 30.dp).weight(1f),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp,
-            textAlign = TextAlign.Center
-        )
     }
 }

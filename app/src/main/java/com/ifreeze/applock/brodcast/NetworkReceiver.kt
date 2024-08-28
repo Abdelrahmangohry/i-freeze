@@ -19,5 +19,4 @@ class NetworkReceiver : BroadcastReceiver() {
         }
 
     }
-
 }

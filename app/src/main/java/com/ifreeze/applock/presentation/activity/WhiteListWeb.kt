@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,13 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.ui.theme.Shape
-
 import com.patient.data.cashe.PreferencesGateway
 
 @Composable
@@ -55,7 +51,7 @@ fun WhiteListWeb(navController: NavController) {
                 .padding(horizontal = 14.dp)
                 .padding(top = 10.dp),
         ) {
-            webWhiteListTitle(onBackPressed = { navController.popBackStack() })
+            HeaderMenu(onBackPressed = { navController.popBackStack() }, "Whitelisted Websites")
             var allowedWebsites by remember {
                 mutableStateOf(
                     preference.getList("allowedWebsites") ?: mutableListOf()
@@ -88,7 +84,6 @@ fun WhiteListWeb(navController: NavController) {
         }
     }
 }
-
 
 data class WebSiteWhiteList(val name: String, val icon: String? = null)
 
@@ -171,29 +166,6 @@ fun textWithButtonWhiteListWebView(onValidMacSubmit: (String) -> Unit) {
         ) {
             Text("Submit", color = Color.White)
         }
-    }
-}
-
-@Composable
-fun webWhiteListTitle(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-        Text(
-            text = "Whitelisted Websites",
-            color = Color.White,
-
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 35.dp),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
-        )
     }
 }
 

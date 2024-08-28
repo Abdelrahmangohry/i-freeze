@@ -12,82 +12,38 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
-import com.ifreeze.applock.service.LocationService
-import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
 
 
 @RequiresApi(34)
 @Composable
-fun SettingScreen(navController: NavController, activity:Activity) {
-    Column (
-        modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
-    ){
-        HeaderSetting(onBackPressed = { navController.popBackStack() })
-        GeneralOptionsUISetting(activity)
-    }
-}
+fun SettingScreen(navController: NavController, activity: Activity) {
+    // Main column layout for the settings screen
+    Column(
+        modifier = Modifier
+            .fillMaxSize() // Fills the maximum size of the parent
+            .background(Color(0xFF175AA8)) // Background color of the column
+    ) {
+        // Header menu with a back navigation button and title
+        HeaderMenu(onBackPressed = { navController.popBackStack() }, "Permissions")
 
-@Composable
-fun HeaderSetting(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-        Text(
-            text = "Permissions",
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 30.dp).padding(horizontal = 75.dp),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
-        )
+        // General settings UI for managing permissions and settings
+        GeneralOptionsUISetting(activity)
     }
 }
 
@@ -99,214 +55,142 @@ fun HeaderSetting(onBackPressed: () -> Unit) {
 fun GeneralOptionsUISetting(
     activity:Activity,
 ) {
+    // Obtain context and device manager for managing device policies
     val context = LocalContext.current
-    val preference = PreferencesGateway(context)
     val deviceManager = activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(activity, MyDeviceAdminReceiver::class.java)
-    val isAdminPermissionGranted = remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(preference.loadBaseUrl() ?: "") }
-    val isLocationEnabled = preference.load("locationBlocked", false)
-    val locationBlockedState = remember { mutableStateOf(isLocationEnabled) }
-    Log.d("abdo", "locationBlockedState ${locationBlockedState.value}")
-
-    val serviceIntent = Intent(context, LocationService::class.java)
-
-    val launcher =  rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult ={
-            if (it){
-                Log.d("islam", "isAdminPermissionGranted : $it ")
-                isAdminPermissionGranted.value = true
-            }
-        }
-    )
-
+    // Column layout for general settings items
     Column(
         modifier = Modifier
             .padding(horizontal = 14.dp)
             .padding(top = 10.dp)
     ) {
-
+        // Admin permission setting item
         GeneralSettingItem(
             icon = R.drawable.admin,
             mainText = "Admin Permission",
             subText = "Provide admin privilege to i-Freeze",
             onClick = {
+                // Check if the app is not a device owner
                 if (!deviceManager.isDeviceOwnerApp(activity.packageName)){
+                    // Create an intent to add device admin
                     val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
                     intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
                     intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-                    context.startActivity(intent)
+                    context.startActivity(intent) // Start the activity to request admin permission
                 }else{
+                    // Show a toast if admin permission is already granted
                     Toast.makeText(context,"the admin permission is add ", Toast.LENGTH_SHORT).show()
                 }
             }
         )
+        // Overlay permission setting item
         GeneralSettingItem(
-            icon = R.drawable.draw,
-            mainText = "Over Draw ",
-            subText = "Enable the screen control option in settings",
+            icon = R.drawable.draw, // Icon for overlay permission
+            mainText = "Over Draw", // Main text for the item
+            subText = "Enable the screen control option in settings", // Subtext for the item
             onClick = {
-                Log.d("islam", "GeneralOptionsUISetting :drawAction ")
+                Log.d("islam", "GeneralOptionsUISetting : drawAction ")
 
+                // Check if the app does not have overlay permission
                 if (!Settings.canDrawOverlays(context)) {
+                    // Create an intent to request overlay permission
                     val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                    myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(myIntent)
-                }else{
-                    Toast.makeText(
-                        context,"Over Draw Already Enabled", Toast.LENGTH_SHORT).show()
+                    myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Add flag to start activity in a new task
+                    context.startActivity(myIntent) // Start the activity to request overlay permission
+                } else {
+                    // Show a toast if overlay permission is already granted
+                    Toast.makeText(context, "Over Draw Already Enabled", Toast.LENGTH_SHORT).show()
                 }
             }
         )
+
+        // Accessibility service setting item
         GeneralSettingItem(
-            icon = R.drawable.ic_baseline_check_24,
-            mainText = "Accessibility Service",
-            subText = "Activate the proactive feature in mobile settings",
+            icon = R.drawable.ic_baseline_check_24, // Icon for accessibility service
+            mainText = "Accessibility Service", // Main text for the item
+            subText = "Activate the proactive feature in mobile settings", // Subtext for the item
             onClick = {
+                // Get the list of enabled accessibility services
                 val enabledServicesSetting = Settings.Secure.getString(context.contentResolver,
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
                 )
-                if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true){
+                // Check if the accessibility service for i-Freeze is not enabled
+                if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true) {
+                    // Create an intent to open accessibility settings
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                    context.startActivity(intent)
-                }else{
-                    Toast.makeText(context,"Accessibility service is already enabled", Toast.LENGTH_SHORT).show()
+                    context.startActivity(intent) // Start the activity to request accessibility service activation
+                } else {
+                    // Show a toast if accessibility service is already enabled
+                    Toast.makeText(context, "Accessibility service is already enabled", Toast.LENGTH_SHORT).show()
                 }
             }
         )
 
+        // Location permission setting item
         GeneralSettingItem(
-            icon = R.drawable.location,
-            mainText = "Location Permission",
-            subText = "Permit location accessibility",
+            icon = R.drawable.location, // Icon for location permission
+            mainText = "Location Permission", // Main text for the item
+            subText = "Permit location accessibility", // Subtext for the item
             onClick = {
-                val locationPermissionRequestCode = 123
+                val locationPermissionRequestCode = 123 // Request code for location permission
                 // Check if location permission is already granted
                 if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // Location permission is not granted, request it
+                    // Request location permission
                     ActivityCompat.requestPermissions(context as Activity,
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                         locationPermissionRequestCode
                     )
                 } else {
-                    // Location permission is already granted
+                    // Show a toast if location permission is already granted
                     Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_SHORT).show()
                 }
             }
         )
 
+        // Files permission setting item
         GeneralSettingItem(
-
-            icon = R.drawable.folder,
-            mainText = "Files Permission",
-            subText = "Enable i-Freeze to scan files",
+            icon = R.drawable.folder, // Icon for files permission
+            mainText = "Files Permission", // Main text for the item
+            subText = "Enable i-Freeze to scan files", // Subtext for the item
             onClick = {
-                val EXTERNAL_STORAGE_PERMISSION_CODEE = 1234
+                val EXTERNAL_STORAGE_PERMISSION_CODEE = 1234 // Request code for file permissions
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // Check if READ_MEDIA_IMAGES permission is granted
                     if (ContextCompat.checkSelfPermission(
                             context,
                             Manifest.permission.READ_MEDIA_IMAGES
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
+                        // Request READ_MEDIA_IMAGES permission
                         ActivityCompat.requestPermissions(
                             context as Activity,
                             arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
                             EXTERNAL_STORAGE_PERMISSION_CODEE
                         )
-                    }else{
+                    } else {
+                        // Show a toast if files access permission is already granted
                         Toast.makeText(context, "Files access was granted", Toast.LENGTH_SHORT).show()
                     }
-                }else{
+                } else {
+                    // Check if READ_EXTERNAL_STORAGE permission is granted
                     if (ContextCompat.checkSelfPermission(
                             context,
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
+                        // Request READ_EXTERNAL_STORAGE permission
                         ActivityCompat.requestPermissions(
                             context as Activity,
                             arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                             EXTERNAL_STORAGE_PERMISSION_CODEE
                         )
+                    } else {
+                        // Show a toast if files access permission is already granted
+                        Toast.makeText(context, "Files access was granted", Toast.LENGTH_SHORT).show()
                     }
                 }
-
             }
         )
-
     }
 }
-
-
-@Composable
-fun toggleLocationSettingItem(
-    icon: Int,
-    mainText: String,
-    subText: String,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .background(Color(0xFF175AA8))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-
-                // Icon
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(shape = Shape.medium)
-                        .background(Color(0xFF175AA8))
-                ) {
-                    Icon(
-                        painter = painterResource(id = icon),
-                        contentDescription = "",
-                        tint = Color.White,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                // Text and Switch
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = mainText,
-                        color = Color(0xFF175AA8),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-
-                    Text(
-                        text = subText,
-                        color = Color(0xFF175AA8),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold,
-
-                        )
-                }
-
-                Switch(
-                    checked = isChecked,
-                    onCheckedChange = onCheckedChange,
-
-                    )
-            }
-        }
-
-    }
-}
-
-

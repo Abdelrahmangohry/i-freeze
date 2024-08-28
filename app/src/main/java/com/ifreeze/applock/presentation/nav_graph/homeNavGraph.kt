@@ -2,20 +2,15 @@ package com.ifreeze.applock.presentation.nav_graph
 
 import android.app.Activity
 import android.content.Context
-import android.gesture.GestureOverlayView
-import androidx.activity.compose.BackHandler
-import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.example.compse.ui.*
 import com.ifreeze.applock.presentation.activity.AdminAccess
-import com.ifreeze.applock.presentation.activity.AllBrowsersList
 import com.ifreeze.applock.presentation.activity.AppManager
 import com.ifreeze.applock.presentation.activity.BlackList
 import com.ifreeze.applock.presentation.activity.BlackListWeb
-import com.ifreeze.applock.presentation.activity.GeneralWebView
 import com.ifreeze.applock.presentation.activity.KioskMode
 import com.ifreeze.applock.presentation.activity.LicenseActivation
 import com.ifreeze.applock.presentation.activity.Login
@@ -28,10 +23,10 @@ import com.ifreeze.applock.presentation.activity.WhiteList
 import com.ifreeze.applock.presentation.activity.WhiteListWeb
 import com.ifreeze.applock.presentation.activity.WhiteListWifi
 import com.ifreeze.applock.presentation.activity.SupportTeam
-import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen1
-import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen2
-import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen3
-import com.ifreeze.applock.presentation.boardingscreen.OnboardingScreen4
+import com.ifreeze.applock.boardingscreen.OnboardingScreen1
+import com.ifreeze.applock.boardingscreen.OnboardingScreen2
+import com.ifreeze.applock.boardingscreen.OnboardingScreen3
+import com.ifreeze.applock.boardingscreen.OnboardingScreen4
 import com.ifreeze.applock.presentation.screen.HomeScreen
 import com.ifreeze.applock.presentation.screen.NetworkControl
 import com.ifreeze.applock.presentation.screen.SplashScreen
@@ -79,11 +74,6 @@ fun NavGraphBuilder.homeNavGraph(
         }
 
         composable(
-            route = Screen.GeneralWebView.route
-        ) {
-            GeneralWebView(navController = navController)
-        }
-        composable(
             route = Screen.Home.route
         ) {
             HomeScreen(navController = navController, wifi)
@@ -93,7 +83,7 @@ fun NavGraphBuilder.homeNavGraph(
             route = Screen.KioskMode.route
         ) {
 
-            KioskMode(navController = navController, lifecycle)
+            KioskMode()
 
         }
         composable(
@@ -105,12 +95,6 @@ fun NavGraphBuilder.homeNavGraph(
             route = Screen.BlackList.route
         ) {
             BlackList(navController = navController)
-        }
-
-        composable(
-            route = Screen.AllBrowsersList.route
-        ) {
-            AllBrowsersList(navController = navController)
         }
 
         composable(
@@ -145,7 +129,7 @@ fun NavGraphBuilder.homeNavGraph(
         composable(
             route = Screen.SettingAdmin.route
         ) {
-            SettingAdmin(navController = navController,activity)
+            SettingAdmin(navController = navController)
         }
 
         composable(

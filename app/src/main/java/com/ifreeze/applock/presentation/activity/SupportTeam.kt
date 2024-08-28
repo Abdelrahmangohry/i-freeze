@@ -1,6 +1,5 @@
 package com.ifreeze.applock.presentation.activity
 
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
@@ -16,7 +14,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,11 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
@@ -41,16 +35,16 @@ import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.data.model.TicketMessageBody
 import com.patient.data.cashe.PreferencesGateway
 
+//Composable function to send a ticket
 @RequiresApi(34)
 @Composable
 fun SupportTeam(
     navController: NavController
 ) {
-
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
-        HeaderSupport(onBackPressed = { navController.popBackStack() })
+        HeaderMenu(onBackPressed = { navController.popBackStack() }, "Support")
         ticketBody(navController)
 
     }
@@ -148,6 +142,7 @@ fun ticketBody( navController: NavController) {
 
             Button(
                 onClick = {
+                    //ticket body
                     val message = TicketMessageBody(
                         deviceId = deviceId!!,
                         name = name.trim(),
@@ -155,11 +150,8 @@ fun ticketBody( navController: NavController) {
                         phone = phone.trim(),
                         description = description.trim(),
                     )
-                    Log.d("abdo", "deviceId ${deviceId}")
-                    Log.d("abdo", "name:  ${name.trim()}")
-                    Log.d("abdo", "email:  ${email.trim()}")
-                    Log.d("abdo", "phone:  ${phone.trim()}")
-                    Log.d("abdo", "description:  ${description.trim()}")
+
+                    // check if connection available and all required fields filled
                     if (!isNetworkAvailable(context)) {
                         Toast.makeText(
                             context,
@@ -168,7 +160,7 @@ fun ticketBody( navController: NavController) {
                         ).show()
                         return@Button
                     }
-                    else if(name.trim().isNullOrEmpty()){
+                    else if(name.trim().isEmpty()){
                         Toast.makeText(
                             context,
                             "Please add your name",
@@ -176,7 +168,7 @@ fun ticketBody( navController: NavController) {
                         ).show()
                         return@Button
                     }
-                    else if(email.trim().isNullOrEmpty()){
+                    else if(email.trim().isEmpty()){
                         Toast.makeText(
                             context,
                             "Please add your e-mail",
@@ -184,7 +176,7 @@ fun ticketBody( navController: NavController) {
                         ).show()
                         return@Button
                     }
-                    else if(phone.trim().isNullOrEmpty()){
+                    else if(phone.trim().isEmpty()){
                         Toast.makeText(
                             context,
                             "Please add your phone",
@@ -192,7 +184,7 @@ fun ticketBody( navController: NavController) {
                         ).show()
                         return@Button
                     }
-                    else if(description.trim().isNullOrEmpty()){
+                    else if(description.trim().isEmpty()){
                         Toast.makeText(
                             context,
                             "Please add a description",
@@ -201,6 +193,7 @@ fun ticketBody( navController: NavController) {
                         return@Button
                     }
                     else {
+                        //send the ticket
                         authViewModel.sendTicket(message)
                         Toast.makeText(
                             context,
@@ -216,30 +209,6 @@ fun ticketBody( navController: NavController) {
                 Text("Submit", color = Color.White)
             }
         }
-    }
-}
-
-
-@Composable
-fun HeaderSupport(onBackPressed: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-        Text(
-            text = "Support",
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 30.dp),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp,
-            textAlign = TextAlign.Center
-        )
     }
 }
 

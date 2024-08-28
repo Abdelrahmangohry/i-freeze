@@ -8,7 +8,6 @@ sealed class Screen(val route:String){
     object AdminAccess : Screen(route = "admin_access")
     object Login : Screen(route = "login")
     object Home : Screen(route = "home_screen")
-    object GeneralWebView : Screen(route = "general_web_view")
     object Setting : Screen(route = "setting_screen")
 
     object OnboardingScreen1 : Screen(route = "on_boarding_Screen_1")
@@ -21,7 +20,6 @@ sealed class Screen(val route:String){
     object SettingAdmin : Screen(route = "setting_admin")
     object WhiteList : Screen(route = "withe_list_screen")
     object BlackList : Screen(route = "black_list_screen")
-    object AllBrowsersList : Screen(route = "all_browsers")
     object BlackListWeb : Screen(route = "black_list_web_screen")
     object WhiteListWeb : Screen(route = "white_list_web_screen")
     object WhiteListWifi : Screen(route = "white_list_wifi")

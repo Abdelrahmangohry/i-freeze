@@ -1,20 +1,9 @@
 package com.ifreeze.applock.presentation.activity
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.AlertDialog
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.provider.Settings
 import android.util.Log
-import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,7 +23,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -57,15 +43,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.ifreeze.applock.GeneralSettingItem
 import com.ifreeze.applock.R
-import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
-import com.ifreeze.applock.service.AdminService
 import com.ifreeze.applock.service.ForceCloseKiosk
-
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
@@ -73,34 +53,15 @@ import com.patient.data.cashe.PreferencesGateway
 
 @RequiresApi(34)
 @Composable
-fun SettingAdmin(navController: NavController, activity: Activity) {
+fun SettingAdmin(navController: NavController) {
+    // Main container for the settings screen with a background color.
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
-        HeaderAdmin(onBackPressed = { navController.popBackStack() })
-        GeneralOptionsUIAdmin(activity)
-    }
-}
-
-@Composable
-fun HeaderAdmin(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-        Text(
-            text = "Settings",
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 30.dp).padding(horizontal = 75.dp),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 20.sp
-        )
+        // Header menu with a back button and title text.
+        HeaderMenu(onBackPressed = { navController.popBackStack() }, "Settings")
+        // Main content of the settings screen containing admin-related options.
+        GeneralOptionsUIAdmin()
     }
 }
 
@@ -109,156 +70,48 @@ fun HeaderAdmin(onBackPressed: () -> Unit) {
 @SuppressLint("SuspiciousIndentation")
 @RequiresApi(34)
 @Composable
-fun GeneralOptionsUIAdmin(
-    activity: Activity,
-) {
+fun GeneralOptionsUIAdmin() {
     val context = LocalContext.current
     val preference = PreferencesGateway(context)
-    val deviceManager =
-        activity.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-    val compName = ComponentName(activity, MyDeviceAdminReceiver::class.java)
-    val isAdminPermissionGranted = remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(preference.loadBaseUrl() ?: "") }
 
+    // State variables for managing location and application block settings.
+    var text by remember { mutableStateOf(preference.loadBaseUrl() ?: "") }
     val isLocationEnabled = preference.load("locationBlocked", false)
     val locationBlockedState = remember { mutableStateOf(isLocationEnabled) }
-
     val isApplicationBlocked = preference.load("BlockState", false)
     val lockedApplicationState = remember { mutableStateOf(isApplicationBlocked) }
-    Log.d("kiosk", "lockedApplicationState $lockedApplicationState")
 
+    // Intents for starting and stopping services.
     val serviceIntent = Intent(context, LocationService::class.java)
     val kioskIntent = Intent(context, ForceCloseKiosk::class.java)
-//    val lockedApplicationState = mutableStateOf(false)
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = {
-            if (it) {
-                Log.d("islam", "isAdminPermissionGranted : $it ")
-                isAdminPermissionGranted.value = true
-            }
-        }
-    )
 
+    // Container for all the admin settings.
     Column(
         modifier = Modifier
             .padding(horizontal = 14.dp)
             .padding(top = 10.dp)
     ) {
-
-//        GeneralSettingItem(
-//            icon = R.drawable.admin,
-//            mainText = "Admin Permission",
-//            subText = "For get access and control over apps",
-//            onClick = {
-//                if (!deviceManager.isDeviceOwnerApp(activity.packageName)) {
-//                    val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-//                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-//                    intent.putExtra(
-//                        DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-//                        "You should enable the app!"
-//                    )
-//                    activity.startActivityForResult(intent, 1)
-//                } else {
-//                    Toast.makeText(context, "the admin permission is add ", Toast.LENGTH_SHORT)
-//                        .show()
-//                }
-//                Log.d("islam", "GeneralOptionsUISetting :admin ")
-////                AdminAction()
-//            }
-//        )
-//        GeneralSettingItem(
-//            icon = R.drawable.draw,
-//            mainText = "Over Draw ",
-//            subText = "can create a layout over other apps",
-//            onClick = {
-//                Log.d("islam", "GeneralOptionsUISetting :drawAction ")
-//
-//                if (!Settings.canDrawOverlays(context)) {
-//                    val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-//                    myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    context.startActivity(myIntent)
-//                } else {
-//                    Toast.makeText(
-//                        context, "Over Draw Already Enabled", Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//            }
-//        )
-//        GeneralSettingItem(
-//            icon = R.drawable.ic_baseline_check_24,
-//            mainText = "Accessibility Service",
-//            subText = "This is essential part of Android's",
-//            onClick = {
-//                val enabledServicesSetting = Settings.Secure.getString(
-//                    context.contentResolver,
-//                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-//                )
-//                if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true) {
-//                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-//                    context.startActivity(intent)
-//                } else {
-//                    Toast.makeText(
-//                        context,
-//                        "Accessibility Service Already Enabled",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//            }
-//        )
-
-//        GeneralSettingItem(
-//            icon = R.drawable.location,
-//            mainText = "Location Permission",
-//            subText = "Enable location access for better functionality",
-//            onClick = {
-//                val locationPermissionRequestCode = 123
-//                // Check if location permission is already granted
-//                if (ContextCompat.checkSelfPermission(
-//                        context,
-//                        Manifest.permission.ACCESS_FINE_LOCATION
-//                    ) != PackageManager.PERMISSION_GRANTED
-//                ) {
-//                    // Location permission is not granted, request it
-//                    ActivityCompat.requestPermissions(
-//                        context as Activity,
-//                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                        locationPermissionRequestCode
-//                    )
-//                } else {
-//                    // Location permission is already granted
-//                    Toast.makeText(
-//                        context,
-//                        "Location permission is already granted",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//            }
-//        )
-
+        // Toggle item for enabling/disabling location tracking.
         toggleLocationAdminItem(
             icon = R.drawable.map,
             mainText = "Track Location",
             subText = "Click Here to Track The Location",
             isChecked = locationBlockedState.value!!,
             onCheckedChange = { isCheckedLocation ->
-
                 preference.update("locationBlocked", isCheckedLocation)
                 locationBlockedState.value = isCheckedLocation
                 if (isCheckedLocation && !isLocationEnabled(context)) {
-                    Log.d("abdo", "i am here")
-                    Log.d("abdo", "isCheckedLocation $isCheckedLocation")
                     context.startService(serviceIntent)
                 } else {
-                    Log.d("abdo", "iam in else")
                     context.stopService(serviceIntent)
                 }
             },
             onClick = {
-
+                // Optional click action for the location item.
             }
         )
 
+        // Toggle item for enabling/disabling kiosk mode.
         toggleLocationAdminItem(
             icon = R.drawable.lock,
             mainText = "Kiosk Mode",
@@ -267,23 +120,23 @@ fun GeneralOptionsUIAdmin(
             onCheckedChange = { isApplicationBlocked ->
                 Log.d("kiosk", "isApplicationBlocked $isApplicationBlocked")
                 if (isApplicationBlocked) {
-                    // Enable kiosk mode
+                    // Enable kiosk mode.
                     preference.update("BlockState", true)
                     lockedApplicationState.value = true
                     context.startService(kioskIntent)
-                    Log.d("abdo", "start lock")
                 } else {
+                    // Disable kiosk mode.
                     preference.update("BlockState", false)
                     lockedApplicationState.value = false
                     context.stopService(kioskIntent)
-                    Log.d("abdo", "stop lock")
                 }
             },
             onClick = {
-                // Handle item click if needed
+                // Optional click action for the kiosk mode item.
             }
         )
 
+        // Card containing a text field for managing server URL and a save button.
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 8.dp
@@ -292,8 +145,7 @@ fun GeneralOptionsUIAdmin(
             modifier = Modifier
                 .padding(top = 15.dp)
                 .fillMaxWidth()
-        )
-        {
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -303,6 +155,7 @@ fun GeneralOptionsUIAdmin(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(15.dp)
                 ) {
+                    // Text field for entering the management server URL.
                     OutlinedTextField(
                         value = text,
                         onValueChange = { text = it },
@@ -310,7 +163,7 @@ fun GeneralOptionsUIAdmin(
                         maxLines = 1,
                         textStyle = TextStyle(fontSize = 16.sp),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = Color.Black, // Text color // Color of the leading icon
+                            textColor = Color.Black, // Text color
                             unfocusedBorderColor = Color.LightGray, // Border color when unfocused
                             focusedBorderColor = Color.Black,
                             cursorColor = Color.Black
@@ -318,25 +171,22 @@ fun GeneralOptionsUIAdmin(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Save Button
+                    // Save button to save the entered server URL.
                     Button(
                         modifier = Modifier.padding(5.dp),
                         colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
                         onClick = {
                             preference.saveBaseUrl(text)
                             Toast.makeText(context, "Base URL saved", Toast.LENGTH_LONG).show()
-                        },
-
-                        ) {
+                        }
+                    ) {
                         Text(text = "Save", color = Color.White)
                     }
                 }
             }
-
         }
     }
 }
-
 
 @Composable
 fun toggleLocationAdminItem(
@@ -347,11 +197,13 @@ fun toggleLocationAdminItem(
     onCheckedChange: (Boolean) -> Unit,
     onClick: () -> Unit
 ) {
+    // Card item with a toggle switch and text.
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .background(Color(0xFF175AA8)).padding(bottom = 12.dp)
+            .background(Color(0xFF175AA8))
+            .padding(bottom = 12.dp)
     ) {
         Box(
             modifier = Modifier
@@ -362,8 +214,7 @@ fun toggleLocationAdminItem(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-
-                // Icon
+                // Icon displayed on the card.
                 Box(
                     modifier = Modifier
                         .size(34.dp)
@@ -372,13 +223,13 @@ fun toggleLocationAdminItem(
                 ) {
                     Icon(
                         painter = painterResource(id = icon),
-                        contentDescription = "",
+                        contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                // Text and Switch
+                // Column containing text and switch.
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
@@ -394,18 +245,15 @@ fun toggleLocationAdminItem(
                         color = Color(0xFF175AA8),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
-
-                        )
+                    )
                 }
-
+                // Switch for toggling settings.
                 Switch(
                     checked = isChecked,
                     onCheckedChange = onCheckedChange,
-
-                    )
+                )
             }
         }
-
     }
 }
 

@@ -29,9 +29,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +57,15 @@ import java.net.Inet4Address
 import java.net.NetworkInterface
 
 
+/**
+ * Composable function that represents the License Activation screen.
+ * It displays the status of the license and provides a button to activate the license key.
+ *
+ * @param navController Navigation controller for handling navigation actions.
+ * @param lifecycle Lifecycle owner to observe LiveData.
+ * @param context Context for accessing resources and system services.
+ * @param authViewModel ViewModel to handle authentication and license activation logic.
+ */
 @RequiresApi(34)
 @Composable
 fun LicenseActivation(
@@ -69,11 +76,22 @@ fun LicenseActivation(
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
+        // Header with back button
         headerLicense(onBackPressed = { navController.popBackStack() })
+        // License key section
         licenseKey(lifecycle, context, navController, authViewModel)
 
     }
 }
+
+/**
+ * Composable function that handles the display and activation of the license key.
+ *
+ * @param lifecycle Lifecycle owner to observe LiveData.
+ * @param context Context for accessing resources and system services.
+ * @param navController Navigation controller for handling navigation actions.
+ * @param authViewModel ViewModel to handle authentication and license activation logic.
+ */
 
 @SuppressLint("FlowOperatorInvokedInComposition", "HardwareIds")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +102,7 @@ fun licenseKey(
     navController: NavController,
     authViewModel: AuthViewModel
 ) {
-
+    // Retrieve preferences
     val preference = PreferencesGateway(LocalContext.current)
     var deviceId = preference.load("responseID", "")
     val syncTime = preference.load("time", "")
@@ -135,7 +153,7 @@ fun licenseKey(
         serialNumber = androidId
     )
 
-
+    // Header for the license activation section
     Row(
         modifier = Modifier.padding(top = 100.dp, bottom = 30.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
@@ -148,13 +166,14 @@ fun licenseKey(
             fontSize = 20.sp
         )
     }
+    // Main content
     Column(
         modifier = Modifier
             .fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        // License status display
         Box(modifier = Modifier.background(color = Color.White)) {
             if (deviceId.isNullOrEmpty()) {
                 Text(
@@ -173,6 +192,7 @@ fun licenseKey(
             }
 
         }
+        // License activation button and last update text
         Column(modifier = Modifier.wrapContentSize(align = Alignment.Center)) {
             if (deviceId.isNullOrEmpty()) {
 
@@ -295,7 +315,12 @@ fun licenseKey(
     }
 }
 
-// Function to check if the device is connected to the internet
+/**
+ * Checks if the device is connected to the internet.
+ *
+ * @param context The context to access system services.
+ * @return True if connected to the internet, otherwise false.
+ */
 @SuppressLint("ServiceCast")
 fun isNetworkAvailable(context: Context): Boolean {
     val connectivityManager =
@@ -313,6 +338,13 @@ fun isNetworkAvailable(context: Context): Boolean {
     }
 }
 
+
+/**
+ * Checks if the location permission is granted.
+ *
+ * @param context The context to check the permission status.
+ * @return True if location permission is granted, otherwise false.
+ */
 fun isLocationPermissionGranted(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
         context,
@@ -320,12 +352,23 @@ fun isLocationPermissionGranted(context: Context): Boolean {
     ) == PackageManager.PERMISSION_GRANTED
 }
 
+/**
+ * Checks if location services are enabled.
+ *
+ * @param context The context to access the location service.
+ * @return True if either GPS or network provider is enabled, otherwise false.
+ */
 fun isLocationEnabled(context: Context): Boolean {
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
             locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 }
 
+/**
+ * Composable function for the header section of the License Activation screen.
+ *
+ * @param onBackPressed Lambda function to handle back navigation.
+ */
 @Composable
 fun headerLicense(onBackPressed: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {

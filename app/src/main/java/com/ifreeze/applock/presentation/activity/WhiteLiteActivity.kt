@@ -47,22 +47,13 @@ import com.ifreeze.applock.presentation.AppsViewModel
 import com.ifreeze.applock.ui.theme.Shape
 import com.patient.data.cashe.PreferencesGateway
 
-//@Composable
-//fun  WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController){
-//    val preference = PreferencesGateway(LocalContext.current)
-//    var allowedAppsList by remember { mutableStateOf(preference.getList("allowedAppsList") ?: mutableListOf()) }
-//    WhiteAppList(allowedAppsList, viewModel,onBackPressed = { navController.popBackStack() })
-//
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController) {
     val preference = PreferencesGateway(LocalContext.current)
     var allowedAppsList by remember { mutableStateOf(preference.getList("allowedAppsList") ?: mutableListOf()) }
-
     var inputText by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {

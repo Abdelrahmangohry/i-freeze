@@ -56,7 +56,7 @@ fun WhiteListWifi(navController: NavController) {
                 .padding(horizontal = 14.dp)
                 .padding(top = 10.dp),
         ) {
-            wifiHeaderMenu(onBackPressed = { navController.popBackStack() })
+            HeaderMenu(onBackPressed = { navController.popBackStack() }, "Whitelisted WiFi")
             var allowedWifi by remember {
                 mutableStateOf(
                     preference.getList("allowedWifiList") ?: mutableListOf()
@@ -177,29 +177,6 @@ fun SimpleInputTextWithButtonWifi(onValidMacSubmit: (String) -> Unit, allowedWif
         ) {
             Text("Submit", color = Color.White)
         }
-    }
-}
-
-@Composable
-fun wifiHeaderMenu(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-        Text(
-            text = "Whitelisted WiFi",
-            color = Color.White,
-
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp, bottom = 30.dp).padding(horizontal = 55.dp),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp
-        )
     }
 }
 

@@ -167,11 +167,6 @@ class MainActivity : ComponentActivity() {
                     preference,
                     { screenShareFun() }
                 )
-                // Handle back press
-                BackHandler {
-                    finishAffinity() // Close the application
-                }
-
 
             }
         }

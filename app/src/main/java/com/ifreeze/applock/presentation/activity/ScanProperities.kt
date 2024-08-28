@@ -3,7 +3,6 @@ package com.ifreeze.applock.presentation.activity
 import android.app.KeyguardManager
 import android.content.Context
 import android.provider.Settings
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -20,17 +19,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,18 +41,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
-import com.ifreeze.applock.presentation.AppsViewModel
 import com.ifreeze.applock.presentation.AuthViewModel
-import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.data.model.AlertBody
-import com.ifreeze.data.model.DeviceDTO
 import com.patient.data.cashe.PreferencesGateway
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -68,42 +60,40 @@ import java.util.Date
 @Composable
 fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
     val context = LocalContext.current
-    val viewModel: AppsViewModel = hiltViewModel()
     val authViewModel: AuthViewModel = hiltViewModel()
     val sharedPreferences = PreferencesGateway(context)
-    val newList = viewModel.articlesItems.collectAsState().value
-
-    val appsNamesList = newList.map { it.appName }
-
+    // State variables for managing progress and loading state
     var currentProgress by remember { mutableStateOf(0f) }
     var loading by remember { mutableStateOf(false) }
     var clicked by remember { mutableStateOf(false) }
+    // Coroutine scope for handling asynchronous tasks
     val scope = rememberCoroutineScope()
+
+    // Check device security and configuration status
     val lockedScreen = hasLockScreenPassword(context)
     val rooted = isDeviceRooted()
     val developerOptionsEnabled = areDeveloperOptionsEnabled(context)
     val untrustedAppsList by remember { mutableStateOf(sharedPreferences.getList(("UntrustedApps"))) }
 
-    // Function to send alert
+    // Function to send an alert to the view model
     fun sendAlert(issueName: String) {
+        // Format the current time
         val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
-        var deviceId = sharedPreferences.load("responseID", "")
         val message: List<AlertBody> = listOf(
             AlertBody(
-                deviceId = "4E29E0D6-FE60-4AE9-B3CE-680B2F2C1A2F",
-                logName = issueName,
-                time = currentTime,
-                action = "String",
-                description = "String",
-                source = "String"
+                deviceId = "4E29E0D6-FE60-4AE9-B3CE-680B2F2C1A2F", // Example device ID
+                logName = issueName, // Name of the issue
+                time = currentTime, // Current timestamp
+                action = "String", // Placeholder for action
+                description = "String", // Placeholder for description
+                source = "String" // Placeholder for source
             )
         )
+        // Send the alert message using the view model
         authViewModel.sendAlert(message)
-        Log.d("Alert", "Sending alert for issue: $issueName")
-        Log.d("Alert", "message $message")
     }
 
-    // Function to handle scan button click
+    // Function to start a scan and update progress
     fun performScan() {
         clicked = false
         loading = true
@@ -115,26 +105,25 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
             clicked = true
         }
     }
-
+    // Check network availability and fetch untrusted apps if available
     if (isNetworkAvailable(context)) {
         authViewModel.unTrustedApps()
         authViewModel._untrustedAppsFlow.observe(lifecycle, Observer { response ->
             if (response.isSuccessful) {
-                val appNames: List<String> = response.body()?.data?.map { it.appName } ?: emptyList()
+                val appNames: List<String> =
+                    response.body()?.data?.map { it.appName } ?: emptyList()
                 sharedPreferences.saveList("UntrustedApps", appNames)
-                Log.d("abdo", "this is Untrusted app $appNames")
-            } else {
-                Log.d("abdo", "this is Untrusted app error ${response.errorBody()}")
             }
         })
     }
-
+    // Main Column layout for scan properties screen
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF175AA8)),
     ) {
-        backArrow(onBackPressed = { navController.popBackStack() })
+        // Back navigation button
+        BackArrow(onBackPressed = { navController.popBackStack() })
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -145,7 +134,7 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
+                // Display scan results if the scan has been clicked
                 if (clicked) {
                     ScanResults("Scan Results")
                     Column(
@@ -153,6 +142,7 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
                             .padding(20.dp)
 
                     ) {
+                        // List of check items with their status
                         val checkItems = mutableListOf<Pair<String, Boolean>>()
                         if (lockedScreen) {
                             CheckItem("Lock Screen", true)
@@ -173,20 +163,18 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
                             checkItems.add("Developer Option Disabled" to true)
                         }
                         UntrustedApps("Untrusted Applications", untrustedAppsList)
+                        // Send alerts for any issues found
                         checkItems.filter { it.second }.forEach { (issueName, _) ->
                             sendAlert(issueName)
                         }
                     }
 
                 } else {
+                    // Display scanning button and progress indicator
                     Box {
                         if (loading) {
                             CircularProgressBar(
                                 percentage = currentProgress,
-                                number = 100,
-                                fontSize = 28.sp,
-                                radius = 50.dp,
-                                color = Color.Green,
                                 strokeWidth = 8.dp,
                                 animationDuration = 500,
                                 animationDelay = 0
@@ -200,6 +188,7 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
                                 .clip(CircleShape),
                             colors = ButtonDefaults.buttonColors(Color.Transparent),
                         ) {
+                            // Button text changes based on loading state
                             val buttonText = if (loading) {
                                 "Scanning"
                             } else {
@@ -219,149 +208,142 @@ fun ScanProperties(navController: NavController, lifecycle: LifecycleOwner) {
     }
 }
 
-fun sendAlert(preferences: PreferencesGateway,authViewModel: AuthViewModel, issueName: String) {
-    val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
-    var deviceId = preferences.load("responseID", "")
-    val message : List<AlertBody> = listOf(AlertBody(
-        deviceId = "4E29E0D6-FE60-4AE9-B3CE-680B2F2C1A2F",
-        logName = issueName, // Set the issue name as logName
-        time = currentTime,
-        action = "String",
-        description = "$issueName Found",
-        source = "String"
-    ))
-    authViewModel.sendAlert(message)
-    Log.d("Alert", "Sending alert for issue: $issueName")
-    Log.d("Alert", "message $message")
-}
 
 @Composable
 fun ScanResults(title: String) {
+    // Column to display the scan results title
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), // Takes up full width of the parent
+        horizontalAlignment = Alignment.CenterHorizontally // Centers the text horizontally
     ) {
         Text(
-            text = title,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 30.sp
+            text = title, // Title text
+            color = Color.White, // Text color
+            fontWeight = FontWeight.Bold, // Bold font weight
+            fontSize = 30.sp // Font size for the title
         )
     }
 }
 
 @Composable
 fun UntrustedApps(title: String, appsList: List<String>) {
+    // Row to display the title and status icon for untrusted apps
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier
+            .fillMaxWidth() // Takes up full width of the parent
+            .padding(vertical = 8.dp), // Vertical padding for the row
+        horizontalArrangement = Arrangement.SpaceBetween // Distributes space between title and icon
     ) {
         Text(
-            text = title,
-            color = Color.White,
-            fontWeight = FontWeight.Bold
+            text = title, // Title text
+            color = Color.White, // Text color
+            fontWeight = FontWeight.Bold // Bold font weight
         )
+        // Display an icon based on whether the app list is empty or not
         if (appsList.isEmpty()) {
             Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
-                tint = Color.Green
+                imageVector = Icons.Default.CheckCircle, // Check circle icon
+                contentDescription = null, // No content description needed
+                tint = Color.Green // Icon color
             )
         } else {
             Icon(
-                imageVector = Icons.Default.Cancel,
-                contentDescription = null,
-                tint = Color.Red
+                imageVector = Icons.Default.Cancel, // Cancel icon
+                contentDescription = null, // No content description needed
+                tint = Color.Red // Icon color
             )
         }
     }
 
+    // LazyColumn to display the list of untrusted apps
     LazyColumn(
-        modifier = Modifier.padding(horizontal = 20.dp)
+        modifier = Modifier.padding(horizontal = 20.dp) // Horizontal padding for the list
     ) {
         items(appsList.size) { index ->
-            Text(text = appsList[index], color = Color.White)
+            Text(text = appsList[index], color = Color.White) // Display each app name
         }
     }
 }
 
 @Composable
 fun CheckItem(label: String, isChecked: Boolean) {
+    // Row to display a check item with a label and status icon
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier
+            .fillMaxWidth() // Takes up full width of the parent
+            .padding(vertical = 4.dp), // Vertical padding for the row
+        horizontalArrangement = Arrangement.SpaceBetween // Distributes space between label and icon
     ) {
-        Text(text = label, color = Color.White)
+        Text(text = label, color = Color.White) // Label text
+        // Display a check or cancel icon based on the status
         Icon(
             imageVector = if (isChecked) Icons.Default.CheckCircle else Icons.Default.Cancel,
-            contentDescription = null,
-            tint = if (isChecked) Color.Green else Color.Red
+            contentDescription = null, // No content description needed
+            tint = if (isChecked) Color.Green else Color.Red // Icon color based on status
         )
     }
 }
 
+// Function to simulate progress loading
 suspend fun loadProgress(updateProgress: (Float) -> Unit) {
     for (i in 1..100) {
-        updateProgress(i.toFloat() / 100)
-        delay(100)
+        updateProgress(i.toFloat() / 100) // Update progress value
+        delay(100) // Delay to simulate loading time
     }
 }
 
 @Composable
 fun CircularProgressBar(
     percentage: Float,
-    number: Int,
-    fontSize: TextUnit = 28.sp,
-    radius: Dp = 100.dp,
-    color: Color = Color.Green,
     strokeWidth: Dp = 8.dp,
     animationDuration: Int = 1000,
     animationDelay: Int = 0
 ) {
+    // State to control animation playback
     var animationPlayed by remember { mutableStateOf(false) }
+
+    // Animate progress bar percentage
     var curPercentage = animateFloatAsState(
         targetValue = if (animationPlayed) percentage else 0f,
         animationSpec = tween(
             durationMillis = animationDuration,
             delayMillis = animationDelay
-        ), label = ""
-
+        ),
+        label = ""
     )
+
+    // Start animation when the composable is first launched
     LaunchedEffect(key1 = true) {
         animationPlayed = true
     }
+
+    // Display the circular progress bar
     Column(
-        modifier = Modifier.size(300.dp),
+        modifier = Modifier.size(300.dp), // Size of the progress bar
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally // Center content within the column
     ) {
         Canvas(modifier = Modifier.size(300.dp)) {
             drawArc(
-                color = Color(0xFFee6c4d),
-                -90f,
-                360 * curPercentage.value,
+                color = Color(0xFFee6c4d), // Arc color
+                -90f, // Start angle
+                360 * curPercentage.value, // Sweep angle based on progress
                 useCenter = false,
-                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
+                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round) // Stroke style
             )
-
         }
-
-//        Text(
-//            text = (curPercentage.value * number).toInt().toString(),
-//            color = Color.Black,
-//            fontSize = fontSize,
-//            fontWeight = FontWeight.Bold
-//
-//        )
     }
 }
 
+
+// Helper function to check if the device has a lock screen password
 @Composable
 fun hasLockScreenPassword(context: Context): Boolean {
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     return keyguardManager.isKeyguardSecure
 }
 
+// Helper function to check if the device is rooted
 @Composable
 fun isDeviceRooted(): Boolean {
     return try {
@@ -379,6 +361,7 @@ fun isDeviceRooted(): Boolean {
     }
 }
 
+// Helper function to check if developer options are enabled
 @Composable
 fun areDeveloperOptionsEnabled(context: Context): Boolean {
     return Settings.Secure.getInt(
@@ -389,15 +372,4 @@ fun areDeveloperOptionsEnabled(context: Context): Boolean {
 }
 
 
-@Composable
-fun backArrow(onBackPressed: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-    }
-}
+

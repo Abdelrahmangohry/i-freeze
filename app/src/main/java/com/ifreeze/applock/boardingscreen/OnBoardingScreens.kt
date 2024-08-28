@@ -1,4 +1,4 @@
-package com.ifreeze.applock.presentation.boardingscreen
+package com.ifreeze.applock.boardingscreen
 
 import android.Manifest
 import android.app.Activity
@@ -7,24 +7,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Button
@@ -34,8 +28,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,17 +39,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -65,7 +52,6 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
-import com.ifreeze.applock.presentation.activity.GeneralSettingItem
 import com.ifreeze.applock.presentation.activity.HeaderLogo
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.applock.presentation.screen.PermissionViewModel
@@ -74,6 +60,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun OnboardingScreen1(navController: NavHostController) {
+    // Annotated string for clickable text links to "Agreement" and "Privacy Policy"
     val annotatedText = buildAnnotatedString {
         append("By proceeding, you confirm ")
         pushStringAnnotation(tag = "Agreement", annotation = "https://flothers.com/user_agreement")
@@ -87,7 +74,10 @@ fun OnboardingScreen1(navController: NavHostController) {
         }
         pop()
         append(" and ")
-        pushStringAnnotation(tag = "Privacy Policy", annotation = "https://flothers.com/privacy_policy")
+        pushStringAnnotation(
+            tag = "Privacy Policy",
+            annotation = "https://flothers.com/privacy_policy"
+        )
         withStyle(
             style = SpanStyle(
                 color = Color.White,
@@ -98,21 +88,24 @@ fun OnboardingScreen1(navController: NavHostController) {
         }
         pop()
     }
-
+    // Main layout for the first onboarding screen
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF175AA8)),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFF175AA8)), // Set background color
+        verticalArrangement = Arrangement.SpaceBetween, // Space elements vertically
+        horizontalAlignment = Alignment.CenterHorizontally // Center elements horizontally
     ) {
+        // Header and clickable text
         Column(
             modifier = Modifier.weight(1f).padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.Center, // Center the content vertically
+            horizontalAlignment = Alignment.CenterHorizontally // Center the content horizontally
         ) {
-            HeaderLogo()
-            Spacer(modifier = Modifier.height(24.dp))
+            HeaderLogo() // Custom composable for the header logo
+            Spacer(modifier = Modifier.height(24.dp)) // Space between logo and text
+
+            // Clickable text with links to "Agreement" and "Privacy Policy"
             ClickableText(
                 text = annotatedText,
                 style = LocalTextStyle.current.copy(
@@ -123,6 +116,7 @@ fun OnboardingScreen1(navController: NavHostController) {
                 onClick = { offset ->
                     annotatedText.getStringAnnotations(start = offset, end = offset)
                         .firstOrNull()?.let { annotation ->
+                            // Open the corresponding link when text is clicked
                             navController.context.startActivity(
                                 Intent(
                                     Intent.ACTION_VIEW,
@@ -134,21 +128,22 @@ fun OnboardingScreen1(navController: NavHostController) {
             )
         }
 
+        // Button to navigate to the next screen
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.Center,// Center the button horizontally
+            verticalAlignment = Alignment.CenterVertically // Align button content vertically
         ) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                onClick = { navController.navigate(Screen.OnboardingScreen2.route) },
-                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
+                    .padding(16.dp), // Full-width button with padding
+                onClick = { navController.navigate(Screen.OnboardingScreen2.route) }, // Navigate to Screen 2
+                colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)) // Button color styling
             ) {
-                Text(text = "GET STARTED", color = Color.White)
+                Text(text = "GET STARTED", color = Color.White) // Button text
             }
         }
     }
@@ -158,54 +153,63 @@ fun OnboardingScreen1(navController: NavHostController) {
 @Composable
 fun OnboardingScreen2(navController: NavHostController) {
     val context = LocalContext.current
+    // Main layout for the second onboarding screen
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF175AA8)),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFF175AA8)), // Set background color
+        verticalArrangement = Arrangement.SpaceBetween, // Space elements vertically
+        horizontalAlignment = Alignment.CenterHorizontally // Center elements horizontally
     ) {
+
+        // Content section with instructions
         Column(
             modifier = Modifier.weight(2f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.Center, // Center the content vertically
+            horizontalAlignment = Alignment.CenterHorizontally // Center the content horizontally
         ) {
-            OnboardingImage(R.drawable.accessnew)
-
+            OnboardingImage(R.drawable.accessnew) // Custom composable for the image
+            // Instruction text
             Text(
                 modifier = Modifier.padding(15.dp),
                 text = "Enable accessibility service in settings for keeping your mobile safe.",
                 color = Color.White,
                 fontSize = 20.sp
             )
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(20.dp)) // Space between text and the list
+            // List of steps for enabling accessibility service
             Column(
                 modifier = Modifier.fillMaxWidth().padding(15.dp),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.Start // Align text to the start
             ) {
+
+                // Step 1
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    NumberedCircle(1)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    NumberedCircle(1) // Custom composable for numbered circle
+                    Spacer(modifier = Modifier.width(8.dp)) // Space between circle and text
                     Text(
                         text = "Open Accessibility settings by tapping the setting button below",
                         color = Color.White,
                         fontSize = 16.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp)) // Space between steps
+
+                // Step 2
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    NumberedCircle(2)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    NumberedCircle(2)  // Custom composable for numbered circle
+                    Spacer(modifier = Modifier.width(8.dp)) // Space between circle and text
                     Text(
                         text = "Tap Installed apps or Installed services and select i-Freeze Antivirus",
                         color = Color.White,
                         fontSize = 16.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))// Space between steps
+                // Step 3
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    NumberedCircle(3)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    NumberedCircle(3) // Custom composable for numbered circle
+                    Spacer(modifier = Modifier.width(8.dp)) // Space between circle and text
                     Text(
                         text = "Tap the toggle to give us permission",
                         color = Color.White,
@@ -214,13 +218,13 @@ fun OnboardingScreen2(navController: NavHostController) {
                 }
             }
         }
-
+        // Buttons for navigating to settings or proceeding to the next screen
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.Center, // Center buttons vertically
+            horizontalAlignment = Alignment.CenterHorizontally // Center buttons horizontally
         ) {
-
+            // Button to open accessibility settings
             Button(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
                 onClick = {
@@ -230,18 +234,20 @@ fun OnboardingScreen2(navController: NavHostController) {
                     )
                     if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true) {
                         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        context.startActivity(intent)
-                        Log.d("abdo", "Setting Not Granted")
+                        context.startActivity(intent) // Open accessibility settings
+                        Log.d("abdo", "Setting Not Granted") // Log if setting not granted
                     } else {
                         Toast.makeText(
                             context,
                             "Accessibility permission is already granted",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()  // Show toast if permission is already granted
                     }
                 }) {
-                Text(text = "Settings", color = Color.White)
+                Text(text = "Settings", color = Color.White) // Button text
             }
+
+            // Button to proceed to the next screen
             Button(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
                 onClick = {
@@ -254,15 +260,14 @@ fun OnboardingScreen2(navController: NavHostController) {
                             context,
                             "Enable accessibility service to proceed",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show() // Show toast if permission is already granted
                     } else {
                         navController.navigate(Screen.OnboardingScreen3.route)
-                        Log.d("abdo", "Setting Granted")
+                        Log.d("abdo", "Setting Granted") // Log if setting is granted
                     }
                 }) {
-                Text(text = "Next", color = Color.White)
+                Text(text = "Next", color = Color.White)  // Button text
             }
-
         }
     }
 }
@@ -270,7 +275,8 @@ fun OnboardingScreen2(navController: NavHostController) {
 @Composable
 fun OnboardingScreen3(navController: NavHostController) {
     val context = LocalContext.current
-    val deviceManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+    val deviceManager =
+        context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
 
     // ViewModel to manage permission state
@@ -278,22 +284,24 @@ fun OnboardingScreen3(navController: NavHostController) {
 
     // Observe permission states
     val permissionStates by viewModel.permissionStates.collectAsState()
-    viewModel.checkAllPermissions(context, compName, deviceManager)
-    // Define UI
+    viewModel.checkAllPermissions(context, compName, deviceManager) // Check permissions on screen load
+    // Main layout for the third onboarding screen
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF175AA8))
-            .padding(horizontal = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(horizontal = 20.dp), // Set background color and padding
+        horizontalAlignment = Alignment.CenterHorizontally,// Center elements horizontally
+        verticalArrangement = Arrangement.Center // Center elements vertically
     ) {
+        // Content section with settings options
         Column(
             modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally,// Center content horizontally
+            verticalArrangement = Arrangement.Center // Center content vertically
         ) {
-            OnboardingImage(R.drawable.accessabilitypref)
+            OnboardingImage(R.drawable.accessabilitypref) // Custom composable for the image
+
             // Admin Permission Card
             GeneralSettingItemNew(
                 icon = R.drawable.admin,
@@ -303,14 +311,21 @@ fun OnboardingScreen3(navController: NavHostController) {
                     if (!deviceManager.isAdminActive(compName)) {
                         val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
                             putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                            putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
+                            putExtra(
+                                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                "You should enable the app!"
+                            )
                         }
-                        context.startActivity(intent)
+                        context.startActivity(intent) // Request admin permission
 
                     } else {
-                        Toast.makeText(context, "Admin permission is already granted", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Admin permission is already granted",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    viewModel.checkAllPermissions(context, compName, deviceManager)
+                    viewModel.checkAllPermissions(context, compName, deviceManager) //check permission and change the icon if granted
                 },
                 granted = permissionStates.adminPermission,
                 icon2 = if (permissionStates.adminPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
@@ -328,9 +343,10 @@ fun OnboardingScreen3(navController: NavHostController) {
                         }
                         context.startActivity(myIntent)
                     } else {
-                        Toast.makeText(context, "Over Draw is already enabled", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Over Draw is already enabled", Toast.LENGTH_SHORT)
+                            .show()
                     }
-                    viewModel.checkAllPermissions(context, compName, deviceManager)
+                    viewModel.checkAllPermissions(context, compName, deviceManager) //check permission and change the icon if granted
                 },
                 granted = permissionStates.drawOverPermission,
                 icon2 = if (permissionStates.drawOverPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
@@ -343,13 +359,19 @@ fun OnboardingScreen3(navController: NavHostController) {
                 subText = "Enable the screen control option",
                 onClick = {
                     if (!context.packageManager.canRequestPackageInstalls()) {
-                        val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                            data = Uri.parse("package:${context.packageName}")
-                        }
+                        val settingsIntent =
+                            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                            }
                         context.startActivity(settingsIntent)
                     } else {
-                        Toast.makeText(context, "Install Unknown Apps is already enabled", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Install Unknown Apps is already enabled",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+                    //check permission and change the icon if granted
                     viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.unknownAppsPermission,
@@ -362,11 +384,25 @@ fun OnboardingScreen3(navController: NavHostController) {
                 mainText = "Location Permission",
                 subText = "Permit location accessibility",
                 onClick = {
-                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 123)
+                    // Launch the system dialog for location permission if not granted
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            123
+                        )
                     } else {
-                        Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Location permission is already granted",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+                    //check permission and change the icon if granted
                     viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.locationPermission,
@@ -379,26 +415,51 @@ fun OnboardingScreen3(navController: NavHostController) {
                 mainText = "Files Permission",
                 subText = "Enable i-Freeze to scan files",
                 onClick = {
+                    // Launch the system dialog for Files permission if not granted
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), 1234)
+                        if (ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.READ_MEDIA_IMAGES
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            ActivityCompat.requestPermissions(
+                                context as Activity,
+                                arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                                1234
+                            )
                         } else {
-                            Toast.makeText(context, "Files access is already granted", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Files access is already granted",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     } else {
-                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1234)
+                        if (ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            ActivityCompat.requestPermissions(
+                                context as Activity,
+                                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                                1234
+                            )
                         } else {
-                            Toast.makeText(context, "Files access is already granted", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Files access is already granted",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
+                    //check permission and change the icon if granted
                     viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.filesPermission,
                 icon2 = if (permissionStates.filesPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
             )
         }
-
 
         // Next Button
         Button(
@@ -407,7 +468,9 @@ fun OnboardingScreen3(navController: NavHostController) {
                 .padding(16.dp),
             colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
             onClick = {
-                val nonGrantedPermissions = viewModel.checkAllPermissions(context, compName, deviceManager)
+                //check permission and navigate to next page if all permission granted
+                val nonGrantedPermissions =
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 if (nonGrantedPermissions.isEmpty()) {
                     navController.navigate(Screen.OnboardingScreen4.route)
                 } else {
@@ -427,126 +490,61 @@ fun OnboardingScreen3(navController: NavHostController) {
 
 @Composable
 fun OnboardingScreen4(navController: NavHostController) {
-    val currentPage = remember { mutableStateOf(3) }
-Column(
-    modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8)),
-    verticalArrangement = Arrangement.Center,
-    horizontalAlignment = Alignment.CenterHorizontally
-) {
-    HeaderLogo()
-    OnboardingImage(R.drawable.welcome_page)
+    // Main layout for the fourth onboarding screen
 
-    Text(modifier = Modifier.padding(vertical =5.dp ), text = "Welcome to i-Freeze", color = Color.White, fontSize = 25.sp)
-    Text(modifier = Modifier.padding(vertical =5.dp).fillMaxWidth(), text = "You can now manage and protect your mobile device", color = Color.White, fontSize = 22.sp, textAlign = TextAlign.Center)
-    Button(modifier = Modifier.padding(vertical = 10.dp), colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)), onClick = {navController.navigate(Screen.AdminAccess.route)}){
-        Text(text = "Start Application", color = Color.White)
-
-    }
-}
-
-}
-
-@Composable
-fun OnboardingScreen(
-    imageRes: Int,
-    text: AnnotatedString,
-    buttonText: String,
-    onTextClick: (Int) -> Unit,
-    onButtonClick: () -> Unit,
-    currentPage: Int,
-    totalPages: Int,
-    onIndicatorClick: (Int) -> Unit,
-    additionalContent: @Composable () -> Unit = {}
-) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFF175AA8)),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8)), // Set background color
+        verticalArrangement = Arrangement.Center, // Center content vertically
+        horizontalAlignment = Alignment.CenterHorizontally  // Center elements horizontally
     ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OnboardingImage(imageRes = imageRes)
-            Spacer(modifier = Modifier.height(24.dp))
-            ClickableText(
-                text = text,
-                style = LocalTextStyle.current.copy(
-                    fontSize = 18.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                ),
-                onClick = { offset -> onTextClick(offset) }
-            )
-            additionalContent()
-        }
+        // ifreeze logo
+        HeaderLogo()
 
-//        PageIndicator(
-//            totalPages = totalPages,
-//            currentPage = currentPage,
-//            onIndicatorClick = onIndicatorClick
-//        )
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+
+        OnboardingImage(R.drawable.welcome_page)
+
+        Text(
+            modifier = Modifier.padding(vertical = 5.dp),
+            text = "Welcome to i-Freeze",
+            color = Color.White,
+            fontSize = 25.sp
+        )
+        Text(
+            modifier = Modifier.padding(vertical = 5.dp).fillMaxWidth(),
+            text = "You can now manage and protect your mobile device",
+            color = Color.White,
+            fontSize = 22.sp,
+            textAlign = TextAlign.Center
+        )
         Button(
-            onClick = onButtonClick,
-            colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton))
-        ) {
-            Text(text = buttonText, color = Color.White)
+            modifier = Modifier.padding(vertical = 10.dp),
+            colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
+            onClick = { navController.navigate(Screen.AdminAccess.route) }) {
+            Text(text = "Start Application", color = Color.White)
+
         }
     }
 
-}
-
-@Composable
-fun PageIndicator(totalPages: Int, currentPage: Int, onIndicatorClick: (Int) -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        repeat(totalPages) { index ->
-            val isSelected = index == currentPage
-            Box(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .size(16.dp)
-                    .background(
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                        shape = MaterialTheme.shapes.small
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = MaterialTheme.shapes.small
-                    )
-                    .clickable { onIndicatorClick(index) }
-            )
-        }
-    }
 }
 
 @Composable
 fun OnboardingImage(imageRes: Int) {
+    // Display an image using the provided resource ID
     Image(
+        // Load the image resource using the painterResource function
         painter = painterResource(id = imageRes),
+        // No content description is provided as it's not needed in this context
         contentDescription = null,
+        // Set the image to fill half the height of its parent container
         modifier = Modifier
-            .fillMaxHeight(0.50f).fillMaxWidth().padding(15.dp),
+            .fillMaxHeight(0.50f)
+            // Set the image to fill the entire width of its parent container
+            .fillMaxWidth()
+            // Add padding around the image
+            .padding(15.dp),
+        // Scale the image to fit within its container while maintaining aspect ratio
         contentScale = ContentScale.Fit
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -559,45 +557,63 @@ fun GeneralSettingItemNew(
     granted: Boolean,
     icon2: ImageVector
 ) {
+    // Create an elevated card with a click action
     ElevatedCard(
+        // Set the elevation of the card to 8.dp
         elevation = CardDefaults.cardElevation(
             defaultElevation = 8.dp
         ),
+        // Trigger the onClick function when the card is clicked
         onClick = { onClick() },
+        // Make the card fill the full width of its parent and add bottom padding
         modifier = Modifier
             .padding(bottom = 10.dp)
             .fillMaxWidth()
     ) {
+        // Create a box to hold the content, filling the full width of the card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                // Set the background color of the card to white
                 .background(Color.White)
         ) {
+            // Create a horizontal row to arrange items inside the card
             Row(
                 modifier = Modifier
+                    // Add padding to the row's vertical and horizontal sides
                     .padding(vertical = 10.dp, horizontal = 14.dp)
                     .fillMaxWidth(),
+                // Align items vertically centered within the row
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Create a box to hold the icon, set its size and shape
                 Box(
                     modifier = Modifier
                         .size(34.dp)
+                        // Clip the box to a medium shape
                         .clip(shape = Shape.medium)
+                        // Set the background color of the icon box
                         .background(Color(0xFF175AA8))
                 ) {
+                    // Display the icon inside the box with padding
                     Icon(
                         painter = painterResource(id = icon),
                         contentDescription = null,
                         tint = Color.White,
+                        // Add padding inside the icon box
                         modifier = Modifier.padding(8.dp)
                     )
                 }
 
+                // Add a spacer between the icon and text
                 Spacer(modifier = Modifier.width(9.dp))
 
+                // Create a column to hold the main and subtext
                 Column(
+                    // Make the column take up the remaining space in the row
                     modifier = Modifier.weight(1f)
                 ) {
+                    // Display the main text with styling
                     Text(
                         text = mainText,
                         color = Color(0xFF175AA8),
@@ -605,18 +621,20 @@ fun GeneralSettingItemNew(
                         fontWeight = FontWeight.Bold,
                     )
 
+                    // Display the subtext with styling
                     Text(
                         text = subText,
                         color = Color(0xFF175AA8),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
-
-                        )
+                    )
                 }
 
+                // Display the second icon, color it based on the granted status
                 Icon(
                     imageVector = icon2,
                     contentDescription = null,
+                    // Change tint to green if granted, otherwise dark gray
                     tint = if (granted) Color.Green else Color.DarkGray
                 )
             }
@@ -626,16 +644,19 @@ fun GeneralSettingItemNew(
 
 @Composable
 fun NumberedCircle(number: Int) {
+    // Create a box with centered content to display a number inside a circle
     Box(
         contentAlignment = Alignment.Center,
+        // Set the size of the circle
         modifier = Modifier
-            .size(40.dp)  // Size of the circle
+            .size(40.dp)
+            // Set the background color to white and shape to a circle
             .background(
                 color = Color.White,
                 shape = CircleShape
-            ) // Circle shape with white background
-
+            )
     ) {
+        // Display the number in the center of the circle with styling
         Text(
             text = number.toString(),
             color = Color(0xFF175AA8),

@@ -34,44 +34,47 @@ import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
 
+/**
+ * Activity class for performing a full system scan to detect affected files based on a hash list.
+ * Manages permissions, initializes views, and performs the scanning operation.
+ */
 class FullSystemScan : AppCompatActivity() {
 
-    // Define constants
-
-    private val FILE_SIZE_ESTIMATE = 1024 // Estimated average file size in bytes
     var EXTERNAL_STORAGE_PERMISSION_CODE = 145
     // Views
-    private lateinit var callLogTextView: TextView
-    private lateinit var numberOfAffectedFiles: TextView
-    private lateinit var progressBar: ProgressBar
-    private lateinit var estimatedTimeTextView: TextView
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var btn: Button
+    // Views
+    private lateinit var callLogTextView: TextView // TextView for displaying the scan progress percentage
+    private lateinit var numberOfAffectedFiles: TextView // TextView for displaying the number of affected files
+    private lateinit var progressBar: ProgressBar // ProgressBar for showing scan progress
+    private lateinit var estimatedTimeTextView: TextView // TextView for displaying estimated time left
+    private lateinit var recyclerView: RecyclerView // RecyclerView for displaying the list of affected files
+    private lateinit var btn: Button // Button to start the scan
 
-    //    private lateinit var btn2: Button
-    private var hashesList = mutableListOf<Pair<String, String>>()
+    // Private variables
+    private var hashesList = mutableListOf<Pair<String, String>>() // List to store file paths and their hashes
+    private var affectedList = mutableListOf<String>() // List to store paths of affected files
+    private lateinit var numberOfScannedFiles: TextView // TextView for displaying the number of scanned files
+    private lateinit var loadingProgressBar: ProgressBar // ProgressBar for displaying loading status
+    private lateinit var preference: PreferencesGateway // PreferencesGateway for managing preferences
+    private lateinit var database: SQLiteDatabase // SQLiteDatabase for database operations
 
-    private var affectedList = mutableListOf<String>()
-    private lateinit var numberOfScannedFiles: TextView
-    private lateinit var loadingProgressBar: ProgressBar
-    private lateinit var preference: PreferencesGateway
-    private lateinit var database: SQLiteDatabase
-
-
-    // Variables
-    private var totalSize: Long = 0
-    private var processedSize: Long = 0
-    private var startTime: Long = 0
-    private var counter = 0
+    // Variables for scan progress and timing
+    private var totalSize: Long = 0 // Total size of files to be scanned
+    private var processedSize: Long = 0 // Size of files that have been processed
+    private var startTime: Long = 0 // Start time of the scan
+    private var counter = 0 // Counter for the number of scanned files
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("SetTextI18n", "MissingInflatedId", "Range")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_full_system_scan)
+
+        // Initialize PreferencesGateway to manage preferences
         preference = PreferencesGateway(this)
+        // Get the list of hashes from preferences
         val hashesListDatabase = preference.getList("hashesListDatabase")
-        // Request permission if not granted
+        // Request necessary permissions based on Android version
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -98,11 +101,11 @@ class FullSystemScan : AppCompatActivity() {
             }
         }
 
-
+        // Launch coroutine to perform file scanning and comparison
         GlobalScope.launch(Dispatchers.IO) {
             //Copy the database file from assets to internal storage
                 Log.d("abdo", "hashlist $hashesList")
-                // Compare the lists here and update UI accordingly
+            // Compare hashes from the list with the database and update affectedList
                 for (pair in hashesList) {
                     if (pair.second in hashesListDatabase) {
                         affectedList.add(pair.first)
@@ -112,7 +115,7 @@ class FullSystemScan : AppCompatActivity() {
             }
 
 
-        // Initialize loading spinner
+        // Initialize UI elements
         loadingProgressBar = findViewById(R.id.loadingProgressBar)
         numberOfAffectedFiles = findViewById(R.id.numberOfEffectedFiles)
         recyclerView = findViewById(R.id.recyclerView)
@@ -122,10 +125,9 @@ class FullSystemScan : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         estimatedTimeTextView = findViewById(R.id.estimatedTimeTextView)
         btn = findViewById(R.id.btn)
-//        btn2 = findViewById(R.id.btn2)
         numberOfScannedFiles = findViewById(R.id.numberOfScannedFiles)
 
-        // Button click listener
+        // Set click listener for the scan button
         btn.setOnClickListener {
             btn.visibility = View.GONE
             numberOfScannedFiles.text = ""
@@ -134,13 +136,15 @@ class FullSystemScan : AppCompatActivity() {
             counter = 0
             val downloadDirectory =
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            Log.d("abdo", "rootDirectory $downloadDirectory")
+
+            // Launch coroutine to perform scanning
             GlobalScope.launch(Dispatchers.IO) {
 
                 processedSize = 0 // Reset processed size
                 progressBar.progress = 0 // Reset progress bar
                 startTime = System.currentTimeMillis()
 
+                // Update UI to show loading progress
                 runOnUiThread {
                     loadingProgressBar.visibility = View.VISIBLE
                     estimatedTimeTextView.visibility = View.GONE
@@ -148,8 +152,8 @@ class FullSystemScan : AppCompatActivity() {
                     progressBar.visibility = View.GONE
                     callLogTextView.visibility = View.GONE
                 }
-                totalSize = getTotalSize(downloadDirectory)
-                Log.d("abdo", "total size $totalSize")
+                totalSize = getTotalSize(downloadDirectory) // Calculate total size
+                // Update UI to show scanning progress
                 runOnUiThread {
                     loadingProgressBar.visibility = View.GONE
                     estimatedTimeTextView.visibility = View.VISIBLE
@@ -157,8 +161,9 @@ class FullSystemScan : AppCompatActivity() {
                     progressBar.visibility = View.VISIBLE
                     callLogTextView.visibility = View.VISIBLE
                 }
+                // Start scanning files
                 getHashCodeFromFiles(downloadDirectory)
-                Log.d("abdo", "hashesList $hashesList")
+                // Update UI with scan results
                 withContext(Dispatchers.Main) {
                     for (pair in hashesList) {
                         if (pair.second in hashesListDatabase) {
@@ -168,32 +173,36 @@ class FullSystemScan : AppCompatActivity() {
 
                     recyclerView.adapter = AffectedFiles(affectedList)
                     numberOfAffectedFiles.text = "Number of infected files: ${affectedList.size}"
-                    Log.d("abdo", "affectedlistsize = $affectedList")
                     numberOfScannedFiles.text = "Number of scanned files: $counter"
                 }
-            } // Start scanning
+            }
 
         }
-
-
-
     }
 
-
-    // onRequestPermissionsResult function remains the same
-
+    /**
+     * Recursively calculates the total size of files in the given directory.
+     *
+     * @param directory The directory to scan.
+     * @return The total size of files in bytes.
+     */
     private fun getTotalSize(directory: File): Long {
         var totalSize = 0L
         directory.listFiles()?.forEach { file ->
             if (file.isDirectory) {
-                totalSize += getTotalSize(file)
+                totalSize += getTotalSize(file) // Recursively add sizes of subdirectories
             } else {
-                totalSize += file.length()
+                totalSize += file.length() // Add size of individual file
             }
         }
         return totalSize
     }
 
+    /**
+     * Scans the given directory and computes hash codes for all files.
+     *
+     * @param directory The directory to scan.
+     */
     private suspend fun getHashCodeFromFiles(directory: File) {
         val rootDirectory = Environment.getExternalStorageDirectory()
 
@@ -202,28 +211,32 @@ class FullSystemScan : AppCompatActivity() {
             scanDirectory(directory, hashes)
             // Log each file path and its hash
             hashes.forEachIndexed { index, pair ->
-                Log.d("HashLog", "File ${index + 1}: Path: ${pair.first}, Hash: ${pair.second}")
                 hashesList.add(pair)
-                counter++
+                counter++ // Increment the file counter
             }
         } else {
             Log.d("HashLog", "Cannot access root directory.")
         }
     }
 
-
+    /**
+     * Recursively scans a directory and computes hash codes for each file.
+     *
+     * @param directory The directory to scan.
+     * @param hashes The list to store file paths and hash codes.
+     */
     private suspend fun scanDirectory(directory: File, hashes: MutableList<Pair<String, String>>) {
         Log.d("HashLog", "Scanning directory: ${directory.absolutePath}")
 
         if (directory.isDirectory) {
             directory.listFiles()?.forEach { file ->
                 if (file.isDirectory) {
-                    scanDirectory(file, hashes)
+                    scanDirectory(file, hashes) // Recursively scan subdirectories
                 } else {
-                    val hash = getFileHash(file)
+                    val hash = getFileHash(file) // Compute hash for the file
                     hashes.add(Pair(file.absolutePath, hash))
-                    processedSize += file.length()
-                    updateProgress()
+                    processedSize += file.length() // Update processed size
+                    updateProgress() // Update progress bar and estimated time
                 }
             }
         } else {
@@ -231,6 +244,12 @@ class FullSystemScan : AppCompatActivity() {
         }
     }
 
+    /**
+     * Computes the SHA-256 hash for the given file.
+     *
+     * @param file The file to hash.
+     * @return The hash code as a hexadecimal string.
+     */
     private fun getFileHash(file: File): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val fis = FileInputStream(file)
@@ -253,10 +272,13 @@ class FullSystemScan : AppCompatActivity() {
         return stringBuilder.toString()
     }
 
+    /**
+     * Updates the progress bar and estimated time left on the UI thread.
+     */
     private suspend fun updateProgress() {
         withContext(Dispatchers.Main) {
             val progress = ((processedSize.toDouble() / totalSize) * 100).toInt()
-            progressBar.progress = progress
+            progressBar.progress = progress // Update progress bar
 
             // Calculate estimated time left
             val currentTime = System.currentTimeMillis()
@@ -264,12 +286,18 @@ class FullSystemScan : AppCompatActivity() {
             val estimatedTimeLeft =
                 ((elapsedTime.toDouble() / processedSize) * (totalSize - processedSize)).toLong()
 
-            // Update TextViews
+            // Update UI elements
             callLogTextView.text = "$progress%"
             estimatedTimeTextView.text = formatTime(estimatedTimeLeft)
         }
     }
 
+    /**
+     * Formats the given time in milliseconds to a string in HH:MM:SS format.
+     *
+     * @param millis Time in milliseconds.
+     * @return Formatted time string.
+     */
     private fun formatTime(millis: Long): String {
         val seconds = (millis / 1000) % 60
         val minutes = (millis / (1000 * 60)) % 60
