@@ -45,21 +45,27 @@ import com.ifreeze.applock.helper.getAppIconByPackageName
 import com.ifreeze.applock.helper.toImageBitmap
 import com.ifreeze.applock.presentation.AppsViewModel
 import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavController) {
+    // Get the preferences gateway to handle storing and retrieving allowed apps
     val preference = PreferencesGateway(LocalContext.current)
+    // Remember the allowed apps list from preferences or initialize as an empty list if not found
     var allowedAppsList by remember { mutableStateOf(preference.getList("allowedAppsList") ?: mutableListOf()) }
+    // State for handling input text in the text field
     var inputText by remember { mutableStateOf("") }
+    // Main container with a blue background
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF175AA8))
     ) {
+        // Top row containing the back button and the title
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
         ) {
+            // Back button to navigate to the previous screen
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
@@ -67,6 +73,7 @@ fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavCont
                     tint = Color.White
                 )
             }
+            // Title text for the screen
             Text(
                 text = "Whitelisted Applications",
                 color = Color.White,
@@ -78,10 +85,11 @@ fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavCont
                 fontSize = 22.sp
             )
         }
-
+// Column containing the text input and submit button
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
         ) {
+            // Text field for entering the package name
             OutlinedTextField(
                 value = inputText,
                 onValueChange = { inputText = it },
@@ -98,13 +106,16 @@ fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavCont
                 label = { Text(text = "Package Name", color = Color.Black) },
                 placeholder = { Text(text = "Enter Package Name") },
             )
-
+            // Button to submit the entered package name
             Button(
                 onClick = {
                     if (inputText.isNotEmpty()) {
+                        // Add the entered package name to the allowed apps list
                         allowedAppsList =
                             allowedAppsList.toMutableList().apply { add(inputText.lowercase().trim()) }
+                        // Save the updated list in preferences
                         preference.saveList("allowedAppsList", allowedAppsList)
+                        // Clear the input text field
                         inputText = ""
                     }
                 },
@@ -116,16 +127,19 @@ fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavCont
                 Text("Submit", color = Color.White)
             }
         }
-
+        // LazyColumn to display the list of allowed apps
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            // Iterate over the allowed apps list
             items(allowedAppsList.size) { index ->
+                // Display each app in the list using the AppListItemWhiteList composable
                 AppListItemWhiteList(
                     app = allowedAppsList[index],
                     onDeleteClick = {
-                        // Handle delete action here
+                        // Handle deletion of the selected app
                         allowedAppsList = allowedAppsList.toMutableList().apply {
                             remove(allowedAppsList[index])
                         }
+                        // Save the updated list in preferences
                         preference.saveList("allowedAppsList", allowedAppsList)
                     }
                 )
@@ -137,7 +151,9 @@ fun WhiteList(viewModel: AppsViewModel = hiltViewModel(), navController: NavCont
 
 @Composable
 fun AppListItemWhiteList(app: String, onDeleteClick: () -> Unit) {
+    // Retrieve the app icon using the package name and convert it to a bitmap
     val imageBitmap = LocalContext.current.getAppIconByPackageName(app)?.toImageBitmap()
+    // Card container for each app item
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -146,7 +162,7 @@ fun AppListItemWhiteList(app: String, onDeleteClick: () -> Unit) {
             .padding(top = 10.dp),
         shape = Shape.large
     ) {
-
+        // Row containing the app icon and name with a delete button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -154,13 +170,14 @@ fun AppListItemWhiteList(app: String, onDeleteClick: () -> Unit) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Container for the app icon
             Box(
                 modifier = Modifier
                     .size(34.dp)
                     .clip(shape = Shape.medium)
                     .background(Color(0xFF175AA8))
             ) {
-
+                // Display the app icon if available
                 imageBitmap?.let {
                     Image(
                         bitmap = it,
@@ -170,15 +187,18 @@ fun AppListItemWhiteList(app: String, onDeleteClick: () -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
+            // Row containing the app name and the delete button
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Display the app name
                 Text(
                     text = app,
                     color = Color.Black,
                     modifier = Modifier.weight(1f).padding(8.dp),
                 )
+                // Button to delete the app from the list
                 IconButton(
                     onClick = onDeleteClick,
                     modifier = Modifier.size(30.dp).padding(end = 8.dp),

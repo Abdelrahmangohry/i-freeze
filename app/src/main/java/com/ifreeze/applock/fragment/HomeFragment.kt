@@ -8,7 +8,7 @@ import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
-import com.example.browser.adapter.BookmarkAdapter
+import com.ifreeze.applock.presentation.adapter.BookmarkAdapter
 import com.ifreeze.applock.R
 import com.ifreeze.applock.databinding.FragmentHomeBinding
 import com.ifreeze.applock.presentation.activity.MainWebActivity

@@ -1,30 +1,21 @@
 package com.ifreeze.applock
 
-import LightPrimaryColor
-import SecondaryColor
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +28,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -65,27 +55,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.compse.ui.SetupNavGraph
+import com.ifreeze.applock.presentation.nav_graph.SetupNavGraph
 import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.activity.FullSystemScan
 import com.ifreeze.applock.presentation.activity.MainWebActivity
-import com.ifreeze.applock.presentation.activity.isLocationEnabled
 import com.ifreeze.applock.presentation.activity.isNetworkAvailable
 import com.ifreeze.applock.presentation.nav_graph.Screen
-import com.ifreeze.applock.service.startAutoSyncWorker
 import com.ifreeze.applock.ui.theme.AppLockTheme
 import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import dagger.hilt.android.AndroidEntryPoint
-import java.net.URI
 import androidx.lifecycle.Observer
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
 import com.ifreeze.applock.ui.LoginActivityScreenSharing
@@ -146,11 +128,13 @@ class MainActivity : ComponentActivity() {
         //getting the AndroidID
         val androidId: String =
             Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        var hashesListDatabase = mutableListOf<String>()
+        val hashesListDatabase = mutableListOf<String>()
         //    private lateinit var btn2: Button
 
 
-        Log.d("abdo", "deviceId $deviceId")
+        /**
+         * Sets up the content view, initializes various components, and performs startup tasks.
+         */
         setContent {
             window.statusBarColor = getColor(R.color.blue)
             AppLockTheme {
@@ -172,7 +156,8 @@ class MainActivity : ComponentActivity() {
         }
 
 
-
+        // Checks network connectivity
+        // Activate license automatic
         if (!isNetworkAvailable(this)) {
             Toast.makeText(
                 this,
@@ -241,20 +226,16 @@ class MainActivity : ComponentActivity() {
                 }
                 preference.saveList("hashesListDatabase", hashesListDatabase)
                 cursor.close()
-//            Log.d("abdo", "hashlist $hashesList")
-//            // Compare the lists here and update UI accordingly
-//            for (pair in hashesList) {
-//                if (pair.second in hashesListDatabase) {
-//                    affectedList.add(pair.first)
-//                    Log.d("abdo", "affectedList $affectedList")
-//                }
-//            }
 
             }
         }
 
 
     }
+
+    /**
+     * Copies the database file from assets to internal storage if it doesn't already exist.
+     */
 
     fun copyDatabaseFileMain() {
         try {
@@ -285,39 +266,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun showDefaultBrowserDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Set as Default Browser")
-            .setMessage("Would you like to set this app as your default browser?")
-            .setPositiveButton("Yes") { dialog, which ->
-                openDefaultAppsSettings()
-            }
-            .setNegativeButton("No", null)
-            .show()
-    }
 
-    private fun isDefaultBrowser(): Boolean {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
-        val resolveInfo =
-            packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-        val defaultBrowserPackageName = resolveInfo?.activityInfo?.packageName
-        return defaultBrowserPackageName == packageName
-    }
-
-    private fun openDefaultAppsSettings() {
-        val intent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
-        try {
-            startActivity(intent)
-        } catch (e: Exception) {
-            // If the above intent doesn't work, fall back to a more general settings intent
-            val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.parse("package:$packageName")
-            }
-            startActivity(fallbackIntent)
-        }
-    }
-
-    //getting the IP Address
+    /**
+     * Retrieves the IP address of the device.
+     *
+     * @return The IP address of the device or an empty string if not found.
+     */
     fun getIpAddress(): String {
         var ipAddress = ""
         try {
@@ -339,6 +293,9 @@ class MainActivity : ComponentActivity() {
         return ipAddress
     }
 
+    /**
+     * Checks if overlay permissions are granted, and if not, requests them.
+     */
     fun checkOverlayPermission() {
         if (!Settings.canDrawOverlays(applicationContext)) {
             val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
@@ -348,6 +305,13 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    /**
+     * Handles the result of activity requests.
+     *
+     * @param requestCode The request code associated with the activity result.
+     * @param resultCode The result code returned by the activity.
+     * @param data The intent data returned by the activity.
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         when (requestCode) {
@@ -365,7 +329,9 @@ class MainActivity : ComponentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-
+    /**
+     * Starts the full system scan activity.
+     */
     fun systemScan() {
         this.startActivity(
             Intent(
@@ -375,6 +341,9 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    /**
+     * Starts the web activity.
+     */
     fun webActivity() {
         this.startActivity(
             Intent(
@@ -384,6 +353,9 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    /**
+     * Starts the screen sharing login activity.
+     */
     fun screenShareFun() {
         this.startActivity(
             Intent(
@@ -394,21 +366,16 @@ class MainActivity : ComponentActivity() {
     }
 
     fun wifiCheck() {
-//        val broadcastNetworkReceiver = NetworkReceiver()
-//        val intentFilterNetwork = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-//        registerReceiver(broadcastNetworkReceiver, intentFilterNetwork)
         Log.d("islam  ", "wifiCheck start: ${preference.load("WifiBlocked", false)} ")
-//        val serviceIntent = Intent(this, NetworkMonitoringService::class.java)
-//        if (preferenc.load("WifiBlocked", false) == true) {
-//            startService(serviceIntent)
-//        } else {
-//            Log.d("islam", "wifiCheck if fals : ${preferenc.load("WifiBlocked", false)} ")
-//            stopService(serviceIntent)
-//        }
     }
 
 }
 
+/**
+ * Displays a dropdown menu in the UI with user options.
+ *
+ * @param navController The navigation controller for handling navigation actions.
+ */
 @Composable
 fun Demo_DropDownMenu(navController: NavController) {
     val preference = PreferencesGateway(LocalContext.current)
@@ -436,8 +403,6 @@ fun Demo_DropDownMenu(navController: NavController) {
                 contentDescription = "More",
                 colorFilter = ColorFilter.tint(Color(0xFF175AA8))
             )
-
-
             DropdownMenu(
 
                 expanded = expanded,
@@ -460,6 +425,7 @@ fun Demo_DropDownMenu(navController: NavController) {
 }
 
 
+//header ui for logo and Freeze Your Risks text
 @Composable
 fun HeaderLogo() {
     val logoImage = painterResource(id = R.drawable.ifreezelogo22)
@@ -497,6 +463,12 @@ fun HeaderLogo() {
     }
 }
 
+/**
+ * Composable function that displays a column of general settings options.
+ *
+ * @param navController The navigation controller used to navigate between screens.
+ * @param wifi A lambda function to perform an action related to Wi-Fi.
+ */
 @Composable
 fun GeneralOptionsUI(
     navController: NavController,
@@ -509,6 +481,7 @@ fun GeneralOptionsUI(
 
     ) {
 
+        // Displays an item for initiating a system scan
         GeneralSettingItem(
             icon = R.drawable.scan,
             mainText = "System Scan",
@@ -518,7 +491,7 @@ fun GeneralOptionsUI(
 
             }
         )
-
+        // Displays an item for managing network connections
         GeneralSettingItem(
             icon = R.drawable.network_check,
             mainText = "Network Control",
@@ -530,7 +503,7 @@ fun GeneralOptionsUI(
             }
         )
 
-
+        // Displays an item for managing web filters
         GeneralSettingItem(
             icon = R.drawable.web,
             mainText = "Web Filter",
@@ -539,7 +512,7 @@ fun GeneralOptionsUI(
                 navController.navigate(Screen.WebManager.route)
             }
         )
-
+        // Displays an item for managing applications
         GeneralSettingItem(
             icon = R.drawable.manage,
             mainText = "App Manager",
@@ -548,7 +521,7 @@ fun GeneralOptionsUI(
                 navController.navigate(Screen.AppManager.route)
             }
         )
-
+        // Displays an item for accessing app settings
         GeneralSettingItem(
             icon = R.drawable.icon_settings,
             mainText = "Settings",
@@ -560,6 +533,15 @@ fun GeneralOptionsUI(
     }
 }
 
+
+/**
+ * Composable function that displays a general setting item within a card.
+ *
+ * @param icon The resource ID of the icon to display.
+ * @param mainText The main text to display on the item.
+ * @param subText The secondary text to display on the item.
+ * @param onClick A lambda function to handle item click events.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneralSettingItem(icon: Int, mainText: String, subText: String, onClick: () -> Unit) {

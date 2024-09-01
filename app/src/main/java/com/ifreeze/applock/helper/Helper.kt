@@ -11,7 +11,7 @@ import android.graphics.drawable.Drawable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.ifreeze.data.model.AppsModel
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import java.io.ByteArrayOutputStream
 
 

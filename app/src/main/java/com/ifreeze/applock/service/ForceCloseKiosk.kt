@@ -14,41 +14,53 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ifreeze.applock.R
-import com.ifreeze.applock.helper.getAppIconByPackageName
-import com.ifreeze.applock.helper.toImageBitmap
-import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.adapter.AdapterKiosk
-import com.ifreeze.applock.presentation.nav_graph.Screen
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
+
+/**
+ * A service that manages a chat head view for a kiosk mode. The service allows for showing
+ * a floating chat head with options and handles password protection to stop kiosk mode.
+ */
 class ForceCloseKiosk : Service() {
     private var chatHeadView: View? = null
     private val myBinder = BinderForce()
     private var windowManager: WindowManager? = null
     private val correctPassword = "123"
     private lateinit var preferenc: PreferencesGateway
+
+    /**
+     * Binder class for the service to provide a reference to the service itself.
+     */
     inner class BinderForce : Binder() {
+        /**
+         * Provides a reference to the ForceCloseKiosk service.
+         *
+         * @return The ForceCloseKiosk service instance.
+         */
         fun getServices(): ForceCloseKiosk {
             return this@ForceCloseKiosk
         }
     }
 
+    /**
+     * Called when a client binds to this service.
+     *
+     * @param intent The Intent that was used to bind to this service.
+     * @return The binder instance for this service.
+     */
+
     override fun onBind(intent: Intent?): IBinder? {
         return myBinder
     }
 
+    /**
+     * Called when the service is first created. Initializes the service and creates the chat head view.
+     */
     override fun onCreate() {
         preferenc = PreferencesGateway(applicationContext)
         Log.d("abdo", "ForceCloseKiosk onCreate kiosk: ")
@@ -56,13 +68,21 @@ class ForceCloseKiosk : Service() {
         super.onCreate()
     }
 
+    /**
+     * Called when the service is destroyed. Removes the chat head view and performs cleanup.
+     */
     override fun onDestroy() {
         super.onDestroy()
         Log.d("abdo", "ForceCloseKiosk onDestroy kiosk")
         removeChatHeadView()
     }
 
-    // Creates a chat head view for overlay
+    /**
+     * Creates and displays a chat head view as an overlay on the screen.
+     *
+     * Configures the view's layout parameters and sets up interaction elements such as a
+     * RecyclerView for kiosk applications and a button to show a password dialog.
+     */
     fun createChatHeadView() {
         // Ensure proper handling of overlay permissions and user experience
         chatHeadView = LayoutInflater.from(this).inflate(R.layout.create_kiosk_mode, null)
@@ -81,7 +101,7 @@ class ForceCloseKiosk : Service() {
             showPasswordDialog()
         }
 
-        // Configure layout parameters for the overlay
+        // Configure layout parameters for the chat head view
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -95,8 +115,14 @@ class ForceCloseKiosk : Service() {
     }
 
 
+    /**
+     * Displays a password dialog to allow the user to stop the kiosk mode.
+     *
+     * Sets up number buttons for password input and provides options for deleting
+     * input and confirming the password. If the correct password is entered, kiosk mode is stopped.
+     */
     private fun showPasswordDialog() {
-        val builder = AlertDialog.Builder(this) // Use 'this' instead of applicationContext
+        val builder = AlertDialog.Builder(this)
         val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val dialogView = inflater.inflate(R.layout.dialog_password, null)
 
@@ -105,7 +131,7 @@ class ForceCloseKiosk : Service() {
         val input = dialogView.findViewById<EditText>(R.id.passwordInput)
         val buttonOk = dialogView.findViewById<Button>(R.id.buttonOk)
 
-        // Set up number buttons
+        // Set up number buttons for password input
         val numberButtons = listOf(
             dialogView.findViewById<Button>(R.id.button1),
             dialogView.findViewById<Button>(R.id.button2),
@@ -126,8 +152,9 @@ class ForceCloseKiosk : Service() {
             }
         }
 
-        // Set up delete button
+        // Set up delete button for input
         val buttonDelete = dialogView.findViewById<Button>(R.id.buttonDelete)
+        // Set up OK button to verify the password
         buttonDelete.setOnClickListener {
             val currentText = input.text.toString()
             if (currentText.isNotEmpty()) {
@@ -161,7 +188,9 @@ class ForceCloseKiosk : Service() {
         window?.attributes = layoutParams
     }
 
-    // Removes the chat head view
+    /**
+     * Removes the chat head view from the screen and performs cleanup.
+     */
     fun removeChatHeadView() {
         Log.d("abdo", "removeChatHeadView :  location")
         chatHeadView?.let { view ->

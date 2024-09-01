@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.presentation.nav_graph.Screen
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 
 /**

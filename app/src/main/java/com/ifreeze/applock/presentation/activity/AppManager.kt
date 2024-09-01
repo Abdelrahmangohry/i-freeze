@@ -36,14 +36,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ifreeze.applock.BuildConfig
 import com.ifreeze.applock.R
-import com.ifreeze.applock.presentation.AppsViewModel
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 
 /**

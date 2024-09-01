@@ -1,4 +1,4 @@
-package com.app.data.remote
+package com.ifreeze.data.remote
 
 //Generic class
 sealed class NetWorkState {

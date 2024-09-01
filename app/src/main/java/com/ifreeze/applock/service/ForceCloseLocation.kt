@@ -15,34 +15,62 @@
     import com.ifreeze.applock.R
     import com.ifreeze.applock.presentation.activity.isLocationEnabled
 
+    /**
+     * A service that manages a chat head view to prompt the user to enable location services.
+     */
     class ForceCloseLocation : Service() {
         private var chatHeadView: View? = null
         private val myBinder = BinderForce()
         private var windowManager: WindowManager? = null
 
+        /**
+         * Binder class for the service to provide a reference to the service itself.
+         */
         inner class BinderForce : Binder() {
+            /**
+             * Provides a reference to the ForceCloseLocation service.
+             *
+             * @return The ForceCloseLocation service instance.
+             */
             fun getServices(): ForceCloseLocation {
                 return this@ForceCloseLocation
             }
         }
 
+        /**
+         * Called when a client binds to this service.
+         *
+         * @param intent The Intent that was used to bind to this service.
+         * @return The binder instance for this service.
+         */
         override fun onBind(intent: Intent?): IBinder? {
             return myBinder
         }
 
+        /**
+         * Called when the service is first created. Initializes the service and creates the chat head view.
+         */
         override fun onCreate() {
             Log.d("abdo", "ForceCloselocation onCreate: ")
             createChatHeadView()
             super.onCreate()
         }
 
+        /**
+         * Called when the service is destroyed. Removes the chat head view and performs cleanup.
+         */
         override fun onDestroy() {
             super.onDestroy()
             Log.d("abdo", "ForceCloselocation onDestroy")
             removeChatHeadView()
         }
 
-        // Creates a chat head view for overlay
+        /**
+         * Creates and displays a chat head view as an overlay on the screen.
+         *
+         * Configures the view's layout parameters and sets up an interaction button to handle
+         * enabling or disabling the location service. Displays a message if the location is disabled.
+         */
         fun createChatHeadView() {
             // Ensure proper handling of overlay permissions and user experience
             chatHeadView = LayoutInflater.from(this).inflate(R.layout.enable_location, null)
@@ -63,7 +91,7 @@
 //                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                 }
             }
-            // Configure layout parameters for the overlay
+            // Configure layout parameters for the chat head view
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -76,7 +104,9 @@
             Log.d("abdo", "createChatHeadView : view created location")
         }
 
-        // Removes the chat head view
+        /**
+         * Removes the chat head view from the screen and performs cleanup.
+         */
         fun removeChatHeadView() {
             Log.d("abdo", "removeChatHeadView :  location")
             chatHeadView?.let { view ->

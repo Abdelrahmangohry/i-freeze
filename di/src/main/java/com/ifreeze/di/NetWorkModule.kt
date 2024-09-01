@@ -1,14 +1,12 @@
 package com.ifreeze.di
 
-import android.content.Context
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.ifreeze.data.remote.UserApi
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

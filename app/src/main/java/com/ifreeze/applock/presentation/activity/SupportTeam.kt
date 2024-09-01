@@ -33,7 +33,7 @@ import com.ifreeze.applock.R
 import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.data.model.TicketMessageBody
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 //Composable function to send a ticket
 @RequiresApi(34)

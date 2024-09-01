@@ -21,16 +21,36 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 
+/**
+ * Helper object for handling location-related tasks such as fetching the user's current location
+ * and checking necessary permissions. This object provides utility functions to access
+ * location data and manage location permissions within an Android application.
+ */
 object LocationHelper {
 
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private const val permissionId = 2
 
+    /**
+     * Interface to be implemented by the caller to receive the location data once it is fetched.
+     */
     interface LocationCallback {
+
+        /**
+         * Called when the location data is successfully fetched.
+         *
+         * @param locationData The fetched location data including address, latitude, and longitude.
+         */
         suspend fun onLocationFetched(locationData: LocationDataAddress)
     }
 
-
+    /**
+     * Fetches the user's current location and provides the data through the callback.
+     * Checks for location permissions and whether location services are enabled before attempting to fetch the location.
+     *
+     * @param context The context used to access system services and resources.
+     * @param callback The callback to be invoked when the location is successfully fetched.
+     */
     fun getLocation(context: Context, callback: LocationCallback) {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         if (checkPermissions(context)) {
@@ -80,17 +100,19 @@ object LocationHelper {
                     }
                 }
             } else {
-                Log.d("abdo", "getLocation: error")
-                // TODO: add message overdraw
-                // Toast.makeText(context,"enable gps", Toast.LENGTH_LONG).show()
+                // add message overdraw
             }
         } else {
-//            Toast.makeText(context, "Please Give I-Freeze The Location Permission", Toast.LENGTH_SHORT).show()
-            // Request location permissions
             createLocationRequest(context as AppCompatActivity)
         }
     }
 
+    /**
+     * Checks whether location services (GPS or Network) are enabled on the device.
+     *
+     * @param context The context used to access system services.
+     * @return True if location services are enabled, false otherwise.
+     */
     private fun isLocationEnabled(context: Context): Boolean {
         val locationManager: LocationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -99,6 +121,13 @@ object LocationHelper {
         )
     }
 
+    /**
+     * Checks whether the necessary location permissions (ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION)
+     * are granted to the application.
+     *
+     * @param context The context used to check the permissions.
+     * @return True if both permissions are granted, false otherwise.
+     */
     private fun checkPermissions(context: Context): Boolean {
         return ActivityCompat.checkSelfPermission(
             context,
@@ -111,7 +140,12 @@ object LocationHelper {
     }
 
 
-
+    /**
+     * Requests location permissions from the user if they have not already been granted.
+     * This method should be called if permissions are needed and the user has not granted them yet.
+     *
+     * @param activity The activity context used to request permissions.
+     */
     private fun createLocationRequest(activity: AppCompatActivity) {
         val MY_PERMISSIONS_REQUEST_LOCATION = 99
         if (ContextCompat.checkSelfPermission(
@@ -140,6 +174,12 @@ object LocationHelper {
         }
     }
 
+    /**
+     * Displays a message prompting the user to enable location services.
+     * Redirects the user to the location settings page.
+     *
+     * @param context The context used to start the settings activity.
+     */
     private fun showLocationDisabledMessage(context: Context) {
         val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
         context.startActivity(intent)

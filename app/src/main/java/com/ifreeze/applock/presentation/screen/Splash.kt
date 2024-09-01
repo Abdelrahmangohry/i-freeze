@@ -1,9 +1,5 @@
 package com.ifreeze.applock.presentation.screen
 
-import android.util.Log
-import android.view.animation.OvershootInterpolator
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,40 +11,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.ifreeze.applock.R
-import com.ifreeze.applock.helper.getListApps
-import com.ifreeze.applock.presentation.AppsViewModel
 import com.ifreeze.applock.presentation.nav_graph.Screen
-import com.patient.data.cashe.PreferencesGateway
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import com.ifreeze.data.cash.PreferencesGateway
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
+/**
+ * Composable function that displays the splash screen for the application.
+ *
+ * This screen shows the terms and conditions to the user. Based on whether the terms have
+ * been previously accepted or not, the user will be navigated to the appropriate screen.
+ *
+ * @param navController The [NavController] used for navigation between screens.
+ * @param preferences The [PreferencesGateway] used to check and update the preference indicating
+ *                    whether the terms and conditions have been displayed.
+ */
 @Composable
 fun SplashScreen(navController: NavController , preferences: PreferencesGateway) {
+    // Remember the state indicating if the terms and conditions have been previously accepted
     val isDisplayed = remember { (preferences.load("isDisplayed", false)) }
-
+    // Coroutine scope for handling asynchronous tasks
     val coroutineScope = rememberCoroutineScope()
     if (isDisplayed == true) {
-        // Navigate to the home screen if terms are already accepted
+        // Navigate to the Admin Access screen if terms are already accepted
         navController.navigate(Screen.AdminAccess.route)
     } else {
         // Display the terms and conditions screen
         Box(
+            // Display the terms and conditions screen
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
@@ -60,8 +56,8 @@ fun SplashScreen(navController: NavController , preferences: PreferencesGateway)
                     color = Color.Black,
                     modifier = Modifier.padding(16.dp)
                 )
-                // Add actual terms and conditions text here
-
+                // Placeholder for actual terms and conditions text
+                // Add terms and conditions content here
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier.fillMaxWidth()
@@ -69,7 +65,9 @@ fun SplashScreen(navController: NavController , preferences: PreferencesGateway)
                     Button(
                         onClick = {
                             coroutineScope.launch {
+                                // Update the preference to indicate terms have been accepted
                                 preferences.update("isDisplayed", true)
+                                // Navigate to the Admin Access screen
                                 navController.navigate(Screen.AdminAccess.route)
                             }
                         }
@@ -78,7 +76,6 @@ fun SplashScreen(navController: NavController , preferences: PreferencesGateway)
                     }
                     Button(
                         onClick = {
-                            // Display "Thank you" message and exit the app
                             android.os.Process.killProcess(android.os.Process.myPid())
                         }
                     ) {
@@ -89,38 +86,3 @@ fun SplashScreen(navController: NavController , preferences: PreferencesGateway)
         }
     }
 }
-    // Splash screen content
-//    Box(
-//        contentAlignment = Alignment.Center,
-//        modifier = Modifier.fillMaxSize()
-//    ) {
-//        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//            Text(
-//                text = "Do you accept all terms and conditions?",
-//                color = Color.Black,
-//                modifier = Modifier.padding(16.dp)
-//            )
-//            Row(
-//                horizontalArrangement = Arrangement.SpaceEvenly,
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Button(
-//                    onClick = {
-//                        navController.navigate(Screen.Setting.route)
-//                    }
-//                ) {
-//                    Text(text = "Accept", color = Color.Black)
-//                }
-//                Button(
-//                    onClick = {
-//                        // Display "Thank you" message and exit the app
-//                        Log.d("SplashScreen", "Thank you")
-//                        android.os.Process.killProcess(android.os.Process.myPid())
-//                    }
-//                ) {
-//                    Text(text = "Refuse", color = Color.Black)
-//                }
-//            }
-//        }
-//    }
-//}

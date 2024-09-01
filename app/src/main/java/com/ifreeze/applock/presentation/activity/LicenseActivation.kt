@@ -52,7 +52,7 @@ import com.ifreeze.applock.R
 import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.data.model.DeviceDTO
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import java.net.Inet4Address
 import java.net.NetworkInterface
 

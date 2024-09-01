@@ -49,7 +49,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import com.ifreeze.applock.presentation.AuthViewModel
 import com.ifreeze.data.model.AlertBody
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedReader

@@ -29,9 +29,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.example.browser.adapter.TabAdapter
-import com.example.browser.model.Bookmark
-import com.example.browser.model.Tab
+import com.ifreeze.applock.presentation.adapter.TabAdapter
+import com.ifreeze.data.model.Bookmark
+import com.ifreeze.data.model.Tab
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton

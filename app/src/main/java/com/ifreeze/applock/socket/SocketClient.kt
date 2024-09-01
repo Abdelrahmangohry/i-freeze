@@ -1,4 +1,4 @@
-package com.codewithkael.webrtcscreenshare.socket
+package com.ifreeze.applock.socket
 
 import android.util.Log
 import com.google.gson.Gson
@@ -15,6 +15,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.Exception
 
+
+/**
+ * A singleton class that manages a WebSocket connection for real-time communication.
+ * Uses Gson for JSON serialization and deserialization.
+ *
+ * @property gson The Gson instance used for JSON operations.
+ */
 @Singleton
 class SocketClient @Inject constructor(
     private val gson:Gson
@@ -24,12 +31,23 @@ class SocketClient @Inject constructor(
         private var webSocket:WebSocketClient?=null
     }
 
-    var listener:Listener?=null
+    /**
+     * Listener interface for handling incoming messages from the WebSocket.
+     */
+    var listener: Listener?=null
+
+    /**
+     * Initializes the WebSocket connection with the specified username.
+     * Sends a sign-in message to the WebSocket server upon connection.
+     *
+     * @param username The username to authenticate with the WebSocket server.
+     */
     fun init(username:String){
         this.username = username
 
-        webSocket= object : WebSocketClient(URI("ws://192.168.1.250:8080")){
+        webSocket = object : WebSocketClient(URI("ws://192.168.1.250:8080")){
             override fun onOpen(handshakedata: ServerHandshake?) {
+                // Send a sign-in message when the connection is opened
                 sendMessageToSocket(
                     DataModel(
                         type = DataModelType.SignIn,
@@ -41,6 +59,7 @@ class SocketClient @Inject constructor(
             }
 
             override fun onMessage(message: String?) {
+                // Parse and handle incoming messages
                 val model = try {
                     gson.fromJson(message.toString(),DataModel::class.java)
                 }catch (e:Exception){
@@ -53,6 +72,7 @@ class SocketClient @Inject constructor(
             }
 
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
+                // Attempt to reconnect after a delay when the connection is closed
                 CoroutineScope(Dispatchers.IO).launch {
                     delay(5000)
                     init(username)
@@ -67,6 +87,11 @@ class SocketClient @Inject constructor(
     }
 
 
+    /**
+     * Sends a message to the WebSocket server.
+     *
+     * @param message The message to send, which will be serialized to JSON.
+     */
     fun sendMessageToSocket(message:Any?){
         try {
             webSocket?.send(gson.toJson(message))
@@ -75,10 +100,16 @@ class SocketClient @Inject constructor(
         }
     }
 
+    /**
+     * Closes the WebSocket connection and cleans up resources.
+     */
     fun onDestroy(){
         webSocket?.close()
     }
 
+    /**
+     * Interface for listening to new messages received from the WebSocket.
+     */
     interface Listener {
         fun onNewMessageReceived(model:DataModel)
     }

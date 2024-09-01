@@ -24,7 +24,7 @@ import com.ifreeze.applock.R
 import com.ifreeze.applock.databinding.FragmentBrowseBinding
 import com.ifreeze.applock.presentation.activity.MainWebActivity
 import com.ifreeze.applock.presentation.activity.changeTab
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 
 class BrowseFragment : Fragment() {

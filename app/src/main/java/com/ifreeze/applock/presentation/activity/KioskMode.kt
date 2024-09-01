@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.ifreeze.applock.helper.getAppIconByPackageName
 import com.ifreeze.applock.helper.toImageBitmap
 import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 
 /**

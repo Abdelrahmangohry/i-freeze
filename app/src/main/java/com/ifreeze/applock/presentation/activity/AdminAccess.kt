@@ -62,7 +62,7 @@ import com.ifreeze.applock.presentation.nav_graph.Screen
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.service.startAutoSyncWorker
 import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 
 /**

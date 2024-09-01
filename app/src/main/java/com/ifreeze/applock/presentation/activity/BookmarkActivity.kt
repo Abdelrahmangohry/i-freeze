@@ -3,7 +3,7 @@ package com.ifreeze.applock.presentation.activity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.browser.adapter.BookmarkAdapter
+import com.ifreeze.applock.presentation.adapter.BookmarkAdapter
 import com.ifreeze.applock.databinding.ActivityBookmarkBinding
 
 class BookmarkActivity : AppCompatActivity() {

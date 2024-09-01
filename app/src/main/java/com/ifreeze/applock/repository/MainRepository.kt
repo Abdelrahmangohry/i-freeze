@@ -2,7 +2,7 @@ package com.ifreeze.applock.repository
 
 import android.content.Intent
 import android.util.Log
-import com.codewithkael.webrtcscreenshare.socket.SocketClient
+import com.ifreeze.applock.socket.SocketClient
 import com.google.gson.Gson
 import com.ifreeze.applock.utils.DataModel
 import com.ifreeze.applock.utils.DataModelType
@@ -12,6 +12,16 @@ import org.webrtc.*
 import javax.inject.Inject
 
 
+/**
+ * Manages interactions between the socket client and WebRTC client for handling real-time communication.
+ *
+ * This class integrates `SocketClient` and `WebrtcClient` to facilitate screen sharing and calling functionalities.
+ * It initializes the clients, manages connection states, and handles messages related to screen sharing and calls.
+ *
+ * @property socketClient The instance of [SocketClient] used for network communication.
+ * @property webrtcClient The instance of [WebrtcClient] used for WebRTC operations.
+ * @property gson The instance of [Gson] used for JSON parsing.
+ */
 class MainRepository @Inject constructor(
     private val socketClient: SocketClient,
     private val webrtcClient: WebrtcClient,
@@ -23,6 +33,12 @@ class MainRepository @Inject constructor(
     private lateinit var surfaceView: SurfaceViewRenderer
     var listener: Listener? = null
 
+    /**
+     * Initializes the repository with the given username and surface view renderer.
+     *
+     * @param username The username of the current user.
+     * @param surfaceView The [SurfaceViewRenderer] used for rendering video streams.
+     */
     fun init(username: String, surfaceView: SurfaceViewRenderer) {
         this.username = username
         this.surfaceView = surfaceView
@@ -31,15 +47,28 @@ class MainRepository @Inject constructor(
 
     }
 
+    /**
+     * Initializes the socket client and sets up the listener.
+     */
     private fun initSocket() {
         socketClient.listener = this
         socketClient.init(username)
     }
 
+    /**
+     * Sets the permission intent for the WebRTC client.
+     *
+     * @param intent The [Intent] containing permission settings.
+     */
     fun setPermissionIntentToWebrtcClient(intent:Intent){
         webrtcClient.setPermissionIntent(intent)
     }
 
+    /**
+     * Sends a request to start screen sharing to the target user.
+     *
+     * @param target The username of the target user.
+     */
     fun sendScreenShareConnection(target: String){
         socketClient.sendMessageToSocket(
             DataModel(
@@ -51,14 +80,27 @@ class MainRepository @Inject constructor(
         )
     }
 
+    /**
+     * Starts capturing the screen and rendering it to the provided surface view.
+     *
+     * @param surfaceView The [SurfaceViewRenderer] for rendering the captured screen.
+     */
     fun startScreenCapturing(surfaceView: SurfaceViewRenderer){
         webrtcClient.startScreenCapturing(surfaceView)
     }
 
+    /**
+     * Initiates a call to the target user.
+     *
+     * @param target The username of the target user.
+     */
     fun startCall(target: String){
         webrtcClient.call(target)
     }
 
+    /**
+     * Sends a message to the socket indicating that the call has ended.
+     */
     fun sendCallEndedToOtherPeer(){
         socketClient.sendMessageToSocket(
             DataModel(
@@ -70,15 +112,24 @@ class MainRepository @Inject constructor(
         )
     }
 
+    /**
+     * Restarts the WebRTC client.
+     */
     fun restartRepository(){
         webrtcClient.restart()
     }
 
+    /**
+     * Cleans up resources and closes connections for both socket and WebRTC clients.
+     */
     fun onDestroy(){
         socketClient.onDestroy()
         webrtcClient.closeConnection()
     }
 
+    /**
+     * Initializes the WebRTC client and sets up the peer observer for handling WebRTC events.
+     */
     private fun initWebrtcClient() {
         webrtcClient.listener = this
         webrtcClient.initializeWebrtcClient(username, surfaceView,
@@ -104,6 +155,11 @@ class MainRepository @Inject constructor(
             })
     }
 
+    /**
+     * Handles incoming messages from the socket client.
+     *
+     * @param model The [DataModel] received from the socket.
+     */
     override fun onNewMessageReceived(model: DataModel) {
         when (model.type) {
             DataModelType.StartStreaming -> {
@@ -146,14 +202,38 @@ class MainRepository @Inject constructor(
         }
     }
 
+    /**
+     * Forwards the data model to the socket client.
+     *
+     * @param data The [DataModel] to be sent to the socket.
+     */
     override fun onTransferEventToSocket(data: DataModel) {
         socketClient.sendMessageToSocket(data)
     }
 
+    /**
+     * Interface for listening to repository events.
+     */
     interface Listener {
+        /**
+         * Called when a connection request is received from a target user.
+         *
+         * @param target The username of the target user.
+         */
         fun onConnectionRequestReceived(target: String)
+        /**
+         * Called when a connection is successfully established.
+         */
         fun onConnectionConnected()
+        /**
+         * Called when a call end message is received.
+         */
         fun onCallEndReceived()
+        /**
+         * Called when a remote stream is added.
+         *
+         * @param stream The [MediaStream] added from the remote peer.
+         */
         fun onRemoteStreamAdded(stream: MediaStream)
     }
 }

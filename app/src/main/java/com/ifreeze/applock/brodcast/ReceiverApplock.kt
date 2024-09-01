@@ -8,7 +8,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.ifreeze.applock.utils.utils
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import java.time.LocalDate
 import java.util.Calendar
 

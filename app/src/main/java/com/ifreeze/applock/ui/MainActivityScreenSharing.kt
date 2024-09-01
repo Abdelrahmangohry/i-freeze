@@ -14,6 +14,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.webrtc.MediaStream
 import javax.inject.Inject
 
+
+/**
+ * Main activity for handling screen sharing functionality.
+ * This activity manages the screen sharing process, including requesting connections, handling incoming connection requests,
+ * and displaying remote video streams.
+ */
 @AndroidEntryPoint
 class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
 
@@ -23,6 +29,13 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
     @Inject lateinit var webrtcServiceRepository: WebrtcServiceRepository
     private val capturePermissionRequestCode = 1
 
+
+    /**
+     * Called when the activity is first created.
+     * Initializes the view binding and sets up necessary components for screen sharing.
+     *
+     * @param savedInstanceState The saved instance state bundle, or null if there is no saved state.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         views= ActivityMainScreenSharingBinding.inflate(layoutInflater)
@@ -31,6 +44,9 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
 
     }
 
+    /**
+     * Initializes the activity, sets up the WebRTC service, and configures the request button.
+     */
     private fun init(){
         username = intent.getStringExtra("username")
         if (username.isNullOrEmpty()){
@@ -45,12 +61,23 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
 
     }
 
+    /**
+     * Requests a connection to the target user.
+     */
     private fun requestConnection(){
         webrtcServiceRepository.requestConnection(
             views.targetEt.text.toString()
         )
     }
 
+
+    /**
+     * Handles the result of the screen capture permission request.
+     *
+     * @param requestCode The request code that was used to start the activity.
+     * @param resultCode The result code returned by the activity.
+     * @param data The intent containing the result data.
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode != capturePermissionRequestCode) return
@@ -60,6 +87,9 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
         )
     }
 
+    /**
+     * Starts the screen capture process by requesting user permission.
+     */
     private fun startScreenCapture(){
         val mediaProjectionManager = application.getSystemService(
             Context.MEDIA_PROJECTION_SERVICE
@@ -71,6 +101,11 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
     }
 
 
+    /**
+     * Called when a connection request is received.
+     *
+     * @param target The username of the user requesting the connection.
+     */
     override fun onConnectionRequestReceived(target: String) {
         runOnUiThread{
             views.apply {
@@ -88,6 +123,9 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
         }
     }
 
+    /**
+     * Called when a connection is successfully established.
+     */
     override fun onConnectionConnected() {
         runOnUiThread {
             views.apply {
@@ -101,12 +139,20 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
         }
     }
 
+    /**
+     * Called when a call end notification is received.
+     */
     override fun onCallEndReceived() {
         runOnUiThread {
             restartUi()
         }
     }
 
+    /**
+     * Called when a remote video stream is added.
+     *
+     * @param stream The remote media stream.
+     */
     override fun onRemoteStreamAdded(stream: MediaStream) {
         runOnUiThread {
             views.surfaceView.isVisible = true
@@ -114,6 +160,9 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
         }
     }
 
+    /**
+     * Restarts the UI to its initial state, hiding or showing appropriate views.
+     */
     private fun restartUi(){
         views.apply {
             disconnectBtn.isVisible=false

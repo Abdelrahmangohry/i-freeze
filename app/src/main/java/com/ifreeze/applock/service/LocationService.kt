@@ -13,8 +13,11 @@ import android.os.IBinder
 import android.util.Log
 import android.view.WindowManager
 import com.ifreeze.applock.helper.NotificationHelper
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
+/**
+ * A service that monitors location settings and manages an overlay layout based on location provider status.
+ */
 class LocationService : Service() {
     private lateinit var locationService: Intent
 
@@ -26,24 +29,45 @@ class LocationService : Service() {
     lateinit var preferenc: PreferencesGateway
 
     private var windowManager: WindowManager? = null
-//    private var isServiceBound = false
 
+    /**
+     * Called when a connection to the ForceCloseLocation service is established.
+     *
+     * @param componentName The name of the service component that has been connected.
+     * @param iBinder The IBinder instance provided by the connected service.
+     */
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
             val binder = p1 as ForceCloseLocation.BinderForce
             serviceApp = binder.getServices()
         }
 
+        /**
+         * Called when the connection to the ForceCloseLocation service is lost.
+         *
+         * @param componentName The name of the service component that was disconnected.
+         */
         override fun onServiceDisconnected(p0: ComponentName?) {
             // Consider handling service disconnection more robustly
             serviceApp = null
         }
     }
 
+
+    /**
+     * Called when a client binds to this service. This service does not provide binding, so returns null.
+     *
+     * @param intent The Intent that was used to bind to this service.
+     * @return null since this service does not support binding.
+     */
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
+
+    /**
+     * Called when the service is created. Initializes the service and binds to the ForceCloseLocation service.
+     */
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -51,6 +75,15 @@ class LocationService : Service() {
         bindService(locationService, serviceConnection, BIND_AUTO_CREATE)
     }
 
+
+    /**
+     * Called when the service is started. Begins monitoring location settings.
+     *
+     * @param intent The Intent that started this service.
+     * @param flags Additional data about the service start request.
+     * @param startId An identifier for this specific start request.
+     * @return START_STICKY to indicate that the service should be restarted if it is killed.
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         preferenc = PreferencesGateway(applicationContext)
         // Start monitoring location settings
@@ -59,9 +92,10 @@ class LocationService : Service() {
     }
 
 
+    /**
+     * Starts monitoring the location provider status and manages the overlay layout based on provider status.
+     */
     private fun startLocationMonitoring() {
-//        preferenc = PreferencesGateway(applicationContext)
-//        var locationToggle = preferenc.update("locationBlocked", isCheckedLocation)
         // Start the foreground service
         startForeground(NotificationHelper.NOTIFICATION_ID, helper.getNotification())
 
@@ -117,12 +151,18 @@ class LocationService : Service() {
     }
 
 
+    /**
+     * Displays the overlay layout by calling the createChatHeadView method on the serviceApp.
+     */
     private fun showOverlayLayout() {
         if (serviceApp != null) {
             serviceApp?.createChatHeadView()
         }
     }
 
+    /**
+     * Removes the overlay layout by calling the removeChatHeadView method on the serviceApp.
+     */
     private fun removeOverlayLayout() {
         if (serviceApp != null) {
             serviceApp?.removeChatHeadView()
@@ -131,11 +171,13 @@ class LocationService : Service() {
         }
     }
 
+    /**
+     * Called when the service is destroyed. Stops the location service and removes the overlay layout.
+     */
     override fun onDestroy() {
         removeOverlayLayout()
         applicationContext.stopService(locationService)
 
         super.onDestroy()
     }
-
 }

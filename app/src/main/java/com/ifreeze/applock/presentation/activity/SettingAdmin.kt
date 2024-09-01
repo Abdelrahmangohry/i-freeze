@@ -48,7 +48,7 @@ import com.ifreeze.applock.R
 import com.ifreeze.applock.service.ForceCloseKiosk
 import com.ifreeze.applock.service.LocationService
 import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 
 @RequiresApi(34)

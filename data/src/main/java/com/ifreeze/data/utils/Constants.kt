@@ -1,4 +1,4 @@
-package com.app.data.remote
+package com.ifreeze.data.utils
 
 
 object Constants {

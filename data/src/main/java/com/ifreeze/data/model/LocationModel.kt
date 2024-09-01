@@ -2,8 +2,9 @@ package com.ifreeze.data.model
 
 //get mobile configurations
 data class Data(
-    val data : Device,
+    val data: Device,
 )
+
 data class Device(
     val device: DeviceConfigurations,
     val exceptionWifi: List<String>?,
@@ -13,21 +14,22 @@ data class Device(
     val exceptionWebsites: List<String>,
     val deviceKioskApps: List<String>
 )
+
 data class DeviceConfigurations(
-    val blockWiFi : Boolean,
-    val whiteListWiFi : Boolean,
-    val blockListURLs : Boolean,
-    val whiteListURLs : Boolean,
-    val browsers : Boolean,
-    val blockListApps : Boolean,
-    val whiteListApps : Boolean,
-    val licenseId : String,
+    val blockWiFi: Boolean,
+    val whiteListWiFi: Boolean,
+    val blockListURLs: Boolean,
+    val whiteListURLs: Boolean,
+    val browsers: Boolean,
+    val blockListApps: Boolean,
+    val whiteListApps: Boolean,
+    val licenseId: String,
     val time: String,
     val kiosk: Boolean,
     val locationTracker: Boolean,
 
 
-)
+    )
 //////////////////////////////////
 
 
@@ -40,21 +42,23 @@ data class LocationModel(
 
 
 //location response
-data class Location (
-    var data    : LocationData,
+data class Location(
+    var data: LocationData,
 )
-data class LocationData (
-    var location : String,
-    var address : String,
-    var deviceId : String
+
+data class LocationData(
+    var location: String,
+    var address: String,
+    var deviceId: String
 )
 //////
 
 //send device apps
-data class MobileApps (
-   var appName  : List<String>,
-    var deviceId : String
+data class MobileApps(
+    var appName: List<String>,
+    var deviceId: String
 )
+
 //response
 data class MobileResponse(
     val data: MobileApps,
@@ -75,9 +79,10 @@ data class Untrusted(
     val status: Int,
     val message: String
 )
+
 data class UntrustedApps(
     val id: String,
-    val appName : String
+    val appName: String
 )
 
 
@@ -90,17 +95,17 @@ data class TicketMessageBody(
     val description: String
 )
 
-data class TicketResponse (
-    var data    : TicketMessageBody,
+data class TicketResponse(
+    var data: TicketMessageBody,
 )
 
 //////Get Base Url
 data class BaseUlrResponse(
-    val data : ApiResponse
+    val data: ApiResponse
 )
 
 data class ApiResponse(
-    val url : String
+    val url: String
 )
 
 //Get Kiosk Apps
@@ -126,12 +131,12 @@ data class AlertBody(
     val source: String
 )
 
-
-data class AlertResponse (
+// Alert response
+data class AlertResponse(
     val time: String
 )
 
-//Send Alert
+//Send Proactive Results
 data class ProactiveResultsBody(
     val deviceId: String,
     val processName: String,
@@ -139,12 +144,13 @@ data class ProactiveResultsBody(
     val severity: String,
     val source: String,
 
-)
-data class ProactiveResultsResponse (
+    )
+//Proactive Results Response
+data class ProactiveResultsResponse(
     val time: String
 )
 
-//Get All Versions By ID
+//Get All Versions By ID is still valid or not
 data class VersionsDetails(
     val data: List<DataItem>,
 

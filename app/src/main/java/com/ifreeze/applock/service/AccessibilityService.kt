@@ -10,19 +10,19 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.widget.Toast
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.core.app.ActivityCompat.startActivityForResult
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 
+/**
+ * Accessibility service for managing application access based on user-defined preferences.
+ *
+ * This service monitors and controls app usage based on blocked and allowed app lists, whitelist and blacklist settings,
+ * and handles special cases for kiosk mode and browser apps.
+ */
 class AccessibilityServices : AccessibilityService() {
     private val TAG = "Mgd"
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -35,6 +35,13 @@ class AccessibilityServices : AccessibilityService() {
     var serviceApp: ForceCloseService? = null
     var kioskApp: ForceCloseKiosk? = null
     private lateinit var preferenc: PreferencesGateway
+
+    /**
+     * Checks if the given package name corresponds to a launcher application.
+     *
+     * @param packageName The package name to check.
+     * @return True if the package name corresponds to a launcher application, false otherwise.
+     */
     private fun isLauncherPackage(packageName: String): Boolean {
         val launcherPackages = listOf(
             "com.android.launcher",
@@ -51,6 +58,12 @@ class AccessibilityServices : AccessibilityService() {
         return launcherPackages.any { packageName.startsWith(it) }
     }
 
+    /**
+     * Checks if the given package name corresponds to a browser application.
+     *
+     * @param packageName The package name to check.
+     * @return True if the package name corresponds to a browser application, false otherwise.
+     */
     private fun isBrowsers(packageName: String): Boolean {
         val browserList = listOf(
             "com.android.chrome",
@@ -64,12 +77,24 @@ class AccessibilityServices : AccessibilityService() {
         return browserList.any { packageName.startsWith(it) }
     }
 
+    /**
+     * Checks if the given package name is in the kiosk applications list.
+     *
+     * @param packageName The package name to check.
+     * @return True if the package name is in the kiosk applications list, false otherwise.
+     */
     private fun isKioskPackage(packageName: String): Boolean {
         val kioskPackageList = preferenc.getList("kioskApplications")
         Log.d("abdo", "kioskPackageList $kioskPackageList")
         return kioskPackageList.any { packageName.startsWith(it) }
     }
 
+    /**
+     * Checks if the given package name is a system application in kiosk mode.
+     *
+     * @param packageName The package name to check.
+     * @return True if the package name is a system application in kiosk mode, false otherwise.
+     */
     private fun isSystemInKioskPackage(packageName: String): Boolean {
         val systemList= listOf(
         "com.touchtype.swiftkey",
@@ -78,7 +103,11 @@ class AccessibilityServices : AccessibilityService() {
         return systemList.any { packageName.startsWith(it) }
     }
 
-
+    /**
+     * Handles accessibility events to control app access based on user-defined preferences.
+     *
+     * @param event The [AccessibilityEvent] that triggered this callback.
+     */
     override fun onAccessibilityEvent(p0: AccessibilityEvent?) {
         preferenc = PreferencesGateway(applicationContext)
 
@@ -117,7 +146,12 @@ class AccessibilityServices : AccessibilityService() {
 
     }
 
-
+    /**
+     * Kills the specified package if it is running and returns to the home screen.
+     *
+     * @param context The context to use for the operation.
+     * @param packageName The package name of the app to kill.
+     */
     fun killThisPackageIfRunning(context: Context, packageName: String?) {
         val activityManager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
 
@@ -132,6 +166,12 @@ class AccessibilityServices : AccessibilityService() {
         activityManager.killBackgroundProcesses(packageName)
     }
 
+    /**
+     * Handles app access based on blocked and allowed app lists and settings.
+     *
+     * @param packageName The package name of the app to handle.
+     * @param serviceIntent The intent to start or stop the ForceCloseService.
+     */
     private fun handleAppBasedOnLists(packageName: String, serviceIntent: Intent) {
         serviceScope.launch {
             // Ensure appsList is initialized before proceeding
@@ -169,6 +209,12 @@ class AccessibilityServices : AccessibilityService() {
         }
     }
 
+    /**
+     * Checks if the given package name is a system application.
+     *
+     * @param packageName The package name to check.
+     * @return True if the package name is a system application, false otherwise.
+     */
     private fun isSystemApp(packageName: String): Boolean {
         val packageManager = applicationContext.packageManager
 
@@ -181,20 +227,34 @@ class AccessibilityServices : AccessibilityService() {
         return false
     }
 
+    /**
+     * Removes the overlay and view binding for the ForceCloseService.
+     */
     private fun removeOverlayAndViewBinding() {
         serviceApp?.removeChatHeadView()
     }
 
+    /**
+     * Removes the overlay for the ForceCloseKiosk service.
+     */
     private fun removeOverlayKioskMode() {
         kioskApp?.removeChatHeadView()
     }
 
+    /**
+     * Kills the specified app and shows an overlay for a short duration.
+     *
+     * @param packageName The package name of the app to kill.
+     */
     private fun killAppAndShowOverlay(packageName: String) {
         killThisPackageIfRunning(applicationContext, packageName)
         serviceApp?.createChatHeadView()
         handler.postDelayed({ serviceApp?.removeChatHeadView() }, 5000)
     }
 
+    /**
+     * Called when the accessibility service is connected.
+     */
     override fun onServiceConnected() {
         super.onServiceConnected()
         val info = AccessibilityServiceInfo()
@@ -204,6 +264,13 @@ class AccessibilityServices : AccessibilityService() {
         this.serviceInfo = info
     }
 
+    /**
+     * Checks if the given package name is in the provided list.
+     *
+     * @param packageName The package name to check.
+     * @param list The list to check against.
+     * @return True if the package name is in the list, false otherwise.
+     */
     private fun isAppInList(packageName: String, list: List<String>): Boolean {
         var isFound = false;
         for (item in list) {
@@ -215,6 +282,9 @@ class AccessibilityServices : AccessibilityService() {
         return isFound
     }
 
+    /**
+     * Called when the accessibility service is interrupted.
+     */
     override fun onInterrupt() {
         Log.d("islam", "onInterrupt: ")
     }

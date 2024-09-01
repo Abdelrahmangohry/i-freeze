@@ -1,9 +1,24 @@
 package com.ifreeze.applock.presentation.nav_graph
+
+/**
+ * Constants for argument keys used in navigation.
+ */
 const val DETAIL_ARGUMENT_KEY = "id"
 const val DETAIL_ARGUMENT_KEY2 = "name"
+
+/**
+ * Constants for route names used in the navigation graph.
+ */
 const val ROOT_GRAPH_ROUTE = "root"
 const val HOME_GRAPH_ROUTE = "home"
+
+/**
+ * Sealed class representing different screens in the navigation graph.
+ *
+ * Each screen has a route string associated with it, which is used for navigation.
+ */
 sealed class Screen(val route:String){
+    /** Route for the splash screen. etc*/
     object Splash : Screen(route = "splash_screen")
     object AdminAccess : Screen(route = "admin_access")
     object Login : Screen(route = "login")

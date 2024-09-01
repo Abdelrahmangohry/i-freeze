@@ -18,8 +18,6 @@ import com.ifreeze.data.model.Untrusted
 import com.ifreeze.data.model.VersionsDetails
 import com.ifreeze.data.remote.UserApi
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
 import javax.inject.Inject
 
 class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {

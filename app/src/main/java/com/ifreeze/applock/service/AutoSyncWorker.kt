@@ -15,7 +15,6 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.hilt.work.HiltWorker
@@ -25,9 +24,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.ifreeze.applock.presentation.activity.areDeveloperOptionsEnabled
-import com.ifreeze.applock.presentation.activity.hasLockScreenPassword
-import com.ifreeze.applock.presentation.activity.isDeviceRooted
 import com.ifreeze.applock.service.AutoSyncWorker.Companion.hashesList
 import com.ifreeze.data.model.AlertBody
 import com.ifreeze.data.model.LocationDataAddress
@@ -36,9 +32,7 @@ import com.ifreeze.data.model.MobileApps
 import com.ifreeze.data.model.ProactiveResultsBody
 import com.ifreeze.data.remote.UserApi
 import com.ifreeze.data.repo.auth.LocationHelper
-import com.ifreeze.di.NetWorkModule
-
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -57,43 +51,61 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import javax.inject.Inject
 
+
+/**
+ * A worker that performs automatic synchronization tasks, including network requests and system checks.
+ *
+ * This worker interacts with various APIs, checks system settings, and performs actions based on the results.
+ * It uses coroutine-based work to ensure tasks are executed asynchronously.
+ *
+ * @param api An instance of [UserApi] for making network requests.
+ * @param context The application context.
+ * @param workerParameters The parameters for the worker.
+ */
 @HiltWorker
 class AutoSyncWorker @AssistedInject constructor(
     @Assisted private val api: UserApi,
     @Assisted context: Context,
     @Assisted workerParameter: WorkerParameters,
 ) : CoroutineWorker(context, workerParameter), LocationHelper.LocationCallback {
-
+    // Preference gateway for accessing saved preferences
     private val preference = PreferencesGateway(context)
+    // Lists of allowed Wi-Fi networks and blocked websites retrieved from preferences
     private val allowedList = preference.getList("allowedWifiList")
     private val blockedWebsites = preference.getList("blockedWebsites")
 
+    // Various intents for starting or stopping services
     private val deviceId = preference.load("responseID", "")
     private val serviceIntent = Intent(context, NetworkMonitoringService::class.java)
     private val kioskIntent = Intent(context, ForceCloseKiosk::class.java)
     private val locationService = Intent(context, LocationService::class.java)
     private val installedAppsList = getInstalledApps(context)
     val hashesListDatabase = preference.getList("hashesListDatabase")
+
+    // Variables for failure tracking and license ID
     private var failureCount = preference.load("failureCount", 0)
     private var isFailureLimitReached = preference.load("isFailureLimitReached", false)
     private val licenseID = preference.load("licenseID", "")
+
+    // Settings and environment information
     val enabledServicesSetting = Settings.Secure.getString(
         context.contentResolver,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     )
-    ///
+
+    @SuppressLint("SimpleDateFormat")
     val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())
     val checkItems = mutableListOf<Pair<String, Boolean>>()
     val lockedScreen = lockScreen(context)
     val rooted = deviceRootedEnable()
     val developerOptionsEnabled = developerOptionsEnabled(context)
-    ///
+
     val downloadDirectory =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
     companion object {
+        // List of hashes for proactive scanning
         val hashesList = mutableListOf<Pair<String, String>>()
     }
 
@@ -103,9 +115,20 @@ class AutoSyncWorker @AssistedInject constructor(
     }
 
 
+    /**
+     * Called when location data is fetched.
+     *
+     * Performs the following tasks:
+     * - Updates the base URL from the server if needed
+     * - Checks and updates various settings and preferences
+     * - Sends data to the server and processes responses
+     * - Handles errors and updates failure count
+     *
+     * @param locationData The fetched location data.
+     */
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
-
+            // Retrieve the new base URL from the API
 //            val baseUrl = "https://192.168.1.250/api/"
             val getNewBaseUrl = api.getCloudURL(deviceId!!)
             if (getNewBaseUrl.isSuccessful){
@@ -115,6 +138,7 @@ class AutoSyncWorker @AssistedInject constructor(
             }
 //            preference.saveBaseUrl(baseUrl)
 
+            // Check failure count and update preference
             if (failureCount!! >= 120) {
                 isFailureLimitReached = true
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
@@ -123,7 +147,7 @@ class AutoSyncWorker @AssistedInject constructor(
                 isFailureLimitReached = false
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
             }
-
+            // Check necessary permissions and settings
             if (
                 !Settings.canDrawOverlays(applicationContext) ||
                 enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true ||
@@ -145,7 +169,7 @@ class AutoSyncWorker @AssistedInject constructor(
 //
 //            }
 
-
+            // Fetch location details
             val address = locationData.address ?: "Unknown Address"
             val latitude = locationData.latitude ?: 0.0
             val longitude = locationData.longitude ?: 0.0
@@ -157,9 +181,10 @@ class AutoSyncWorker @AssistedInject constructor(
                 deviceId = deviceId!!
             )
 
-
+            // Send user location data to the server
             val userLocationResponse = api.userLocation(userLocation)
 
+            // Prepare and send mobile application data
             val mobileApplication = MobileApps(
                 deviceId = deviceId,
                 appName = installedAppsList
@@ -170,28 +195,24 @@ class AutoSyncWorker @AssistedInject constructor(
                 val responseBody = checklicenseData.body()?.toString()
                 val isLicenseValid = responseBody?.toBoolean() ?: false // Convert string to boolean
                 preference.save("validLicense", isLicenseValid)
-                Log.d("abdo", "Is license valid: $isLicenseValid")
             }
 
+            // Update mobile applications and handle responses
             val mobileApplications = api.mobileApps(mobileApplication)
             if (mobileApplications.isSuccessful) {
-                Log.d("abdo", "mobile application sent successfully")
                 failureCount = 0
-                Log.d("abdo", "failureCount from try $failureCount")
                 preference.save("failureCount", failureCount!!)
-                Log.d("abdo", "isFailureLimitReached from try $isFailureLimitReached")
             }
 
             if (userLocationResponse.isSuccessful) {
-                Log.d("abdo", "User location updated successfully")
             }
 
 
             val response = api.newUpdateUserData(deviceId)
             if (response.isSuccessful) {
+                // Update preferences with new data from the server
                 val applicationNamesList = response.body()?.data?.deviceKioskApps ?: emptyList()
                 preference.saveList("kioskApplications", applicationNamesList)
-                Log.d("kioskauto", "kiosk applications $applicationNamesList")
 
 
                 val cloudList = response.body()?.data?.exceptionWifi
@@ -212,8 +233,6 @@ class AutoSyncWorker @AssistedInject constructor(
                 }
 
                 val cloudBlockedWebSites = response.body()?.data?.blockedWebsites
-                Log.d("allowed", "cloudBlockedWebSites $cloudBlockedWebSites")
-
                 if (cloudBlockedWebSites != null) {
                 preference.saveList("blockedWebsites", cloudBlockedWebSites)
                 }
@@ -221,15 +240,11 @@ class AutoSyncWorker @AssistedInject constructor(
                 val blockedAppsList = response.body()?.data?.blockedApps
                 if (blockedAppsList != null) { // Check for null
                     preference.saveList("blockedAppsList", blockedAppsList)
-                    Log.d("abdo", "this is blocked apps list $blockedAppsList")
                 }
 
                 val allowedAppsList = response.body()?.data?.exceptionApps
                 if (allowedAppsList != null) { // Check for null
                     preference.saveList("allowedAppsList", allowedAppsList)
-                    Log.d("allowed", "this is allowe apps list $allowedAppsList")
-                } else {
-                    Log.d("abdo", "Blocked apps list is null")
                 }
                 responseData?.let {
                     preference.update("Blacklist", it.blockListApps)
@@ -262,10 +277,9 @@ class AutoSyncWorker @AssistedInject constructor(
                 }
             }
             else {
-                Log.d("abdo", "Retrying.... before ")
                 applicationContext.startService(serviceIntent)
             }
-
+            // Check and update device status
             if (!lockedScreen) {
                 checkItems.add("Lock Screen" to true)
             } else {
@@ -277,6 +291,7 @@ class AutoSyncWorker @AssistedInject constructor(
             } else {
                 checkItems.add("Developer Option Disabled" to false)
             }
+            // Send alerts for any detected issues
             checkItems.filter { it.second }.forEach { (issueName, _) ->
                 val message : List<AlertBody> = listOf(AlertBody(
                     deviceId = deviceId,
@@ -288,10 +303,10 @@ class AutoSyncWorker @AssistedInject constructor(
                 ))
                 val alertIssues = api.sendAlert(message)
                 if (alertIssues.isSuccessful) {
-                    Log.d("abdo", "mobile Issues Sent Successfully")
 
                 }
             }
+            // Scan files for hashes and send proactive results if matched
             getHashCodeFromFiles(downloadDirectory)
 
             // Compare hashesList with hashesListDatabase
@@ -313,10 +328,10 @@ class AutoSyncWorker @AssistedInject constructor(
 
                 val proActiveResult = api.sendProactiveResults(messagePro)
                 if (proActiveResult.isSuccessful) {
-                    Log.d("abdo", "Proactive result sent successfully")
                 }
             }
 
+            // Check for version updates and perform installation or uninstallation
 
             val num = preference.loadDouble("num", 0.9)!!
             val getVersionsDet = api.getAllVersionsDetails(num, deviceId)
@@ -335,7 +350,6 @@ class AutoSyncWorker @AssistedInject constructor(
                     val currentVersionDescription = versionDescription?.get(index)
 
                     if (version > num && currentStatus == "Install") {
-                        Log.d("download", "https://security.flothers.com:8443$currentZipFilePath")
                         downloadAndInstallZip(
                             "https://security.flothers.com:8443/Zip/Versions/InstalledApps/838d499d-8fcd-4357-948f-08dc07916c1e/1.0/Facebook.exe",
                             applicationContext,
@@ -362,10 +376,6 @@ class AutoSyncWorker @AssistedInject constructor(
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
             }
             applicationContext.startService(serviceIntent)
-//                val errorData = Data.Builder().putString("error", e.toString()).build()
-//                Result.failure(errorData)
-            Log.d("abdo", "failureCount from error $failureCount")
-            Log.d("abdo", "isFailureLimitReached $isFailureLimitReached")
 
         }
     }
@@ -393,6 +403,15 @@ fun startAutoSyncWorker(context: Context) {
     )
 }
 
+/**
+ * Retrieves a list of installed applications on the device.
+ *
+ * This function queries the package manager to get a list of applications that have
+ * a launcher activity and returns their names.
+ *
+ * @param context The application context used to access the package manager.
+ * @return A list of names of installed applications.
+ */
 @SuppressLint("SuspiciousIndentation")
 fun getInstalledApps(context: Context): List<String> {
     val apps = mutableListOf<String>()
@@ -409,13 +428,28 @@ fun getInstalledApps(context: Context): List<String> {
     return apps
 }
 
-
+/**
+ * Checks if the device's screen lock is secure.
+ *
+ * This function uses the KeyguardManager to determine if the device has a secure lock screen.
+ *
+ * @param context The application context used to access the KeyguardManager.
+ * @return True if the device has a secure lock screen, false otherwise.
+ */
 fun lockScreen(context: Context): Boolean {
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     return keyguardManager.isKeyguardSecure
 }
 
 
+/**
+ * Checks if the device is rooted.
+ *
+ * This function attempts to execute a command that requires root access and checks
+ * if it succeeds, indicating that the device is rooted.
+ *
+ * @return True if the device is rooted, false otherwise.
+ */
 fun deviceRootedEnable(): Boolean {
     return try {
         val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "ls /data"))
@@ -433,6 +467,15 @@ fun deviceRootedEnable(): Boolean {
 }
 
 
+/**
+ * Checks if developer options are enabled on the device.
+ *
+ * This function queries the Settings.Secure provider to check if the developer options
+ * are enabled.
+ *
+ * @param context The application context used to access the content resolver.
+ * @return True if developer options are enabled, false otherwise.
+ */
 fun developerOptionsEnabled(context: Context): Boolean {
     return Settings.Secure.getInt(
         context.contentResolver,
@@ -441,6 +484,14 @@ fun developerOptionsEnabled(context: Context): Boolean {
     ) != 0
 }
 
+/**
+ * Computes the SHA-256 hash of files in the specified directory.
+ *
+ * This function recursively scans a directory and computes the SHA-256 hash for each file.
+ * The computed hashes are logged and added to a global list for further processing.
+ *
+ * @param directory The directory to scan for files.
+ */
 private suspend fun getHashCodeFromFiles(directory: File) {
     withContext(Dispatchers.IO) {
         if (directory.exists() && directory.canRead()) {
@@ -458,6 +509,15 @@ private suspend fun getHashCodeFromFiles(directory: File) {
 }
 
 
+/**
+ * Recursively scans a directory to compute hashes for files.
+ *
+ * This function traverses the directory structure and computes the SHA-256 hash for each file,
+ * adding the results to the provided list.
+ *
+ * @param directory The directory to scan.
+ * @param hashes The list to which file hashes are added.
+ */
 private fun scanDirectory(directory: File, hashes: MutableList<Pair<String, String>>) {
     if (directory.isDirectory) {
         directory.listFiles()?.forEach { file ->
@@ -473,6 +533,15 @@ private fun scanDirectory(directory: File, hashes: MutableList<Pair<String, Stri
     }
 }
 
+/**
+ * Computes the SHA-256 hash of a file.
+ *
+ * This function reads the file in chunks and updates the SHA-256 digest to compute the hash.
+ * The resulting hash is returned as a hexadecimal string.
+ *
+ * @param file The file to hash.
+ * @return The SHA-256 hash of the file as a hexadecimal string.
+ */
 private fun getFileHash(file: File): String {
     val digest = MessageDigest.getInstance("SHA-256")
     val fis = FileInputStream(file)
@@ -494,6 +563,18 @@ private fun getFileHash(file: File): String {
 
     return stringBuilder.toString()
 }
+
+/**
+ * Downloads and installs an APK file from the specified URL.
+ *
+ * This function uses the DownloadManager to download the APK file and then attempts to
+ * install it. The installation process is handled by registering a BroadcastReceiver
+ * to listen for download completion events.
+ *
+ * @param url The URL from which to download the APK.
+ * @param context The application context used to access the DownloadManager and start the installation.
+ * @param currentName The name of the APK file to be downloaded.
+ */
 @SuppressLint("UnspecifiedRegisterReceiverFlag")
 private suspend fun downloadAndInstallZip(url: String, context: Context, currentName: String) = withContext(Dispatchers.IO) {
     try {
@@ -591,6 +672,15 @@ fun unzipFile(zipFile: File, targetDirectory: File) {
 }
 
 
+/**
+ * Installs an APK file using an Intent.
+ *
+ * This function initiates an APK installation by creating an Intent and launching it.
+ * If the application does not have permission to install unknown apps, it prompts the user to grant this permission.
+ *
+ * @param context The application context used to start the installation activity.
+ * @param apkFile The file object representing the APK to be installed.
+ */
 private fun installApk(context: Context?, apkFile: File) {
     if (apkFile.exists()) {
         val apkUri = FileProvider.getUriForFile(context!!, context.applicationContext.packageName + ".fileprovider", apkFile)
@@ -612,6 +702,14 @@ private fun installApk(context: Context?, apkFile: File) {
     }
 }
 
+/**
+ * Uninstalls an application by launching an uninstall intent.
+ *
+ * This function creates an Intent to remove the specified package from the device.
+ *
+ * @param context The application context used to start the uninstall activity.
+ * @param packageName The package name of the application to be uninstalled.
+ */
 fun uninstallPackage(context: Context, packageName: String) {
     val intent = Intent(Intent.ACTION_DELETE)
     intent.data = Uri.parse("package:$packageName")

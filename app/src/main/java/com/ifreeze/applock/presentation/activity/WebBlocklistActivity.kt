@@ -9,7 +9,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.EditText
 import android.widget.ImageButton
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 class WebBlocklistActivity : AppCompatActivity() {
     private lateinit var myWebView: WebView

@@ -2,8 +2,6 @@ package com.ifreeze.applock.presentation.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.os.Build
@@ -21,7 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ifreeze.applock.R
 import com.ifreeze.applock.presentation.adapter.AffectedFiles
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -29,9 +27,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
 import java.security.MessageDigest
 
 /**

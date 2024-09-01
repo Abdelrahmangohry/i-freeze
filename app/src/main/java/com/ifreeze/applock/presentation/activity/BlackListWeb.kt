@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.ui.theme.Shape
-import com.patient.data.cashe.PreferencesGateway
+import com.ifreeze.data.cash.PreferencesGateway
 
 /**
  * Composable function for managing blacklisted websites.
