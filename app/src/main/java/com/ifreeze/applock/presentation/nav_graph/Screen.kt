@@ -14,11 +14,6 @@ sealed class Screen(val route:String){
     object OnboardingScreen2 : Screen(route = "on_boarding_Screen_2")
     object OnboardingScreen3 : Screen(route = "on_boarding_Screen_3")
     object OnboardingScreen4 : Screen(route = "on_boarding_Screen_4")
-
-    object OnboardingScreen1 : Screen(route = "on_boarding_Screen_1")
-    object OnboardingScreen2 : Screen(route = "on_boarding_Screen_2")
-    object OnboardingScreen3 : Screen(route = "on_boarding_Screen_3")
-    object OnboardingScreen4 : Screen(route = "on_boarding_Screen_4")
     object SupportTeam : Screen(route = "support_team")
     object KioskMode : Screen(route = "kiosk_mode")
     object LicenseActivation : Screen(route = "license_activation")
