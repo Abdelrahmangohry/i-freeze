@@ -15,6 +15,7 @@ import com.ifreeze.data.model.ProactiveResultsResponse
 import com.ifreeze.data.model.TicketMessageBody
 import com.ifreeze.data.model.TicketResponse
 import com.ifreeze.data.model.Untrusted
+import com.ifreeze.data.model.VersionsDetails
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -23,6 +24,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 
+//Api data base GET / POST
 interface UserApi {
     @POST("Licenses/ActivateMobile/{activationKey}")
     suspend fun getUserLogin(
@@ -81,6 +83,12 @@ interface UserApi {
     suspend fun sendProactiveResults(
         @Body message:  List<ProactiveResultsBody>
     ): Response<ProactiveResultsResponse>
+
+    @GET("Versions/GetAllVersionsById")
+    suspend fun getAllVersionsDetails(
+        @Query("num") num: Double,
+        @Query("id") id: String
+    ): Response<VersionsDetails>
 
 }
 

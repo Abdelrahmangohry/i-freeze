@@ -46,6 +46,7 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
             Long::class -> putLong(key, value as Long)
             Float::class -> putFloat(key, value as Float)
             String::class -> putString(key, value as String)
+            Double::class -> putString(key, (value as Double).toString())
             else -> throw UnsupportedOperationException("not supported preferences type")
         }
     }
@@ -60,6 +61,7 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
             Long::class -> getLong(key, defaultValue as Long) as T
             Float::class -> getFloat(key, defaultValue as Float) as T
             String::class -> getString(key, defaultValue as String) as T
+            Double::class -> getString(key, (defaultValue as? Double)?.toString())?.toDouble() as T
             else -> throw UnsupportedOperationException("not supported preferences type")
         }
     }
@@ -146,5 +148,15 @@ class PreferencesGateway @Inject constructor(@ApplicationContext val context: Co
         return load(BASE_URL_KEY, "")
     }
 
+    fun saveDouble(key: String, value: Double) {
+        save(key, value)
+    }
+
+    fun loadDouble(key: String, defaultValue: Double): Double? {
+        return load(key, defaultValue)
+    }
+
+
 }
+
 

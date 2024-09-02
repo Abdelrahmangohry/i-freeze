@@ -143,3 +143,24 @@ data class ProactiveResultsBody(
 data class ProactiveResultsResponse (
     val time: String
 )
+
+//Get All Versions By ID
+data class VersionsDetails(
+    val data: List<DataItem>,
+
+)
+
+data class DataItem(
+    val id: String,
+    val versionNumber: Double,
+    val versionType: String,
+    val versionDescription: String,
+    val date: String,
+    val zipFilePath: String,
+    val status: String,
+    val deviceId: String,
+    val deviceGroupsId: String?,
+    val file: String?,
+    val fileDownloadLink: String?,
+
+)

@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import com.ifreeze.applock.R
 import com.ifreeze.applock.Receiver.MyDeviceAdminReceiver
@@ -159,6 +161,24 @@ fun GeneralOptionsUISetting(
                 }
             }
         )
+
+        GeneralSettingItem(
+            icon = R.drawable.draw,
+            mainText = "Install Unknown Apps",
+            subText = "Enable the screen control option in settings",
+            onClick = {
+                Log.d("islam", "GeneralOptionsUISetting :drawAction ")
+
+
+                if (!context.packageManager.canRequestPackageInstalls()) {
+                    val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                    }
+                    context.startActivity(settingsIntent)
+                }
+            }
+        )
+
         GeneralSettingItem(
             icon = R.drawable.ic_baseline_check_24,
             mainText = "Accessibility Service",
@@ -229,6 +249,8 @@ fun GeneralOptionsUISetting(
                             EXTERNAL_STORAGE_PERMISSION_CODEE
                         )
                     }
+
+
                 }
 
             }
