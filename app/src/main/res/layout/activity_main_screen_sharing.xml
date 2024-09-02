@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/blue"
+    >
 
     <androidx.cardview.widget.CardView
         android:id="@+id/notificationLayout"
@@ -60,21 +62,37 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="3dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="50dp"
         android:id="@+id/requestLayout"
         app:layout_constraintTop_toTopOf="parent"
-        android:orientation="horizontal">
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Remote Access"
+            android:textSize="25sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:paddingVertical="15dp"
+            />
+
+
         <EditText
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/targetEt"
-            android:layout_weight="5"
+            android:textColorHint="@color/black"
+            android:textColor="@color/black"
+            android:background="@drawable/edit_text_background"
+            android:padding="15dp"
             android:hint="target username"/>
         <androidx.appcompat.widget.AppCompatButton
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:text="request"
             android:id="@+id/requestBtn"/>
     </LinearLayout>
