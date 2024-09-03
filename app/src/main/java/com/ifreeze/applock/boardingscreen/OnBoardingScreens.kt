@@ -153,63 +153,54 @@ fun OnboardingScreen1(navController: NavHostController) {
 @Composable
 fun OnboardingScreen2(navController: NavHostController) {
     val context = LocalContext.current
-    // Main layout for the second onboarding screen
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF175AA8)), // Set background color
-        verticalArrangement = Arrangement.SpaceBetween, // Space elements vertically
-        horizontalAlignment = Alignment.CenterHorizontally // Center elements horizontally
+            .background(Color(0xFF175AA8)),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // Content section with instructions
         Column(
             modifier = Modifier.weight(2f),
-            verticalArrangement = Arrangement.Center, // Center the content vertically
-            horizontalAlignment = Alignment.CenterHorizontally // Center the content horizontally
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OnboardingImage(R.drawable.accessnew) // Custom composable for the image
-            // Instruction text
+            OnboardingImage(R.drawable.accessnew)
+
             Text(
                 modifier = Modifier.padding(15.dp),
                 text = "Enable accessibility service in settings for keeping your mobile safe.",
                 color = Color.White,
                 fontSize = 20.sp
             )
-            Spacer(modifier = Modifier.width(20.dp)) // Space between text and the list
-            // List of steps for enabling accessibility service
+            Spacer(modifier = Modifier.width(15.dp))
             Column(
                 modifier = Modifier.fillMaxWidth().padding(15.dp),
-                horizontalAlignment = Alignment.Start // Align text to the start
+                horizontalAlignment = Alignment.Start
             ) {
-
-                // Step 1
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    NumberedCircle(1) // Custom composable for numbered circle
-                    Spacer(modifier = Modifier.width(8.dp)) // Space between circle and text
+                    NumberedCircle(1)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Open Accessibility settings by tapping the setting button below",
                         color = Color.White,
                         fontSize = 16.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp)) // Space between steps
-
-                // Step 2
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    NumberedCircle(2)  // Custom composable for numbered circle
-                    Spacer(modifier = Modifier.width(8.dp)) // Space between circle and text
+                    NumberedCircle(2)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Tap Installed apps or Installed services and select i-Freeze Antivirus",
                         color = Color.White,
                         fontSize = 16.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))// Space between steps
-                // Step 3
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    NumberedCircle(3) // Custom composable for numbered circle
-                    Spacer(modifier = Modifier.width(8.dp)) // Space between circle and text
+                    NumberedCircle(3)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Tap the toggle to give us permission",
                         color = Color.White,
@@ -218,13 +209,13 @@ fun OnboardingScreen2(navController: NavHostController) {
                 }
             }
         }
-        // Buttons for navigating to settings or proceeding to the next screen
+
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center, // Center buttons vertically
-            horizontalAlignment = Alignment.CenterHorizontally // Center buttons horizontally
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Button to open accessibility settings
+
             Button(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
                 onClick = {
@@ -234,20 +225,18 @@ fun OnboardingScreen2(navController: NavHostController) {
                     )
                     if (enabledServicesSetting?.contains("com.ifreeze.applock.service.AccessibilityServices") != true) {
                         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        context.startActivity(intent) // Open accessibility settings
-                        Log.d("abdo", "Setting Not Granted") // Log if setting not granted
+                        context.startActivity(intent)
+                        Log.d("abdo", "Setting Not Granted")
                     } else {
                         Toast.makeText(
                             context,
                             "Accessibility permission is already granted",
                             Toast.LENGTH_SHORT
-                        ).show()  // Show toast if permission is already granted
+                        ).show()
                     }
                 }) {
-                Text(text = "Settings", color = Color.White) // Button text
+                Text(text = "Settings", color = Color.White)
             }
-
-            // Button to proceed to the next screen
             Button(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
                 onClick = {
@@ -260,14 +249,15 @@ fun OnboardingScreen2(navController: NavHostController) {
                             context,
                             "Enable accessibility service to proceed",
                             Toast.LENGTH_SHORT
-                        ).show() // Show toast if permission is already granted
+                        ).show()
                     } else {
                         navController.navigate(Screen.OnboardingScreen3.route)
-                        Log.d("abdo", "Setting Granted") // Log if setting is granted
+                        Log.d("abdo", "Setting Granted")
                     }
                 }) {
-                Text(text = "Next", color = Color.White)  // Button text
+                Text(text = "Next", color = Color.White)
             }
+
         }
     }
 }
@@ -275,8 +265,7 @@ fun OnboardingScreen2(navController: NavHostController) {
 @Composable
 fun OnboardingScreen3(navController: NavHostController) {
     val context = LocalContext.current
-    val deviceManager =
-        context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+    val deviceManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
 
     // ViewModel to manage permission state
@@ -284,24 +273,22 @@ fun OnboardingScreen3(navController: NavHostController) {
 
     // Observe permission states
     val permissionStates by viewModel.permissionStates.collectAsState()
-    viewModel.checkAllPermissions(context, compName, deviceManager) // Check permissions on screen load
-    // Main layout for the third onboarding screen
+    viewModel.checkAllPermissions(context, compName, deviceManager)
+    // Define UI
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF175AA8))
-            .padding(horizontal = 20.dp), // Set background color and padding
-        horizontalAlignment = Alignment.CenterHorizontally,// Center elements horizontally
-        verticalArrangement = Arrangement.Center // Center elements vertically
+            .padding(horizontal = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // Content section with settings options
         Column(
             modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally,// Center content horizontally
-            verticalArrangement = Arrangement.Center // Center content vertically
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            OnboardingImage(R.drawable.accessabilitypref) // Custom composable for the image
-
+            OnboardingImage(R.drawable.accessabilitypref)
             // Admin Permission Card
             GeneralSettingItemNew(
                 icon = R.drawable.admin,
@@ -311,21 +298,14 @@ fun OnboardingScreen3(navController: NavHostController) {
                     if (!deviceManager.isAdminActive(compName)) {
                         val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
                             putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-                            putExtra(
-                                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                                "You should enable the app!"
-                            )
+                            putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
                         }
-                        context.startActivity(intent) // Request admin permission
+                        context.startActivity(intent)
 
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Admin permission is already granted",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Admin permission is already granted", Toast.LENGTH_SHORT).show()
                     }
-                    viewModel.checkAllPermissions(context, compName, deviceManager) //check permission and change the icon if granted
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.adminPermission,
                 icon2 = if (permissionStates.adminPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
@@ -335,7 +315,7 @@ fun OnboardingScreen3(navController: NavHostController) {
             GeneralSettingItemNew(
                 icon = R.drawable.draw,
                 mainText = "Over Draw",
-                subText = "Enable the screen control option",
+                subText = "Enable the screen control option in settings",
                 onClick = {
                     if (!Settings.canDrawOverlays(context)) {
                         val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
@@ -343,10 +323,9 @@ fun OnboardingScreen3(navController: NavHostController) {
                         }
                         context.startActivity(myIntent)
                     } else {
-                        Toast.makeText(context, "Over Draw is already enabled", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(context, "Over Draw is already enabled", Toast.LENGTH_SHORT).show()
                     }
-                    viewModel.checkAllPermissions(context, compName, deviceManager) //check permission and change the icon if granted
+                    viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.drawOverPermission,
                 icon2 = if (permissionStates.drawOverPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
@@ -356,22 +335,16 @@ fun OnboardingScreen3(navController: NavHostController) {
             GeneralSettingItemNew(
                 icon = R.drawable.locked_icon,
                 mainText = "Install Unknown Apps",
-                subText = "Enable the screen control option",
+                subText = "Enable the screen control option in settings",
                 onClick = {
                     if (!context.packageManager.canRequestPackageInstalls()) {
-                        val settingsIntent =
-                            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                            }
+                        val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        }
                         context.startActivity(settingsIntent)
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Install Unknown Apps is already enabled",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Install Unknown Apps is already enabled", Toast.LENGTH_SHORT).show()
                     }
-                    //check permission and change the icon if granted
                     viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.unknownAppsPermission,
@@ -384,25 +357,11 @@ fun OnboardingScreen3(navController: NavHostController) {
                 mainText = "Location Permission",
                 subText = "Permit location accessibility",
                 onClick = {
-                    // Launch the system dialog for location permission if not granted
-                    if (ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        ActivityCompat.requestPermissions(
-                            context as Activity,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            123
-                        )
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 123)
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Location permission is already granted",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Location permission is already granted", Toast.LENGTH_SHORT).show()
                     }
-                    //check permission and change the icon if granted
                     viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.locationPermission,
@@ -415,51 +374,27 @@ fun OnboardingScreen3(navController: NavHostController) {
                 mainText = "Files Permission",
                 subText = "Enable i-Freeze to scan files",
                 onClick = {
-                    // Launch the system dialog for Files permission if not granted
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.READ_MEDIA_IMAGES
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            ActivityCompat.requestPermissions(
-                                context as Activity,
-                                arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
-                                1234
-                            )
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), 1234)
                         } else {
-                            Toast.makeText(
-                                context,
-                                "Files access is already granted",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Files access is already granted", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.READ_EXTERNAL_STORAGE
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            ActivityCompat.requestPermissions(
-                                context as Activity,
-                                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                                1234
-                            )
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1234)
                         } else {
-                            Toast.makeText(
-                                context,
-                                "Files access is already granted",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Files access is already granted", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    //check permission and change the icon if granted
                     viewModel.checkAllPermissions(context, compName, deviceManager)
                 },
                 granted = permissionStates.filesPermission,
                 icon2 = if (permissionStates.filesPermission) Icons.Default.CheckCircle else Icons.Default.TouchApp
             )
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Next Button
         Button(
@@ -468,9 +403,7 @@ fun OnboardingScreen3(navController: NavHostController) {
                 .padding(16.dp),
             colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
             onClick = {
-                //check permission and navigate to next page if all permission granted
-                val nonGrantedPermissions =
-                    viewModel.checkAllPermissions(context, compName, deviceManager)
+                val nonGrantedPermissions = viewModel.checkAllPermissions(context, compName, deviceManager)
                 if (nonGrantedPermissions.isEmpty()) {
                     navController.navigate(Screen.OnboardingScreen4.route)
                 } else {
@@ -516,6 +449,8 @@ fun OnboardingScreen4(navController: NavHostController) {
             fontSize = 22.sp,
             textAlign = TextAlign.Center
         )
+
+        Spacer(modifier = Modifier.height(25.dp))
         Button(
             modifier = Modifier.padding(vertical = 10.dp),
             colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
