@@ -6,7 +6,6 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.*
 import androidx.navigation.compose.composable
-import com.example.compse.ui.*
 import com.ifreeze.applock.presentation.activity.AdminAccess
 import com.ifreeze.applock.presentation.activity.AppManager
 import com.ifreeze.applock.presentation.activity.BlackList
