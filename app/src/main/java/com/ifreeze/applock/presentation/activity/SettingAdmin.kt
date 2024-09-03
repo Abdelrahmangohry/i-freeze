@@ -137,54 +137,54 @@ fun GeneralOptionsUIAdmin() {
         )
 
         // Card containing a text field for managing server URL and a save button.
-        ElevatedCard(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 8.dp
-            ),
-            onClick = { },
-            modifier = Modifier
-                .padding(top = 15.dp)
-                .fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(15.dp)
-                ) {
-                    // Text field for entering the management server URL.
-                    OutlinedTextField(
-                        value = text,
-                        onValueChange = { text = it },
-                        label = { Text("Management Server", color = Color.Black) },
-                        maxLines = 1,
-                        textStyle = TextStyle(fontSize = 16.sp),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = Color.Black, // Text color
-                            unfocusedBorderColor = Color.LightGray, // Border color when unfocused
-                            focusedBorderColor = Color.Black,
-                            cursorColor = Color.Black
-                        ),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    // Save button to save the entered server URL.
-                    Button(
-                        modifier = Modifier.padding(5.dp),
-                        colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
-                        onClick = {
-                            preference.saveBaseUrl(text)
-                            Toast.makeText(context, "Base URL saved", Toast.LENGTH_LONG).show()
-                        }
-                    ) {
-                        Text(text = "Save", color = Color.White)
-                    }
-                }
-            }
-        }
+//        ElevatedCard(
+//            elevation = CardDefaults.cardElevation(
+//                defaultElevation = 8.dp
+//            ),
+//            onClick = { },
+//            modifier = Modifier
+//                .padding(top = 15.dp)
+//                .fillMaxWidth()
+//        ) {
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .background(Color.White)
+//            ) {
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    modifier = Modifier.fillMaxWidth().padding(15.dp)
+//                ) {
+//                    // Text field for entering the management server URL.
+//                    OutlinedTextField(
+//                        value = text,
+//                        onValueChange = { text = it },
+//                        label = { Text("Management Server", color = Color.Black) },
+//                        maxLines = 1,
+//                        textStyle = TextStyle(fontSize = 16.sp),
+//                        colors = TextFieldDefaults.outlinedTextFieldColors(
+//                            textColor = Color.Black, // Text color
+//                            unfocusedBorderColor = Color.LightGray, // Border color when unfocused
+//                            focusedBorderColor = Color.Black,
+//                            cursorColor = Color.Black
+//                        ),
+//                        modifier = Modifier.weight(1f)
+//                    )
+//
+//                    // Save button to save the entered server URL.
+//                    Button(
+//                        modifier = Modifier.padding(5.dp),
+//                        colors = ButtonDefaults.buttonColors(colorResource(R.color.grayButton)),
+//                        onClick = {
+//                            preference.saveBaseUrl(text)
+//                            Toast.makeText(context, "Base URL saved", Toast.LENGTH_LONG).show()
+//                        }
+//                    ) {
+//                        Text(text = "Save", color = Color.White)
+//                    }
+//                }
+//            }
+//        }
     }
 }
 

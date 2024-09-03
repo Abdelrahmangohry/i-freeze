@@ -77,9 +77,9 @@ class AuthViewModel @Inject constructor(private val useCase: AuthUseCase) : View
      *
      * @param deviceDto The [DeviceDTO] containing the device details for login.
      */
-    fun getUserLogin( deviceDto: DeviceDTO) {
+    fun getUserLogin(activationKey: String, deviceDto: DeviceDTO) {
         viewModelScope.launch {
-            val response = useCase.getUserLogin(deviceDto)
+            val response = useCase.getUserLogin(activationKey, deviceDto)
             _loginFlow.value = response
 
         }

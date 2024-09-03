@@ -156,53 +156,6 @@ class MainActivity : ComponentActivity() {
         }
 
 
-        // Checks network connectivity
-        // Activate license automatic
-        if (!isNetworkAvailable(this)) {
-            Toast.makeText(
-                this,
-                "Please connect to the management server",
-                Toast.LENGTH_SHORT
-            ).show()
-
-        } else if (deviceId.isNullOrEmpty()) {
-
-            val deviceDto = DeviceDTO(
-                deviceName = deviceName,
-                operatingSystemVersion = operatingSystemVersion,
-                deviceIp = ipAddress,
-                macAddress = androidId,
-                serialNumber = androidId
-            )
-            val baseUrl = "http://192.168.1.250:8443/api/"
-            preference.saveBaseUrl(baseUrl)
-
-            authViewModel.getUserLogin(deviceDto)
-            authViewModel._loginFlow.observe(this, Observer { response ->
-                if (response.isSuccessful) {
-                    Log.d("abdo", response.body().toString())
-                    deviceId = response.body().toString().trim()
-                    Log.d("deviceID", "this is device id $deviceId")
-                    preference.save("responseID", deviceId!!)
-                    Toast.makeText(
-                        this,
-                        "License is Activated",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            })
-            authViewModel.getKioskApps()
-            authViewModel._getkioskApps.observe(this, Observer { response ->
-                if (response.isSuccessful) {
-                    val applicationNamesList =
-                        response.body()?.data?.map { it.packageName } ?: emptyList()
-                    Log.d("kioskapp", "applicationNames $applicationNamesList")
-                    preference.saveList("kioskApplications", applicationNamesList)
-                    applicationNames = applicationNamesList as ArrayList<String>
-                }
-            })
-        }
-
 
 
         GlobalScope.launch(Dispatchers.IO) {

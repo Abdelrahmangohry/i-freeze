@@ -23,10 +23,11 @@ import javax.inject.Inject
 class AuthRepoImp @Inject constructor(private val api: UserApi):AuthRepo {
 
     override suspend fun getUserLogin(
+        activationKey: String,
         deviceDto: DeviceDTO
     ) : Response<String> {
         return api.
-        getUserLogin(deviceDto)
+        getUserLogin(activationKey,deviceDto)
     }
 
     override suspend fun newUpdateUserData(deviceId: String): Response<Data> {
