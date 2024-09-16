@@ -88,7 +88,7 @@ fun GeneralOptionsUISetting(
         GeneralSettingItem(
             icon = R.drawable.draw, // Icon for overlay permission
             mainText = "Over Draw", // Main text for the item
-            subText = "Enable the screen control option in settings", // Subtext for the item
+            subText = "Enable the screen control options", // Subtext for the item
             onClick = {
                 Log.d("islam", "GeneralOptionsUISetting : drawAction ")
 

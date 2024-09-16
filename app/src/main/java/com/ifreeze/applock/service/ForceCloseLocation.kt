@@ -75,14 +75,14 @@
             // Ensure proper handling of overlay permissions and user experience
             chatHeadView = LayoutInflater.from(this).inflate(R.layout.enable_location, null)
             windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val locationService = Intent(this, LOCATION_SERVICE::class.java)
+            val locationService = Intent(this, LocationService::class.java)
 
             val btn = chatHeadView?.findViewById<Button>(R.id.tryHereAgain)
             btn?.setOnClickListener {
                 if (isLocationEnabled(this)) {
                     Log.d("abdo", "this is from the button")
                     stopService(locationService)
-                    startAutoSyncWorker(this)
+//                    startAutoSyncWorker(this)
                 }
                 else {
                     Log.d("abdo", "this is from the button stop service")

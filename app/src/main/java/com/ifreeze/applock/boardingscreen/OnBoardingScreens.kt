@@ -315,7 +315,7 @@ fun OnboardingScreen3(navController: NavHostController) {
             GeneralSettingItemNew(
                 icon = R.drawable.draw,
                 mainText = "Over Draw",
-                subText = "Enable the screen control option in settings",
+                subText = "Enable the screen control options",
                 onClick = {
                     if (!Settings.canDrawOverlays(context)) {
                         val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
@@ -335,7 +335,7 @@ fun OnboardingScreen3(navController: NavHostController) {
             GeneralSettingItemNew(
                 icon = R.drawable.locked_icon,
                 mainText = "Install Unknown Apps",
-                subText = "Enable the screen control option in settings",
+                subText = "Enable the screen control options",
                 onClick = {
                     if (!context.packageManager.canRequestPackageInstalls()) {
                         val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {

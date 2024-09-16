@@ -56,18 +56,9 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
         WebrtcService.listener = this
         webrtcServiceRepository.startIntent(username!!)
         views.requestBtn.setOnClickListener {
-            requestConnection()
+            startScreenCapture()
         }
 
-    }
-
-    /**
-     * Requests a connection to the target user.
-     */
-    private fun requestConnection(){
-        webrtcServiceRepository.requestConnection(
-            views.targetEt.text.toString()
-        )
     }
 
 
@@ -113,7 +104,6 @@ class MainActivityScreenSharing : AppCompatActivity(), MainRepository.Listener {
                 notificationLayout.isVisible = true
                 notificationAcceptBtn.setOnClickListener {
                     webrtcServiceRepository.acceptCAll(target)
-                    startScreenCapture()
                     notificationLayout.isVisible = false
                 }
                 notificationDeclineBtn.setOnClickListener {

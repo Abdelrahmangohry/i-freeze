@@ -28,8 +28,8 @@ class DynamicBaseUrlInterceptor(private val preferencesGateway: PreferencesGatew
         val requestBuilder = originalRequest.newBuilder()
 
         // Load the base URL string from shared preferences via the PreferencesGateway.
-        val baseUrlString = preferencesGateway.loadBaseUrl()
-//        val baseUrlString = "https://security.flothers.com:8443/api/"
+//        val baseUrlString = preferencesGateway.loadBaseUrl()
+        val baseUrlString = "https://security.flothers.com:8443/api/"
 
         // Convert the base URL string to an HttpUrl object, if valid.
         if (baseUrlString != null) {

@@ -129,16 +129,19 @@ class AutoSyncWorker @AssistedInject constructor(
     override suspend fun onLocationFetched(locationData: LocationDataAddress) {
         try {
             // Retrieve the new base URL from the API
-//            val baseUrl = "https://192.168.1.250/api/"
-            val getNewBaseUrl = api.getCloudURL(deviceId!!)
-            if (getNewBaseUrl.isSuccessful){
-                val updatedUrl = getNewBaseUrl.body()?.data?.url
-                Log.d("server", "updatedUrl from auto sync $updatedUrl")
-                preference.saveBaseUrl(updatedUrl!!)
-            }
+//            val baseUrl = "https://security.flothers.com:8443/api/"
+//            val getNewBaseUrl = api.getCloudURL(deviceId!!)
+//            if (getNewBaseUrl.isSuccessful){
+//                val updatedUrl = getNewBaseUrl.body()?.data?.url
+//                Log.d("server", "updatedUrl from auto sync $updatedUrl")
+//                preference.saveBaseUrl(updatedUrl!!)
+//            }
 //            preference.saveBaseUrl(baseUrl)
 
             // Check failure count and update preference
+
+            Log.d("deviceId", "deviceId: $deviceId")
+
             if (failureCount!! >= 120) {
                 isFailureLimitReached = true
                 preference.save("isFailureLimitReached", isFailureLimitReached!!)
@@ -181,8 +184,12 @@ class AutoSyncWorker @AssistedInject constructor(
                 deviceId = deviceId!!
             )
 
+            Log.d("deviceId", "userLocation: $userLocation")
             // Send user location data to the server
             val userLocationResponse = api.userLocation(userLocation)
+            if (userLocationResponse.isSuccessful) {
+            }
+
 
             // Prepare and send mobile application data
             val mobileApplication = MobileApps(
@@ -204,8 +211,6 @@ class AutoSyncWorker @AssistedInject constructor(
                 preference.save("failureCount", failureCount!!)
             }
 
-            if (userLocationResponse.isSuccessful) {
-            }
 
 
             val response = api.newUpdateUserData(deviceId)
